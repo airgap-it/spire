@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component } from '@angular/core'
 
-import { Platform } from '@ionic/angular';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { Platform } from '@ionic/angular'
+import { SplashScreen } from '@ionic-native/splash-screen/ngx'
+import { StatusBar } from '@ionic-native/status-bar/ngx'
 
 @Component({
   selector: 'app-root',
@@ -21,22 +21,18 @@ export class AppComponent {
       url: '/list',
       icon: 'list'
     }
-  ];
+  ]
 
-  constructor(
-    private platform: Platform,
-    private splashScreen: SplashScreen,
-    private statusBar: StatusBar
-  ) {
-    this.initializeApp();
+  constructor(private platform: Platform, private splashScreen: SplashScreen, private statusBar: StatusBar) {
+    this.initializeApp()
   }
 
   initializeApp() {
     if (this.platform.is('cordova')) {
       this.platform.ready().then(() => {
-        this.statusBar.styleDefault();
-        this.splashScreen.hide();
-      });
+        this.statusBar.styleDefault()
+        this.splashScreen.hide()
+      })
     }
   }
 }

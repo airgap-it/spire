@@ -10,7 +10,6 @@
 </ion-header>
 
 <ion-content>
-
   <ion-card>
     <ion-label>Mnemonic</ion-label>
     <ion-input [(ngModel)]="cryptoService.mnemonic"></ion-input>
@@ -18,10 +17,13 @@
   </ion-card>
 
   <ion-card>
-    Private Key: {{ cryptoService.privateKey }}<br />
-    Public Key: {{ cryptoService.publicKey }}<br />
-    Address: {{ cryptoService.address }}<br />
-    Balance {{ getBalance(cryptoService.wallet) }}<br />
+    Private Key: {{ cryptoService.privateKey }}
+    <br />
+    Public Key: {{ cryptoService.publicKey }}
+    <br />
+    Address: {{ cryptoService.address }}
+    <br />
+    Balance {{ getBalance(cryptoService.wallet) }}
+    <br />
   </ion-card>
-
 </ion-content>
