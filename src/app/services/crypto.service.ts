@@ -21,7 +21,7 @@ export class CryptoService {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
       this.mnemonic = (mnemonic)
     } else {
-      this.mnemonic = (bip39.generateMnemonic(24))
+      this.mnemonic = (bip39.generateMnemonic())
     }
     this.saveMnemonic()
   }
