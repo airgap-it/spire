@@ -4,6 +4,7 @@
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
+    "postinstall": "node scripts/patch-crypto.js && npm run prepare-prod-build",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -11,7 +12,10 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "extension:build": "ionic build && node ./scripts/copy-extension-files.js",
-    "extension:build:prod": "ionic build --prod && node ./scripts/copy-extension-files.js"
+    "extension:build:prod": "ionic build --prod && node ./scripts/copy-extension-files.js",
+    "prepare-prod-build": "npm run disable-pure-getters && npm run configure-mangle",
+    "disable-pure-getters": "replace 'pure_getters: buildOptions.buildOptimizer' 'pure_getters: false' ./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs/common.js ",
+    "configure-mangle": "replace 'safari10: true' 'safari10: true, keep_fnames: true' ./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs/common.js "
   },
   "private": true,
   "dependencies": {
@@ -25,6 +29,8 @@
     "@ionic-native/splash-screen": "^5.0.0",
     "@ionic-native/status-bar": "^5.0.0",
     "@ionic/angular": "4.11.5",
+    "airgap-coin-lib": "^0.6.2",
+    "bip39": "^3.0.2",
     "core-js": "^2.5.4",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
@@ -40,6 +46,7 @@
     "@angular/compiler-cli": "^9.0.0-rc.5",
     "@angular/language-service": "^9.0.0-rc.5",
     "@ionic/angular-toolkit": "^2.1.1",
+    "@types/bip39": "^3.0.0",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "~8.9.4",
@@ -52,6 +59,7 @@
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.4.0",
     "protractor": "~5.4.0",
+    "replace": "^1.1.1",
     "ts-node": "~7.0.0",
     "tslint": "^5.15.0",
     "typescript": "~3.6.4"
