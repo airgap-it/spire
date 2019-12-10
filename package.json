@@ -11,6 +11,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "prettier": "npx prettier --write 'src/**/*'",
     "extension:build": "ionic build && node ./scripts/copy-extension-files.js",
     "extension:build:prod": "ionic build --prod && node ./scripts/copy-extension-files.js",
     "prepare-prod-build": "npm run disable-pure-getters && npm run configure-mangle",
@@ -32,6 +33,7 @@
     "airgap-coin-lib": "^0.6.2",
     "bip39": "^3.0.2",
     "core-js": "^2.5.4",
+    "prettier": "^1.19.1",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
     "zone.js": "~0.9.1"
