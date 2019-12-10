@@ -1,0 +1,11 @@
+{
+  "name": "tezos-poc-extension",
+  "version": "0.0.1",
+  "description": "",
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_icon": "assets/icon/favicon.png"
+  },
+  "manifest_version": 2
+}
