@@ -1,6 +1,15 @@
 const fs = require('fs')
 
-fs.copyFileSync('extension/manifest.json', 'www/manifest.json')
+const toCopy = ['background.js', 'inject.js', 'runtime.js']
+
+const files = fs.readdirSync('./www').filter(file => file.endsWith('.js'))
+files.forEach(file => {
+	const shouldCopy = toCopy.find(toCopyFile => file.startsWith(`${toCopyFile.split('.')[0]}-es2015`))
+	if (shouldCopy) {
+		console.log('copying', `./www/${file}`, `./www/${shouldCopy}`)
+		fs.copyFileSync(`./www/${file}`, `./www/${shouldCopy}`)
+	}
+})
 
 const needle = `<link rel="icon" type="image/png" href="assets/icon/favicon.png" />`
 const css = `

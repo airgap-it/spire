@@ -1,0 +1,36 @@
+{
+  "name": "beacon",
+  "version": "0.0.1",
+  "description": "",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  
+  "background": {
+    "scripts": ["background.js", "runtime.js"],
+    "persistent": false
+  },
+
+  "permissions": [
+    "tabs",
+    "storage",
+    "activeTab",
+    "notifications",
+    "http://*/",
+    "https://*/"
+  ],
+
+  "content_scripts": [{
+    "run_at": "document_start",
+    "all_frames":true,
+    "matches": [
+      "https://*/*",
+      "http://*/*"
+    ],
+    "js": ["inject.js", "runtime.js"]
+  }],
+
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_icon": "assets/icon/favicon.png"
+  },
+  "manifest_version": 2
+}
