@@ -6,24 +6,34 @@
     <ion-title>
       Home
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addWalletConnection()">+</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-card>
-    <ion-label>Mnemonic</ion-label>
-    <ion-input [(ngModel)]="cryptoService.mnemonic"></ion-input>
-    <ion-button (click)="cryptoService.saveMnemonic()">Save</ion-button>
+  <ion-card (click)="signWithWallet()">
+    <ion-card-header>
+      <ion-card-title>Sign with Wallet</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+    </ion-card-content>
   </ion-card>
 
-  <ion-card>
-    Private Key: {{ cryptoService.privateKey }}
-    <br />
-    Public Key: {{ cryptoService.publicKey }}
-    <br />
-    Address: {{ cryptoService.address }}
-    <br />
-    Balance {{ getBalance(cryptoService.wallet) }}
-    <br />
+  <ion-card (click)="signWithHardwareWallet()">
+    <ion-card-header>
+      <ion-card-title>Sign with Ledger / Trezor</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card (click)="signWithLocalMnemonic()">
+    <ion-card-header>
+      <ion-card-title>Sign with local mnemonic</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+    </ion-card-content>
   </ion-card>
 </ion-content>

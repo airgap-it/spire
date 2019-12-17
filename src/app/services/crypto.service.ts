@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { TezosProtocol, AirGapMarketWallet } from 'airgap-coin-lib'
+import { AirGapMarketWallet, TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
 @Injectable({

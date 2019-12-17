@@ -12,8 +12,16 @@ const routes: Routes = [
     loadChildren: () => import('./pages/home/home.module').then(m => m.HomePageModule)
   },
   {
-    path: 'list',
-    loadChildren: () => import('./pages/list/list.module').then(m => m.ListPageModule)
+    path: 'local-mnemonic',
+    loadChildren: () => import('./pages/local-mnemonic/local-mnemonic.module').then(m => m.ListPageModule)
+  },
+  {
+    path: 'settings',
+    loadChildren: () => import('./pages/settings/settings.module').then(m => m.SettingsPageModule)
+  },
+  {
+    path: 'add-wallet-connection',
+    loadChildren: () => import('./pages/add-wallet-connection/add-wallet-connection.module').then( m => m.AddWalletConnectionPageModule)
   }
 ]
 

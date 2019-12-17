@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      List
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-label>Mnemonic</ion-label>
+    <ion-input [(ngModel)]="cryptoService.mnemonic"></ion-input>
+    <ion-button (click)="cryptoService.saveMnemonic()">Save</ion-button>
+  </ion-card>
+
+  <ion-card>
+    Private Key: {{ cryptoService.privateKey }}
+    <br />
+    Public Key: {{ cryptoService.publicKey }}
+    <br />
+    Address: {{ cryptoService.address }}
+    <br />
+    Balance {{ getBalance(cryptoService.wallet) }}
+    <br />
+    <ion-button (click)="test()">test</ion-button>
+  </ion-card>
+</ion-content>

@@ -1,18 +1,27 @@
 import { Component } from '@angular/core'
-import { CryptoService } from '../../services/crypto.service'
-import { AirGapMarketWallet } from 'airgap-coin-lib'
+import { ModalController } from '@ionic/angular'
+
+import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
 
 @Component({
-  selector: 'app-home',
+  selector: 'beacon-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss']
 })
 export class HomePage {
-  constructor(public readonly cryptoService: CryptoService) {}
+  constructor(private readonly modalController: ModalController) {}
 
-  getBalance(wallet: AirGapMarketWallet) {
-    if (wallet) {
-      return wallet.currentBalance
-    }
+  public async addWalletConnection() {
+    const modal = await this.modalController.create({
+      component: AddWalletConnectionPage
+    })
+
+    return modal.present()
   }
+
+  public async signWithWallet() {}
+
+  public async signWithHardwareWallet() {}
+
+  public async signWithLocalMnemonic() {}
 }

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 import { IonicModule } from '@ionic/angular'
 
-import { ListPage } from './list.page'
+import { LocalMnemonicPage } from './local-mnemonic.page'
 
 describe('ListPage', () => {
-  let component: ListPage
-  let fixture: ComponentFixture<ListPage>
+  let component: LocalMnemonicPage
+  let fixture: ComponentFixture<LocalMnemonicPage>
   let listPage: HTMLElement
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ListPage],
+      declarations: [LocalMnemonicPage],
       imports: [IonicModule.forRoot()]
     }).compileComponents()
 
-    fixture = TestBed.createComponent(ListPage)
+    fixture = TestBed.createComponent(LocalMnemonicPage)
     component = fixture.componentInstance
     fixture.detectChanges()
   }))

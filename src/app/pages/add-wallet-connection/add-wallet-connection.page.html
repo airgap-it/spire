@@ -1,0 +1,11 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>add-wallet-connection</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content >
+  Scan the following code with your wallet:<br />
+  <qr-code *ngIf="handshakeData" [value]="handshakeData" [size]="256" [level]="'M'"></qr-code>
+  <ion-button (click)="dismiss()">Dismiss</ion-button>
+</ion-content>
