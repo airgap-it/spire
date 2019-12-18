@@ -4,7 +4,7 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx'
 import { StatusBar } from '@ionic-native/status-bar/ngx'
 import { AlertController, Platform } from '@ionic/angular'
 import { map } from 'rxjs/operators'
-import { MessageTypes } from 'wallet-communication-sdk/dist/client/Messages'
+import { MessageTypes } from '@airgap/beacon-sdk/dist/client/Messages'
 
 import { CryptoService } from './services/crypto.service'
 

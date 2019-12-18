@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { WalletCommunicationClient } from 'wallet-communication-sdk/dist/client/WalletCommunicationClient'
+import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/client/WalletCommunicationClient'
 
 import { SettingsKey, StorageService } from './storage.service'
 
