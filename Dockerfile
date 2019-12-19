@@ -25,9 +25,6 @@ WORKDIR /app
 COPY package.json /app
 COPY package-lock.json /app
 
-# Copy test dependencies
-COPY karma.conf.js /app
-
 # install dependencies
 RUN npm install
 
