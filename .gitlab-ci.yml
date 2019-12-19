@@ -60,7 +60,7 @@ build_extension:
   artifacts:
     name: 'web_extension'
     paths:
-      - extension/
+      - www/
   tags:
     - docker
 
