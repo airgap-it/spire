@@ -53,7 +53,7 @@ build_extension:
     - sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/services/app-info/app-info.ts
     - sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/services/app-info/app-info.ts
     - npm install
-    - npm run extension:prepare
+    - npm run postinstall
     - npm run extension:build:prod
     - sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
   artifacts:
