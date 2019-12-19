@@ -4,27 +4,65 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      List
+      Local Secret
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-card>
-    <ion-label>Mnemonic</ion-label>
-    <ion-input [(ngModel)]="cryptoService.mnemonic"></ion-input>
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-list-header class="ion-no-padding">
+      <ion-label>Mnemonic</ion-label>
+    </ion-list-header>
+    <ion-item class="ion-no-padding">
+      <ion-textarea placeholder="Mnemonic" wrap="soft" [(ngModel)]="cryptoService.mnemonic"></ion-textarea>
+    </ion-item>
     <ion-button (click)="cryptoService.saveMnemonic()">Save</ion-button>
-  </ion-card>
+  </ion-list>
 
-  <ion-card>
-    Private Key: {{ cryptoService.privateKey }}
-    <br />
-    Public Key: {{ cryptoService.publicKey }}
-    <br />
-    Address: {{ cryptoService.address }}
-    <br />
-    Balance {{ getBalance(cryptoService.wallet) }}
-    <br />
-    <ion-button (click)="test()">test</ion-button>
-  </ion-card>
+  <ion-list>
+    <ion-list-header class="ion-no-padding">
+      <ion-label>Address</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <ion-row>
+    <ion-col class="ion-no-padding">
+      <p class="ion-no-margin">{{ cryptoService.address }}</p>
+    </ion-col>
+  </ion-row>
+
+  <ion-list>
+    <ion-list-header class="ion-no-padding">
+      <ion-label>Balance</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <ion-row>
+    <ion-col class="ion-no-padding">
+      <p color="medium" class="ion-no-margin ion-text">{{ getBalance(cryptoService.wallet) }}</p>
+    </ion-col>
+  </ion-row>
+
+  <ion-list>
+    <ion-list-header class="ion-no-padding">
+      <ion-label>Private Key</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <ion-row>
+    <ion-col class="ion-no-padding">
+      <p class="ion-no-margin">{{ cryptoService.privateKey }}</p>
+    </ion-col>
+  </ion-row>
+
+  <ion-list>
+    <ion-list-header class="ion-no-padding">
+      <ion-label>Public Key</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <ion-row class="ion-padding-bottom">
+    <ion-col class="ion-no-padding">
+      <p class="ion-no-margin">{{ cryptoService.publicKey }}</p>
+    </ion-col>
+  </ion-row>
+
+  <ion-button (click)="test()">test</ion-button>
 </ion-content>
