@@ -21,14 +21,25 @@ export class StorageService {
   private readonly storage: Partial<Storage>
   constructor() {
     if (window.chrome && chrome.runtime && chrome.runtime.id) {
-      throw new Error('chrome storage not supported yet.')
+      this.storage = {
+        get: async (key: string): Promise<unknown> => {
+          return new Promise(resolve => {
+            chrome.storage.sync.get([key], (result) => {
+              resolve(result[key])
+            });
+          })
+        },
+        set: async (key: string, value: any): Promise<void> => {
+          return chrome.storage.local.set({ [key]: value })
+        }
+      }
       // this.storage = chrome.storage.local.set({ isPaused: false })
     } else {
       this.storage = {
-        get: (key: string): any => {
+        get: async (key: string): Promise<unknown> => {
           return localStorage.getItem(key)
         },
-        set: (key: string, value: any): void => {
+        set: async (key: string, value: any): Promise<void> => {
           return localStorage.setItem(key, value)
         }
       }
