@@ -57,10 +57,11 @@ build_extension:
     - npm install ionic
     - npm run postinstall
     - npm run extension:build:prod
+    - mv www beacon-extension
   artifacts:
-    name: 'web_extension'
+    name: 'beacon-extension'
     paths:
-      - www/
+      - beacon-extension/
   tags:
     - docker
 
