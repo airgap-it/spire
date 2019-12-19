@@ -24,7 +24,7 @@ export class StorageService {
       this.storage = {
         get: async (key: string): Promise<unknown> => {
           return new Promise(resolve => {
-            chrome.storage.sync.get([key], (result) => {
+            chrome.storage.local.get(null, (result) => {
               resolve(result[key])
             });
           })
@@ -33,7 +33,6 @@ export class StorageService {
           return chrome.storage.local.set({ [key]: value })
         }
       }
-      // this.storage = chrome.storage.local.set({ isPaused: false })
     } else {
       this.storage = {
         get: async (key: string): Promise<unknown> => {
