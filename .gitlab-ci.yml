@@ -50,12 +50,12 @@ build_extension:
   stage: native_build
   when: manual
   script:
-    - sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/services/app-info/app-info.ts
-    - sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/services/app-info/app-info.ts
+    - sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/app/services/app-info/app-info.ts
+    - sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/app/services/app-info/app-info.ts
+    - sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
     - npm install
     - npm run postinstall
     - npm run extension:build:prod
-    - sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
   artifacts:
     name: 'web_extension'
     paths:
