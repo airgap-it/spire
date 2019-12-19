@@ -54,6 +54,7 @@ build_extension:
     - sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/app/services/app-info/app-info.service.ts
     - sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
     - npm install
+    - npm install ionic
     - npm run postinstall
     - npm run extension:build:prod
   artifacts:
