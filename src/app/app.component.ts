@@ -4,9 +4,15 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx'
 import { StatusBar } from '@ionic-native/status-bar/ngx'
 import { AlertController, Platform } from '@ionic/angular'
 import { map } from 'rxjs/operators'
-import { MessageTypes } from '@airgap/beacon-sdk/dist/client/Messages'
+import { MessageTypes, PermissionResponse, PermissionRequest } from '@airgap/beacon-sdk/dist/client/Messages'
+import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
+import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
 
 import { CryptoService } from './services/crypto.service'
+
+export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
+  return x !== null && typeof x === 'object';
+}
 
 @Component({
   selector: 'app-root',
@@ -53,14 +59,21 @@ export class AppComponent {
 
     const data = this.activatedRoute.queryParamMap.pipe(map(params => params.get('d')))
     data.subscribe(res => {
-      console.log(res)
-      if (res === MessageTypes.PermissionRequest) {
-        this.permissionRequest()
+
+      if (res) {
+        console.log('d', res)
+        const serializer = new Serializer()
+
+        const deserialized = serializer.deserialize(res)
+
+        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.PermissionRequest) {
+          this.permissionRequest(deserialized as any as PermissionRequest)
+        }
       }
     })
   }
 
-  public async permissionRequest(/*request: PermissionRequest*/) {
+  public async permissionRequest(request: PermissionRequest) {
     const alert = await this.alertController.create({
       header: 'Permission request',
       message: 'Do you want to give the dapp permissions to do all the things?',
@@ -102,11 +115,25 @@ export class AppComponent {
           text: 'Ok',
           handler: grantedPermissions => {
             console.log('blah', grantedPermissions)
-            chrome.runtime.sendMessage({
-              address: this.cryptoService.address,
-              networks: ['mainnet'],
-              permissions: grantedPermissions
-            })
+            if (ChromeMessageTransport.isAvailable()) {
+              const transport = new ChromeMessageTransport()
+              const response: PermissionResponse = {
+                id: request.id,
+                type: MessageTypes.PermissionResponse,
+                permissions: {
+                  pubkey: this.cryptoService.publicKey,
+                  networks: ['mainnet'],
+                  scopes: grantedPermissions
+                }
+              }
+              const serialized = new Serializer().serialize(response)
+
+              transport.send(serialized)
+
+              setTimeout(() => {
+                window.close();
+              }, 1000)
+            }
           }
         },
         {

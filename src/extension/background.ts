@@ -1,13 +1,12 @@
 /// <reference types="chrome"/>
 
-const postToContent = data => {
+const sendToPage = data => {
   console.log('background.js: post ', data)
-  chrome.tabs.query({}, function(tabs) {
+  chrome.tabs.query({}, function (tabs) {
     // TODO think about direct communication with tab
-    const message = { method: 'toPage', data }
     tabs.forEach(({ id }) => {
       if (id) {
-        chrome.tabs.sendMessage(id, message)
+        chrome.tabs.sendMessage(id, data)
       }
     }) // Send message to all tabs
   })
@@ -15,8 +14,8 @@ const postToContent = data => {
 
 const connectToPopup = cb => {
   chrome.runtime.onConnect.addListener(port => {
-    port.onMessage.addListener((msg, sender) => {
-      console.log('Popup message!', msg, sender)
+    port.onMessage.addListener((message, sender) => {
+      console.log('Popup message!', message, sender)
       cb()
     })
     port.onDisconnect.addListener(async _event => {
@@ -29,7 +28,7 @@ const connectToPopup = cb => {
 const openPopup = message => {
   return new Promise((resolve, _reject) => {
     chrome.windows.create({
-      url: `./index.html/#/home/?d=${message.data}`,
+      url: `./index.html/#/home/?d=${message.payload}`,
       type: 'popup',
       height: 680,
       width: 420
@@ -40,11 +39,16 @@ const openPopup = message => {
   })
 }
 
-chrome.runtime.onMessage.addListener((msg, _sender) => {
-  console.log('background.js: receive ', msg)
-  if (msg.method === 'toExtension') {
-    openPopup(msg)
-  } else {
-    postToContent(msg)
+const sendToPopup = message => {
+  // TODO: Consider communicating with existing popup instead of creating a new one every time.
+  return openPopup(message)
+}
+
+chrome.runtime.onMessage.addListener((data, _sender) => {
+  console.log('background.js: receive ', data)
+  if (data.method === 'toExtension') {
+    sendToPopup(data)
+  } else if (data.method === 'toPage') {
+    sendToPage(data)
   }
 })
