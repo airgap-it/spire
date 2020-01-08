@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { AirGapMarketWallet } from 'airgap-coin-lib'
 
-import { CryptoService } from '../../services/crypto.service'
+import { LocalWalletService } from '../../services/local-wallet.service'
 
 @Component({
   selector: 'beacon-local-mnemonic',
@@ -9,19 +9,11 @@ import { CryptoService } from '../../services/crypto.service'
   styleUrls: ['local-mnemonic.page.scss']
 })
 export class LocalMnemonicPage {
-  constructor(public readonly cryptoService: CryptoService) {}
+  constructor(public readonly localWalletService: LocalWalletService) { }
 
   public getBalance(wallet: AirGapMarketWallet | undefined): void {
     if (wallet) {
       return wallet.currentBalance
     }
-  }
-
-  public test(): void {
-    chrome.runtime.sendMessage('MESSAGE FROM POPUP')
-    // chrome.tabs.getSelected(null, _tab => {
-    //   // const code: string = 'window.location.reload()'
-    //   // chrome.tabs.postMessage('asdf')
-    // })
   }
 }

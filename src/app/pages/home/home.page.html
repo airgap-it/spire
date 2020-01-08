@@ -16,7 +16,7 @@
 
   <ion-row>
     <ion-col>
-      <ion-button color="primary" expand="block" (click)="addWalletConnection()">
+      <ion-button color="primary" expand="block" (click)="pairWallet()">
         Pair with Wallet
       </ion-button>
       <p>Pair your mobile, desktop or web wallet with Beacon, currently supported are AirGap Wallet.</p>
@@ -27,7 +27,7 @@
 
   <ion-row>
     <ion-col>
-      <ion-button color="primary" expand="block" (click)="signWithHardwareWallet()" disabled>
+      <ion-button color="primary" expand="block" (click)="pairHardwareWallet()" disabled>
         Pair with Ledger
       </ion-button>
       <p>Pair your Ledger Nano hardware wallet with Beacon.</p>
@@ -49,7 +49,7 @@
 
   <ion-row>
     <ion-col>
-      <ion-button color="primary" expand="block" (click)="signWithLocalMnemonic()">
+      <ion-button color="primary" expand="block" (click)="pairLocalMnemonic()">
         Setup local secret
       </ion-button>
       <p>This is a development option only! Use a private key that is stored in the extension.</p>

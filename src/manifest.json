@@ -2,13 +2,19 @@
   "name": "beacon",
   "version": "0.0.1",
   "description": "",
+  "icons": {
+    "16": "assets/icon/beacon_logo-16px.png",
+    "48": "assets/icon/beacon_logo-48px.png",
+    "128": "assets/icon/beacon_logo-128px.png"
+  },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  
   "background": {
-    "scripts": ["background.js", "runtime.js"],
+    "scripts": [
+      "background.js",
+      "runtime.js"
+    ],
     "persistent": false
   },
-
   "permissions": [
     "tabs",
     "storage",
@@ -17,20 +23,26 @@
     "http://*/",
     "https://*/"
   ],
-
-  "content_scripts": [{
-    "run_at": "document_start",
-    "all_frames":true,
-    "matches": [
-      "https://*/*",
-      "http://*/*"
-    ],
-    "js": ["inject.js", "runtime.js"]
-  }],
-
+  "content_scripts": [
+    {
+      "run_at": "document_start",
+      "all_frames": true,
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "inject.js",
+        "runtime.js"
+      ]
+    }
+  ],
   "browser_action": {
     "default_popup": "index.html",
-    "default_icon": "assets/icon/favicon.png"
+    "default_icon": {
+      "19": "assets/icon/beacon_logo-19px.png",
+      "38": "assets/icon/beacon_logo-38px.png"
+    }
   },
   "manifest_version": 2
 }
