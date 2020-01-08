@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core'
 import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/client/WalletCommunicationClient'
+import { Injectable } from '@angular/core'
+
 import { SettingsKey, StorageService } from './storage.service'
-import { MessageTypes, PermissionRequest } from '@airgap/beacon-sdk/dist/client/Messages'
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
 
 @Injectable({
   providedIn: 'root'
@@ -45,10 +44,6 @@ export class CommunicationService {
         throw new Error('Client not initialized')
       }
       this.listenForMessages([pubKey])
-      this.client.listenForEncryptedMessage(pubKey, message => {
-        console.log('DAPP gotEncryptedMessage:', message)
-      })
-      this.client.sendMessage(pubKey, `CHANNEL SUCCESSFULLY OPENED WITH ${pubKey}!`)
     })
   }
 
@@ -62,15 +57,6 @@ export class CommunicationService {
         console.log('DAPP gotEncryptedMessage:', message)
       })
       this.client.sendMessage(pubKey, 'CHANNEL SUCCESSFULLY OPENED!')
-
-      const permissionRequest: PermissionRequest = {
-        id: 'id',
-        type: MessageTypes.PermissionRequest,
-        scope: ['read_address', 'sign', 'payment_request', 'threshold']
-      }
-      const serializer = new Serializer()
-      const serializedPermissionRequest = serializer.serialize(permissionRequest)
-      this.client.sendMessage(pubKey, serializedPermissionRequest)
     })
   }
 
