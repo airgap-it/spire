@@ -2,6 +2,7 @@ import { Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'beacon-home',
@@ -9,9 +10,9 @@ import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-con
   styleUrls: ['home.page.scss']
 })
 export class HomePage {
-  constructor(private readonly modalController: ModalController) {}
+  constructor(private readonly modalController: ModalController, private readonly router: Router) { }
 
-  public async addWalletConnection() {
+  public async pairWallet() {
     const modal = await this.modalController.create({
       component: AddWalletConnectionPage
     })
@@ -19,9 +20,9 @@ export class HomePage {
     return modal.present()
   }
 
-  public async signWithWallet() {}
+  public async pairHardwareWallet() { }
 
-  public async signWithHardwareWallet() {}
-
-  public async signWithLocalMnemonic() {}
+  public async pairLocalMnemonic() {
+    this.router.navigate(['local-mnemonic'])
+  }
 }

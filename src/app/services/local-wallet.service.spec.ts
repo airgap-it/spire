@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing'
 
-import { CryptoService } from './crypto.service'
+import { LocalWalletService } from './local-wallet.service'
 
-describe('CryptoService', () => {
+describe('LocalWalletService', () => {
   beforeEach(() => TestBed.configureTestingModule({}))
 
   it('should be created', () => {
-    const service: CryptoService = TestBed.get(CryptoService)
+    const service: LocalWalletService = TestBed.get(LocalWalletService)
     expect(service).toBeTruthy()
   })
 })

@@ -1,17 +1,23 @@
 import { Injectable } from '@angular/core'
 
 export enum SettingsKey {
-  COMMUNICATION_PRIVATE_SEED = 'COMMUNICATION_PRIVATE_SEED'
+  COMMUNICATION_PRIVATE_SEED = 'COMMUNICATION_PRIVATE_SEED',
+  COMMUNICATION_WALLET_PUBKEYS = 'COMMUNICATION_WALLET_PUBKEYS',
+  LOCAL_MNEMONIC = 'LOCAL_MNEMONIC'
 }
 
 interface SettingsKeyReturnType {
   [SettingsKey.COMMUNICATION_PRIVATE_SEED]: string | undefined
+  [SettingsKey.COMMUNICATION_WALLET_PUBKEYS]: string[]
+  [SettingsKey.LOCAL_MNEMONIC]: string | undefined
 }
 
 type SettingsKeyReturnDefaults = { [key in SettingsKey]: SettingsKeyReturnType[key] }
 
 const defaultValues: SettingsKeyReturnDefaults = {
-  [SettingsKey.COMMUNICATION_PRIVATE_SEED]: undefined
+  [SettingsKey.COMMUNICATION_PRIVATE_SEED]: undefined,
+  [SettingsKey.COMMUNICATION_WALLET_PUBKEYS]: [],
+  [SettingsKey.LOCAL_MNEMONIC]: undefined
 }
 
 @Injectable({

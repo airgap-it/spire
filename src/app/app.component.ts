@@ -4,11 +4,11 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx'
 import { StatusBar } from '@ionic-native/status-bar/ngx'
 import { AlertController, Platform } from '@ionic/angular'
 import { map } from 'rxjs/operators'
-import { MessageTypes, PermissionResponse, PermissionRequest } from '@airgap/beacon-sdk/dist/client/Messages'
+import { MessageTypes, PermissionResponse, PermissionRequest, OperationRequest, SignPayloadRequest, BroadcastRequest } from '@airgap/beacon-sdk/dist/client/Messages'
 import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
 import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
 
-import { CryptoService } from './services/crypto.service'
+import { LocalWalletService } from './services/local-wallet.service'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object';
@@ -44,7 +44,7 @@ export class AppComponent {
     private readonly statusBar: StatusBar,
     private readonly activatedRoute: ActivatedRoute,
     private readonly alertController: AlertController,
-    private readonly cryptoService: CryptoService
+    private readonly localWalletService: LocalWalletService
   ) {
     this.initializeApp()
   }
@@ -69,11 +69,23 @@ export class AppComponent {
         if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.PermissionRequest) {
           this.permissionRequest(deserialized as any as PermissionRequest)
         }
+
+        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.SignPayloadRequest) {
+          this.signRequest(deserialized as any as SignPayloadRequest)
+        }
+
+        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.OperationRequest) {
+          this.operationRequest(deserialized as any as OperationRequest)
+        }
+
+        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.BroadcastRequest) {
+          this.broadcastRequest(deserialized as any as BroadcastRequest)
+        }
       }
     })
   }
 
-  public async permissionRequest(request: PermissionRequest) {
+  public async permissionRequest(request: PermissionRequest): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Permission request',
       message: 'Do you want to give the dapp permissions to do all the things?',
@@ -83,7 +95,7 @@ export class AppComponent {
           type: 'checkbox',
           label: 'Read Address',
           value: 'read_address',
-          checked: true
+          checked: request.scope.indexOf('read_address') >= 0
         },
 
         {
@@ -91,15 +103,15 @@ export class AppComponent {
           type: 'checkbox',
           label: 'Sign',
           value: 'sign',
-          checked: true
+          checked: request.scope.indexOf('sign') >= 0
         },
 
         {
-          name: 'payment_request',
+          name: 'operation_request',
           type: 'checkbox',
-          label: 'Payment request',
-          value: 'payment_request',
-          checked: true
+          label: 'Operation request',
+          value: 'operation_request',
+          checked: request.scope.indexOf('operation_request') >= 0
         },
 
         {
@@ -107,7 +119,7 @@ export class AppComponent {
           type: 'checkbox',
           label: 'Threshold',
           value: 'threshold',
-          checked: true
+          checked: request.scope.indexOf('threshold') >= 0
         }
       ],
       buttons: [
@@ -121,7 +133,7 @@ export class AppComponent {
                 id: request.id,
                 type: MessageTypes.PermissionResponse,
                 permissions: {
-                  pubkey: this.cryptoService.publicKey,
+                  pubkey: this.localWalletService.publicKey,
                   networks: ['mainnet'],
                   scopes: grantedPermissions
                 }
@@ -144,5 +156,66 @@ export class AppComponent {
     })
 
     await alert.present()
+  }
+
+  public async signRequest(request: SignPayloadRequest): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Sign Request',
+      message: 'Do you want to sign: ' + JSON.stringify(request.payload),
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }, {
+          text: 'Okay',
+          handler: () => {
+            console.log('Confirm Okay');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  public async operationRequest(request: OperationRequest): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Operation Request',
+      message: 'Do you want to create operation: ' + JSON.stringify(request.operationDetails),
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }, {
+          text: 'Okay',
+          handler: () => {
+            console.log('Confirm Okay');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  public async broadcastRequest(request: BroadcastRequest): Promise<void> {
+    console.log(request)
+    const alert = await this.alertController.create({
+      header: 'Broadcast Request',
+      message: 'Do you want to broadcast: ' + JSON.stringify(request.signedTransaction.map(buff => buff)),
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }, {
+          text: 'Okay',
+          handler: () => {
+            console.log('Confirm Okay');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 }
