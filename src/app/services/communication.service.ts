@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core'
 import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/client/WalletCommunicationClient'
+import { Injectable } from '@angular/core'
 
 import { SettingsKey, StorageService } from './storage.service'
 
@@ -44,10 +44,6 @@ export class CommunicationService {
         throw new Error('Client not initialized')
       }
       this.listenForMessages([pubKey])
-      this.client.listenForEncryptedMessage(pubKey, message => {
-        console.log('DAPP gotEncryptedMessage:', message)
-      })
-      this.client.sendMessage(pubKey, `CHANNEL SUCCESSFULLY OPENED WITH ${pubKey}!`)
     })
   }
 
@@ -60,6 +56,7 @@ export class CommunicationService {
       this.client.listenForEncryptedMessage(pubKey, message => {
         console.log('DAPP gotEncryptedMessage:', message)
       })
+      this.client.sendMessage(pubKey, 'CHANNEL SUCCESSFULLY OPENED!')
     })
   }
 
