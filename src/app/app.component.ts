@@ -1,17 +1,25 @@
+import {
+  BaseMessage,
+  BroadcastRequest,
+  MessageTypes,
+  OperationRequest,
+  PermissionRequest,
+  PermissionResponse,
+  SignPayloadRequest
+} from '@airgap/beacon-sdk/dist/client/Messages'
+import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
+import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
 import { Component } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { SplashScreen } from '@ionic-native/splash-screen/ngx'
 import { StatusBar } from '@ionic-native/status-bar/ngx'
 import { AlertController, Platform } from '@ionic/angular'
 import { map } from 'rxjs/operators'
-import { MessageTypes, PermissionResponse, PermissionRequest, OperationRequest, SignPayloadRequest, BroadcastRequest } from '@airgap/beacon-sdk/dist/client/Messages'
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
 
 import { LocalWalletService } from './services/local-wallet.service'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
-  return x !== null && typeof x === 'object';
+  return x !== null && typeof x === 'object'
 }
 
 @Component({
@@ -59,27 +67,26 @@ export class AppComponent {
 
     const data = this.activatedRoute.queryParamMap.pipe(map(params => params.get('d')))
     data.subscribe(res => {
-
       if (res) {
         console.log('d', res)
         const serializer = new Serializer()
 
-        const deserialized = serializer.deserialize(res)
+        const deserialized = serializer.deserialize(res) as BaseMessage
 
-        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.PermissionRequest) {
-          this.permissionRequest(deserialized as any as PermissionRequest)
+        if (isUnknownObject(deserialized) && deserialized.type === MessageTypes.PermissionRequest) {
+          this.permissionRequest((deserialized as any) as PermissionRequest)
         }
 
-        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.SignPayloadRequest) {
-          this.signRequest(deserialized as any as SignPayloadRequest)
+        if (isUnknownObject(deserialized) && deserialized.type === MessageTypes.SignPayloadRequest) {
+          this.signRequest((deserialized as any) as SignPayloadRequest)
         }
 
-        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.OperationRequest) {
-          this.operationRequest(deserialized as any as OperationRequest)
+        if (isUnknownObject(deserialized) && deserialized.type === MessageTypes.OperationRequest) {
+          this.operationRequest((deserialized as any) as OperationRequest)
         }
 
-        if (isUnknownObject(deserialized) && deserialized.type && deserialized.type === MessageTypes.BroadcastRequest) {
-          this.broadcastRequest(deserialized as any as BroadcastRequest)
+        if (isUnknownObject(deserialized) && deserialized.type === MessageTypes.BroadcastRequest) {
+          this.broadcastRequest((deserialized as any) as BroadcastRequest)
         }
       }
     })
@@ -143,7 +150,7 @@ export class AppComponent {
               transport.send(serialized)
 
               setTimeout(() => {
-                window.close();
+                window.close()
               }, 1000)
             }
           }
@@ -166,16 +173,17 @@ export class AppComponent {
         {
           text: 'Cancel',
           role: 'cancel'
-        }, {
+        },
+        {
           text: 'Okay',
           handler: () => {
-            console.log('Confirm Okay');
+            console.log('Confirm Okay')
           }
         }
       ]
-    });
+    })
 
-    await alert.present();
+    await alert.present()
   }
 
   public async operationRequest(request: OperationRequest): Promise<void> {
@@ -186,16 +194,17 @@ export class AppComponent {
         {
           text: 'Cancel',
           role: 'cancel'
-        }, {
+        },
+        {
           text: 'Okay',
           handler: () => {
-            console.log('Confirm Okay');
+            console.log('Confirm Okay')
           }
         }
       ]
-    });
+    })
 
-    await alert.present();
+    await alert.present()
   }
 
   public async broadcastRequest(request: BroadcastRequest): Promise<void> {
@@ -207,15 +216,16 @@ export class AppComponent {
         {
           text: 'Cancel',
           role: 'cancel'
-        }, {
+        },
+        {
           text: 'Okay',
           handler: () => {
-            console.log('Confirm Okay');
+            console.log('Confirm Okay')
           }
         }
       ]
-    });
+    })
 
-    await alert.present();
+    await alert.present()
   }
 }
