@@ -94,7 +94,7 @@ export class AppComponent {
 
   public async permissionRequest(request: PermissionRequest): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Permission request',
+      header: `Permission request from ${request.name}`,
       message: 'Do you want to give the dapp permissions to do all the things?',
       inputs: [
         {
@@ -167,7 +167,7 @@ export class AppComponent {
 
   public async signRequest(request: SignPayloadRequest): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Sign Request',
+      header: `Sign Request from ${request.name}`,
       message: 'Do you want to sign: ' + JSON.stringify(request.payload),
       buttons: [
         {
@@ -188,7 +188,7 @@ export class AppComponent {
 
   public async operationRequest(request: OperationRequest): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Operation Request',
+      header: `Operation Request from ${request.name}`,
       message: 'Do you want to create operation: ' + JSON.stringify(request.operationDetails),
       buttons: [
         {
@@ -210,7 +210,7 @@ export class AppComponent {
   public async broadcastRequest(request: BroadcastRequest): Promise<void> {
     console.log(request)
     const alert = await this.alertController.create({
-      header: 'Broadcast Request',
+      header: `Broadcast Request from ${request.name}`,
       message: 'Do you want to broadcast: ' + JSON.stringify(request.signedTransaction.map(buff => buff)),
       buttons: [
         {
