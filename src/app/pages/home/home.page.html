@@ -45,14 +45,17 @@
 
   <!--TODO: show only if development mode is activated -->
 
-  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/send-one-device.svg" /></ion-row>
+  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_extension.png" /></ion-row>
 
   <ion-row>
     <ion-col>
       <ion-button color="primary" expand="block" (click)="signWithLocalMnemonic()">
         Setup local secret
       </ion-button>
-      <p>This is a development option only! Use a private key that is stored in the extension.</p>
+      <p>
+        <strong>This is a development option only!</strong>
+        Use a private key that is stored in the extension.
+      </p>
     </ion-col>
   </ion-row>
 </ion-content>
