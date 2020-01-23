@@ -140,7 +140,7 @@ export class AppComponent {
                 id: request.id,
                 type: MessageTypes.PermissionResponse,
                 permissions: {
-                  pubkey: this.localWalletService.publicKey,
+                  pubkey: this.localWalletService.publicKey as any,
                   networks: ['mainnet'],
                   scopes: grantedPermissions
                 }

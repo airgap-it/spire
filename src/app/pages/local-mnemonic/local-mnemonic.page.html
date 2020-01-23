@@ -15,9 +15,10 @@
       <ion-label>Mnemonic</ion-label>
     </ion-list-header>
     <ion-item class="ion-no-padding">
-      <ion-textarea placeholder="Mnemonic" wrap="soft" [(ngModel)]="localWalletService.mnemonic"></ion-textarea>
+      <ion-textarea placeholder="Mnemonic" wrap="soft" [(ngModel)]="mnemonic"></ion-textarea>
     </ion-item>
-    <ion-button (click)="localWalletService.saveMnemonic(localWalletService.mnemonic)">Save</ion-button>
+    <ion-button (click)="localWalletService.saveMnemonic(mnemonic)">Save</ion-button>
+    <ion-button (click)="localWalletService.generateMnemonic()">Generate</ion-button>
   </ion-list>
 
   <ion-list>
@@ -27,18 +28,7 @@
   </ion-list>
   <ion-row>
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ localWalletService.address }}</p>
-    </ion-col>
-  </ion-row>
-
-  <ion-list>
-    <ion-list-header class="ion-no-padding">
-      <ion-label>Balance</ion-label>
-    </ion-list-header>
-  </ion-list>
-  <ion-row>
-    <ion-col class="ion-no-padding">
-      <p color="medium" class="ion-no-margin ion-text">{{ getBalance(localWalletService.wallet) }}</p>
+      <p class="ion-no-margin">{{ localWalletService.address | async }}</p>
     </ion-col>
   </ion-row>
 
@@ -49,7 +39,7 @@
   </ion-list>
   <ion-row>
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ localWalletService.privateKey }}</p>
+      <p class="ion-no-margin">{{ localWalletService.privateKey | async }}</p>
     </ion-col>
   </ion-row>
 
@@ -60,7 +50,18 @@
   </ion-list>
   <ion-row class="ion-padding-bottom">
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ localWalletService.publicKey }}</p>
+      <p class="ion-no-margin">{{ localWalletService.publicKey | async }}</p>
+    </ion-col>
+  </ion-row>
+  
+  <ion-list>
+    <ion-list-header class="ion-no-padding">
+      <ion-label>Balance</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <ion-row>
+    <ion-col class="ion-no-padding">
+      <p color="medium" class="ion-no-margin ion-text">{{ getBalance(localWalletService.wallet) }}</p>
     </ion-col>
   </ion-row>
 </ion-content>

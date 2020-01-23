@@ -9,7 +9,13 @@ import { LocalWalletService } from '../../services/local-wallet.service'
   styleUrls: ['local-mnemonic.page.scss']
 })
 export class LocalMnemonicPage {
-  constructor(public readonly localWalletService: LocalWalletService) { }
+  public mnemonic: string = ''
+
+  constructor(public readonly localWalletService: LocalWalletService) {
+    this.localWalletService.mnemonic.subscribe(mnemonic => {
+      this.mnemonic = mnemonic
+    })
+  }
 
   public getBalance(wallet: AirGapMarketWallet | undefined): void {
     if (wallet) {

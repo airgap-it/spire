@@ -1,15 +1,15 @@
 import { Component } from '@angular/core'
+import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
 
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
-import { Router } from '@angular/router'
 
 @Component({
-  selector: 'beacon-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss']
+  selector: 'beacon-pair',
+  templateUrl: 'pair.page.html',
+  styleUrls: ['pair.page.scss']
 })
-export class HomePage {
+export class PairPage {
   constructor(private readonly modalController: ModalController, private readonly router: Router) { }
 
   public async pairWallet() {
