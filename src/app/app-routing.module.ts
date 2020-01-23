@@ -4,11 +4,11 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router'
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'pair',
     pathMatch: 'full'
   },
   {
-    path: 'home',
+    path: 'pair',
     loadChildren: () => import('./pages/pair/pair.module').then(m => m.PairPageModule)
   },
   {
@@ -22,6 +22,10 @@ const routes: Routes = [
   {
     path: 'add-wallet-connection',
     loadChildren: () => import('./pages/add-wallet-connection/add-wallet-connection.module').then( m => m.AddWalletConnectionPageModule)
+  },
+  {
+    path: 'beacon-request',
+    loadChildren: () => import('./pages/beacon-request/beacon-request.module').then( m => m.BeaconRequestPageModule)
   }
 ]
 

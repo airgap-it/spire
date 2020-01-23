@@ -10,6 +10,8 @@ import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-con
   styleUrls: ['pair.page.scss']
 })
 export class PairPage {
+  public developerModeEnabled: boolean = false
+  
   constructor(private readonly modalController: ModalController, private readonly router: Router) { }
 
   public async pairWallet() {

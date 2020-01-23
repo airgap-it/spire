@@ -28,7 +28,7 @@ const connectToPopup = cb => {
 const openPopup = message => {
   return new Promise((resolve, _reject) => {
     chrome.windows.create({
-      url: `./index.html/#/home/?d=${message.payload}`,
+      url: `./index.html/#/pair/?d=${message.payload}`,
       type: 'popup',
       height: 680,
       width: 420

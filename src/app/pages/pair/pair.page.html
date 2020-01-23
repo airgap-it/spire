@@ -38,24 +38,26 @@
     <ion-col>
       <ion-item lines="none" class="ion-no-padding">
         <ion-label>Enable Developer Mode</ion-label>
-        <ion-toggle></ion-toggle>
+        <ion-toggle [(ngModel)]="developerModeEnabled"></ion-toggle>
       </ion-item>
     </ion-col>
   </ion-row>
 
   <!--TODO: show only if development mode is activated -->
 
-  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_extension.png" /></ion-row>
+  <ng-container *ngIf="developerModeEnabled">
+    <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_extension.png" /></ion-row>
 
-  <ion-row>
-    <ion-col>
-      <ion-button color="primary" expand="block" (click)="pairLocalMnemonic()">
-        Setup local secret
-      </ion-button>
-      <p>
-        <strong>This is a development option only!</strong>
-        Use a private key that is stored in the extension.
-      </p>
-    </ion-col>
-  </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-button color="primary" expand="block" (click)="pairLocalMnemonic()">
+          Setup local secret
+        </ion-button>
+        <p>
+          <strong>This is a development option only!</strong>
+          Use a private key that is stored in the extension.
+        </p>
+      </ion-col>
+    </ion-row>  
+  </ng-container>
 </ion-content>
