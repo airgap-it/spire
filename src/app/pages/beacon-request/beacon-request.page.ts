@@ -1,3 +1,6 @@
+import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
+import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
+import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport'
 import {
   BaseMessage,
   BroadcastRequest,
@@ -6,10 +9,7 @@ import {
   PermissionRequest,
   PermissionResponse,
   SignPayloadRequest
-} from '@airgap/beacon-sdk/dist/client/Messages'
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
-import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport'
+} from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { take } from 'rxjs/operators'
@@ -33,7 +33,7 @@ export class BeaconRequestPage implements OnInit {
 
   responseHandler: (() => Promise<void>) | undefined
 
-  transport: Transport = new ChromeMessageTransport()
+  transport: Transport = new ChromeMessageTransport('Beacon Extension')
 
   constructor(
     private readonly modalController: ModalController,
@@ -127,7 +127,7 @@ export class BeaconRequestPage implements OnInit {
 
         const serialized = new Serializer().serialize(response)
 
-        this.transport.send(serialized)
+        this.transport.send(serialized, {})
 
         setTimeout(() => {
           window.close()

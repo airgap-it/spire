@@ -1,5 +1,5 @@
-import { BaseMessage } from '@airgap/beacon-sdk/dist/client/Messages'
 import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
+import { BaseMessage } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { SplashScreen } from '@ionic-native/splash-screen/ngx'
