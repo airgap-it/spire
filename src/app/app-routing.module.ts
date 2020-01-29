@@ -21,11 +21,12 @@ const routes: Routes = [
   },
   {
     path: 'add-wallet-connection',
-    loadChildren: () => import('./pages/add-wallet-connection/add-wallet-connection.module').then( m => m.AddWalletConnectionPageModule)
+    loadChildren: () =>
+      import('./pages/add-wallet-connection/add-wallet-connection.module').then(m => m.AddWalletConnectionPageModule)
   },
   {
     path: 'beacon-request',
-    loadChildren: () => import('./pages/beacon-request/beacon-request.module').then( m => m.BeaconRequestPageModule)
+    loadChildren: () => import('./pages/beacon-request/beacon-request.module').then(m => m.BeaconRequestPageModule)
   }
 ]
 

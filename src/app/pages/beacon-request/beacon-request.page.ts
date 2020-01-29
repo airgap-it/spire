@@ -15,7 +15,6 @@ import { ModalController } from '@ionic/angular'
 import { take } from 'rxjs/operators'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 
-
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
 }
@@ -85,7 +84,7 @@ export class BeaconRequestPage implements OnInit {
           icon: 'eye',
           checked: request.scope.indexOf('read_address') >= 0
         },
-  
+
         {
           name: 'sign',
           type: 'checkbox',
@@ -94,7 +93,7 @@ export class BeaconRequestPage implements OnInit {
           icon: 'create',
           checked: request.scope.indexOf('sign') >= 0
         },
-  
+
         {
           name: 'operation_request',
           type: 'checkbox',
@@ -103,7 +102,7 @@ export class BeaconRequestPage implements OnInit {
           icon: 'color-wand',
           checked: request.scope.indexOf('operation_request') >= 0
         },
-  
+
         {
           name: 'threshold',
           type: 'checkbox',
@@ -113,7 +112,7 @@ export class BeaconRequestPage implements OnInit {
           checked: request.scope.indexOf('threshold') >= 0
         }
       ]
-    
+
       this.responseHandler = async () => {
         const response: PermissionResponse = {
           id: request.id,
@@ -132,7 +131,7 @@ export class BeaconRequestPage implements OnInit {
         setTimeout(() => {
           window.close()
         }, 1000)
-      }  
+      }
     })
   }
 

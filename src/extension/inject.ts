@@ -4,7 +4,7 @@
 window.addEventListener(
   'message',
   (event: any) => {
-    const data: { method: string, payload: unknown } = event.data
+    const data: { method: string; payload: unknown } = event.data
     if (data && data.method === 'toExtension') {
       if (data.payload === 'ping') {
         // To detect if extension is installed or not, we answer pings immediately
@@ -13,7 +13,6 @@ window.addEventListener(
         console.log('sending message from page to background', data.payload)
 
         chrome.runtime.sendMessage({ method: 'toExtension', payload: data.payload })
-
       }
     }
   },
@@ -30,4 +29,3 @@ chrome.runtime.onMessage.addListener(data => {
 
   window.postMessage(data, '*')
 })
-

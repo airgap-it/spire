@@ -1,14 +1,13 @@
 .divider--line {
-    border-top: 2px solid var(--ion-color-primary);
-    margin-top: 32px;
+  border-top: 2px solid var(--ion-color-primary);
+  margin-top: 32px;
+}
+.request--container {
+  h5 {
+    word-break: break-all;
   }
-  .request--container {
-    h5 {
-      word-break: break-all;
-    }
-    ion-avatar {
-      display: block;
-      margin: auto;
-    }
+  ion-avatar {
+    display: block;
+    margin: auto;
   }
-  
+}

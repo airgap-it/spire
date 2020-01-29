@@ -11,8 +11,8 @@ import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-con
 })
 export class PairPage {
   public developerModeEnabled: boolean = false
-  
-  constructor(private readonly modalController: ModalController, private readonly router: Router) { }
+
+  constructor(private readonly modalController: ModalController, private readonly router: Router) {}
 
   public async pairWallet() {
     const modal = await this.modalController.create({
@@ -22,7 +22,7 @@ export class PairPage {
     return modal.present()
   }
 
-  public async pairHardwareWallet() { }
+  public async pairHardwareWallet() {}
 
   public async pairLocalMnemonic() {
     this.router.navigate(['local-mnemonic'])

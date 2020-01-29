@@ -1,24 +1,24 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { IonicModule } from '@ionic/angular'
 
-import { AddWalletConnectionPage } from './add-wallet-connection.page';
+import { AddWalletConnectionPage } from './add-wallet-connection.page'
 
 describe('AddWalletConnectionPage', () => {
-  let component: AddWalletConnectionPage;
-  let fixture: ComponentFixture<AddWalletConnectionPage>;
+  let component: AddWalletConnectionPage
+  let fixture: ComponentFixture<AddWalletConnectionPage>
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddWalletConnectionPage ],
+      declarations: [AddWalletConnectionPage],
       imports: [IonicModule.forRoot()]
-    }).compileComponents();
+    }).compileComponents()
 
-    fixture = TestBed.createComponent(AddWalletConnectionPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+    fixture = TestBed.createComponent(AddWalletConnectionPage)
+    component = fixture.componentInstance
+    fixture.detectChanges()
+  }))
 
   it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    expect(component).toBeTruthy()
+  })
+})

@@ -30,9 +30,9 @@ export class StorageService {
       this.storage = {
         get: async (key: string): Promise<unknown> => {
           return new Promise(resolve => {
-            chrome.storage.local.get(null, (result) => {
+            chrome.storage.local.get(null, result => {
               resolve(result[key])
-            });
+            })
           })
         },
         set: async (key: string, value: any): Promise<void> => {

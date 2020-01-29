@@ -43,7 +43,7 @@ export class LocalWalletService {
         this._privateKey.next(privateKey)
         this._publicKey.next(publicKey)
         this._address.next(address)
-  
+
         this.wallet = new AirGapMarketWallet('xtz', publicKey, false, this.protocol.standardDerivationPath)
         this.wallet.synchronize()
       })

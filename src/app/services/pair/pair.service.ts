@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport';
+import { Injectable } from '@angular/core'
+import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport'
 
 @Injectable({
   providedIn: 'root'
@@ -7,11 +7,7 @@ import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport';
 export class PairService {
   public activeTransport: Transport | undefined
 
-  constructor() {
+  constructor() {}
 
-  }
-
-  public async addTransport() {
-
-  }
+  public async addTransport() {}
 }

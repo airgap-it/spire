@@ -42,8 +42,13 @@
     </div>
 
     <ng-container *ngIf="request.type === 'permission_request'">
-      <h2><span class="style__strong color__primary">{{ requesterName }}</span> would like to connect to your account.</h2>
-      <p class="ion-padding-top">This website is requesting the following permissions. Always make sure you trust the websites you interact with.</p>
+      <h2>
+        <span class="style__strong color__primary">{{ requesterName }}</span>
+        would like to connect to your account.
+      </h2>
+      <p class="ion-padding-top">
+        This website is requesting the following permissions. Always make sure you trust the websites you interact with.
+      </p>
       <ion-row class="ion-no-padding">
         <ion-col class="ion-no-padding">
           <ion-list lines="none">

@@ -1,24 +1,24 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { IonicModule } from '@ionic/angular'
 
-import { BeaconRequestPage } from './beacon-request.page';
+import { BeaconRequestPage } from './beacon-request.page'
 
 describe('BeaconRequestPage', () => {
-  let component: BeaconRequestPage;
-  let fixture: ComponentFixture<BeaconRequestPage>;
+  let component: BeaconRequestPage
+  let fixture: ComponentFixture<BeaconRequestPage>
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BeaconRequestPage ],
+      declarations: [BeaconRequestPage],
       imports: [IonicModule.forRoot()]
-    }).compileComponents();
+    }).compileComponents()
 
-    fixture = TestBed.createComponent(BeaconRequestPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+    fixture = TestBed.createComponent(BeaconRequestPage)
+    component = fixture.componentInstance
+    fixture.detectChanges()
+  }))
 
   it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    expect(component).toBeTruthy()
+  })
+})

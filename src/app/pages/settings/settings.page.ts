@@ -9,7 +9,7 @@ import { StorageService, SettingsKey } from 'src/app/services/storage.service'
   styleUrls: ['./settings.page.scss']
 })
 export class SettingsPage {
-  constructor(public readonly settingsService: SettingsService, private readonly storageService: StorageService) { }
+  constructor(public readonly settingsService: SettingsService, private readonly storageService: StorageService) {}
 
   public async resetPairedDevices() {
     this.storageService.delete(SettingsKey.COMMUNICATION_WALLET_PUBKEYS)
