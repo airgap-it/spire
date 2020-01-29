@@ -1,15 +1,17 @@
-import { browser, by, element } from 'protractor';
+import { browser, by, element } from 'protractor'
 
 export class AppPage {
-  navigateTo(destination) {
-    return browser.get(destination);
+  public navigateTo(destination) {
+    return browser.get(destination)
   }
 
-  getTitle() {
-    return browser.getTitle();
+  public getTitle() {
+    return browser.getTitle()
   }
 
-  getPageOneTitleText() {
-    return element(by.tagName('app-pair')).element(by.deepCss('ion-title')).getText();
+  public getPageOneTitleText() {
+    return element(by.tagName('app-pair'))
+      .element(by.deepCss('ion-title'))
+      .getText()
   }
 }

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core'
 import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport'
+import { Injectable } from '@angular/core'
 
 @Injectable({
   providedIn: 'root'

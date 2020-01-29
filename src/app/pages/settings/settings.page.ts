@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
+import { SettingsKey, StorageService } from 'src/app/services/storage.service'
 
 import { SettingsService } from '../../services/settings.service'
-import { StorageService, SettingsKey } from 'src/app/services/storage.service'
 
 @Component({
   selector: 'beacon-settings',

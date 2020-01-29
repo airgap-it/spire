@@ -1,19 +1,19 @@
-import { AppPage } from './app.po';
+import { AppPage } from './app.po'
 
 describe('new App', () => {
-  let page: AppPage;
+  let page: AppPage
 
   beforeEach(() => {
-    page = new AppPage();
-  });
+    page = new AppPage()
+  })
   describe('default screen', () => {
     beforeEach(() => {
-      page.navigateTo('/pair');
-    });
+      page.navigateTo('/pair')
+    })
     it('should have a title saying Pair', () => {
       page.getPageOneTitleText().then(title => {
-        expect(title).toEqual('Pair');
-      });
-    });
-  });
-});
+        expect(title).toEqual('Pair')
+      })
+    })
+  })
+})

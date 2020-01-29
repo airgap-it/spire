@@ -1,8 +1,9 @@
 import { Injectable, NgZone } from '@angular/core'
 import { AirGapMarketWallet, TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
-import { StorageService, SettingsKey } from './storage.service'
 import { Observable, ReplaySubject } from 'rxjs'
+
+import { SettingsKey, StorageService } from './storage.service'
 
 @Injectable({
   providedIn: 'root'

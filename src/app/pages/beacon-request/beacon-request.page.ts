@@ -25,14 +25,14 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
   styleUrls: ['./beacon-request.page.scss']
 })
 export class BeaconRequestPage implements OnInit {
-  request: BaseMessage | undefined
-  requesterName: string = ''
-  address: string = ''
-  inputs?: any
+  public request: BaseMessage | undefined
+  public requesterName: string = ''
+  public address: string = ''
+  public inputs?: any
 
-  responseHandler: (() => Promise<void>) | undefined
+  public responseHandler: (() => Promise<void>) | undefined
 
-  transport: Transport = new ChromeMessageTransport('Beacon Extension')
+  public transport: Transport = new ChromeMessageTransport('Beacon Extension')
 
   constructor(
     private readonly modalController: ModalController,
@@ -43,7 +43,7 @@ export class BeaconRequestPage implements OnInit {
     })
   }
 
-  ngOnInit() {
+  public ngOnInit() {
     if (isUnknownObject(this.request) && this.request.type === MessageTypes.PermissionRequest) {
       this.requesterName = ((this.request as any) as PermissionRequest).name
       this.permissionRequest((this.request as any) as PermissionRequest)

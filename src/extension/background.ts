@@ -2,7 +2,7 @@
 
 const sendToPage = data => {
   console.log('background.js: post ', data)
-  chrome.tabs.query({}, (tabs) => {
+  chrome.tabs.query({}, tabs => {
     // TODO think about direct communication with tab
     tabs.forEach(({ id }) => {
       if (id) {

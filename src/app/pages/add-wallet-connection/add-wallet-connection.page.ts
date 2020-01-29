@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core'
+import { Component, NgZone, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 
 import { CommunicationService } from '../../services/communication.service'

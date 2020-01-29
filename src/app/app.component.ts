@@ -47,7 +47,7 @@ export class AppComponent {
     this.initializeApp()
   }
 
-  initializeApp() {
+  public initializeApp() {
     if (this.platform.is('cordova')) {
       this.platform.ready().then(() => {
         this.statusBar.styleDefault()
