@@ -5,6 +5,7 @@ import { Observable } from 'rxjs'
 import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
 
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
+import { Methods } from 'src/extension/Methods'
 
 @Component({
   selector: 'beacon-pair',
@@ -24,16 +25,26 @@ export class PairPage {
   }
 
   public async pairWallet() {
-    const modal = await this.modalController.create({
-      component: AddWalletConnectionPage
-    })
     this.signingMethodService.setSigningMethod(SigningMethod.WALLET)
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.P2P_INIT }, async response => {
+      console.log(response)
 
-    return modal.present()
+      const modal = await this.modalController.create({
+        component: AddWalletConnectionPage,
+        componentProps: {
+          handshakeData: JSON.stringify(response.qr)
+        }
+      })
+
+      return modal.present()
+    })
   }
 
   public async pairHardwareWallet() {
-    this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LEDGER_INIT }, response => {
+      console.log(response)
+      this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
+    })
   }
 
   public async pairLocalMnemonic() {
