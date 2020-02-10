@@ -1,0 +1,19 @@
+<ion-header no-border no-shadow>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Transaction Detail</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <beacon-from-to [transaction]="transaction"></beacon-from-to>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-button color="primary" (click)="openBlockexplorer()" shape="round">
+      <ion-icon slot="start" name="open"></ion-icon>
+      Open Blockexplorer
+    </ion-button>
+  </ion-fab>
+</ion-content>
