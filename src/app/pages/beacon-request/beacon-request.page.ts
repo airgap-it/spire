@@ -49,6 +49,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   public ngOnInit() {
+    console.log('new request', this.request)
     if (isUnknownObject(this.request) && this.request.type === MessageTypes.PermissionRequest) {
       this.requesterName = ((this.request as any) as PermissionRequest).name
       this.permissionRequest((this.request as any) as PermissionRequest)
@@ -169,6 +170,7 @@ export class BeaconRequestPage implements OnInit {
         transactionDetails: operation
       }
     ]
+    console.log('transactions', this.transactions)
 
     this.responseHandler = async () => {
       chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {

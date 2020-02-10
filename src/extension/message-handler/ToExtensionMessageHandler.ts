@@ -40,11 +40,12 @@ export class ToExtensionMessageHandler extends MessageHandler {
             seed.toString('hex'),
             tezosProtocol.standardDerivationPath
           )
-
-          const info = await tezosProtocol.prepareOperations(publicKey, (deserialized as any).operationDetails)
-          const serialized = new Serializer().serialize(info)
+          ;(deserialized as any).operationDetails = (
+            await tezosProtocol.prepareOperations(publicKey, (deserialized as any).operationDetails)
+          ).contents
+          const serialized = new Serializer().serialize(deserialized)
           openPopup({ ...data, payload: serialized })
-        })()
+        })().catch(console.error)
       } else {
         openPopup(data)
       }
