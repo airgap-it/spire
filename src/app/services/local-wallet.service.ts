@@ -4,6 +4,7 @@ import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
 
 import { SettingsKey, StorageService } from './storage.service'
+import { Methods } from 'src/extension/Methods'
 
 @Injectable({
   providedIn: 'root'
@@ -61,12 +62,20 @@ export class LocalWalletService {
   }
 
   public async generateMnemonic(): Promise<void> {
-    const mnemonic = bip39.generateMnemonic()
-    await this.saveMnemonic(mnemonic)
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_INIT }, response => {
+      console.log('generateMnemonic response', response)
+      this._mnemonic.next(response.mnemonic)
+    })
   }
 
   public async saveMnemonic(mnemonic: string): Promise<void> {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
+      chrome.runtime.sendMessage(
+        { method: 'toBackground', type: Methods.LOCAL_SAVE_MNEMONIC, payload: { params: { mnemonic } } },
+        response => {
+          console.log('saveMnemonic response', response)
+        }
+      )
       this.storageService.set(SettingsKey.LOCAL_MNEMONIC, mnemonic)
       this._mnemonic.next(mnemonic)
     }
