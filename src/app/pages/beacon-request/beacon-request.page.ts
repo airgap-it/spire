@@ -1,4 +1,3 @@
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
 import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
 import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport'
 import {
@@ -12,8 +11,11 @@ import {
 } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
+import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
+import { Methods } from 'src/extension/Methods'
+import { TezosSpendOperation } from 'airgap-coin-lib/dist/protocols/tezos/TezosProtocol'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -25,10 +27,13 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
   styleUrls: ['./beacon-request.page.scss']
 })
 export class BeaconRequestPage implements OnInit {
+  public protocol: TezosProtocol = new TezosProtocol()
+
   public request: BaseMessage | undefined
   public requesterName: string = ''
   public address: string = ''
   public inputs?: any
+  public transactions: IAirGapTransaction[] | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -124,26 +129,72 @@ export class BeaconRequestPage implements OnInit {
           }
         }
 
-        const serialized = new Serializer().serialize(response)
-
-        this.transport.send(serialized, {})
-
-        setTimeout(() => {
-          window.close()
-        }, 1000)
+        chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
+          console.log(res)
+          setTimeout(() => {
+            window.close()
+          }, 1000)
+        })
       }
     })
   }
 
   private async signRequest(request: SignPayloadRequest): Promise<void> {
-    console.log(request)
+    console.log('sign payload', request.payload[0])
+    this.transactions = await this.protocol.getTransactionDetails({
+      publicKey: '',
+      transaction: { binaryTransaction: request.payload[0] as any }
+    })
+    console.log(this.transactions)
+    this.responseHandler = async () => {
+      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
+        console.log(response)
+        setTimeout(() => {
+          window.close()
+        }, 1000)
+      })
+    }
   }
 
   private async operationRequest(request: OperationRequest): Promise<void> {
-    console.log(request)
+    const operation = request.operationDetails[0] as TezosSpendOperation
+    this.transactions = [
+      {
+        from: [operation.source],
+        to: [operation.destination],
+        isInbound: false,
+        amount: operation.amount,
+        fee: operation.fee,
+        protocolIdentifier: 'xtz',
+        transactionDetails: operation
+      }
+    ]
+
+    this.responseHandler = async () => {
+      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
+        console.log(response)
+        setTimeout(() => {
+          window.close()
+        }, 1000)
+      })
+    }
   }
 
   private async broadcastRequest(request: BroadcastRequest): Promise<void> {
-    console.log(request)
+    const signedTransaction = request.signedTransactions[0]
+    console.log('signedTx', signedTransaction)
+    this.transactions = await this.protocol.getTransactionDetailsFromSigned({
+      accountIdentifier: '',
+      transaction: (signedTransaction as any) as string
+    })
+    console.log(this.transactions)
+    this.responseHandler = async () => {
+      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
+        console.log(response)
+        setTimeout(() => {
+          window.close()
+        }, 1000)
+      })
+    }
   }
 }
