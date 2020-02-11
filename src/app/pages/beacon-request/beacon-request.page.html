@@ -3,11 +3,12 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Pairing Request</ion-title>
+    <ion-title>{{ title }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- TODO: Add the name of the dApp somewhere: {{requesterName}} -->
   <ng-container *ngIf="request">
     <div *ngIf="request.type === 'permission_request'" class="request--container">
       <ion-row>

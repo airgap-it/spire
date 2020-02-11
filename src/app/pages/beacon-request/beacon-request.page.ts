@@ -27,6 +27,7 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
   styleUrls: ['./beacon-request.page.scss']
 })
 export class BeaconRequestPage implements OnInit {
+  public title: string = ''
   public protocol: TezosProtocol = new TezosProtocol()
 
   public request: BaseMessage | undefined
@@ -51,19 +52,26 @@ export class BeaconRequestPage implements OnInit {
   public ngOnInit() {
     console.log('new request', this.request)
     if (isUnknownObject(this.request) && this.request.type === MessageTypes.PermissionRequest) {
+      this.title = 'Permission Request'
       this.requesterName = ((this.request as any) as PermissionRequest).name
       this.permissionRequest((this.request as any) as PermissionRequest)
     }
 
     if (isUnknownObject(this.request) && this.request.type === MessageTypes.SignPayloadRequest) {
+      this.title = 'Sign Payload Request'
+      this.requesterName = 'dApp Name (placeholder)'
       this.signRequest((this.request as any) as SignPayloadRequest)
     }
 
     if (isUnknownObject(this.request) && this.request.type === MessageTypes.OperationRequest) {
+      this.title = 'Operation Request'
+      this.requesterName = 'dApp Name (placeholder)'
       this.operationRequest((this.request as any) as OperationRequest)
     }
 
     if (isUnknownObject(this.request) && this.request.type === MessageTypes.BroadcastRequest) {
+      this.title = 'Broadcast Request'
+      this.requesterName = 'dApp Name (placeholder)'
       this.broadcastRequest((this.request as any) as BroadcastRequest)
     }
   }
