@@ -10,7 +10,7 @@ import {
   SignPayloadRequest
 } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component, OnInit } from '@angular/core'
-import { ModalController } from '@ionic/angular'
+import { ModalController, AlertController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
@@ -41,6 +41,7 @@ export class BeaconRequestPage implements OnInit {
   public transport: Transport = new ChromeMessageTransport('Beacon Extension')
 
   constructor(
+    private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly localWalletService: LocalWalletService
   ) {
@@ -144,6 +145,8 @@ export class BeaconRequestPage implements OnInit {
             window.close()
           }, 1000)
         })
+
+        await this.showSuccessAlert()
       }
     })
   }
@@ -162,6 +165,8 @@ export class BeaconRequestPage implements OnInit {
           window.close()
         }, 1000)
       })
+
+      await this.showSuccessAlert()
     }
   }
 
@@ -187,6 +192,8 @@ export class BeaconRequestPage implements OnInit {
           window.close()
         }, 1000)
       })
+
+      await this.showSuccessAlert()
     }
   }
 
@@ -205,6 +212,39 @@ export class BeaconRequestPage implements OnInit {
           window.close()
         }, 1000)
       })
+
+      await this.showSuccessAlert()
     }
+  }
+
+  private async showSuccessAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {
+    const alert: HTMLIonAlertElement = await this.alertController.create({
+      header: 'Success!',
+      message: 'The response has been sent back to the dApp.',
+      buttons: [
+        ...buttons,
+        {
+          text: 'Ok'
+        }
+      ]
+    })
+
+    await alert.present()
+  }
+
+  public openBlockexplorer(address: string, hash: string): void {
+    let blockexplorer: string = this.protocol.blockExplorer
+
+    if (hash) {
+      blockexplorer = this.protocol.getBlockExplorerLinkForTxId(hash)
+    } else if (address) {
+      blockexplorer = this.protocol.getBlockExplorerLinkForAddress(address)
+    }
+
+    this.openUrl(blockexplorer)
+  }
+
+  private openUrl(url: string): void {
+    window.open(url, '_blank')
   }
 }
