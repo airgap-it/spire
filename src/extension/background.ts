@@ -3,7 +3,13 @@
 import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
 import { ChromeStorage } from '@airgap/beacon-sdk/dist/client/storage/ChromeStorage'
 import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/client/WalletCommunicationClient'
-import { MessageTypes } from '@airgap/beacon-sdk/dist/messages/Messages'
+import {
+  BaseMessage,
+  MessageTypes,
+  BroadcastResponse,
+  SignPayloadResponse,
+  OperationResponse
+} from '@airgap/beacon-sdk/dist/messages/Messages'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
@@ -12,6 +18,17 @@ import { ToBackgroundMessageHandler } from './message-handler/ToBackgroundMessag
 import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageHandler'
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { Methods } from './Methods'
+
+export enum Destinations {
+  BACKGROUND = 'toBackground',
+  PAGE = 'toPage',
+  EXTENSION = 'toExtension'
+}
+
+interface ExtensionMessage {
+  method: Destinations
+  payload: string
+}
 
 /*
 import {DAppClient} from '@airgap/beacon-sdk/dist/client/clients/DappClient'
@@ -25,17 +42,20 @@ client.init().then(transport => {
 
 // TODO: Refactor this file
 
+const protocol: TezosProtocol = new TezosProtocol()
+
 console.log('test')
 const walletClient = new WalletCommunicationClient('test', 'asdf', 1, true)
 walletClient.start()
 
-const sendToPage = data => {
+const sendToPage = (data: string): void => {
   console.log('background.js: post ', data)
+  const message: ExtensionMessage = { method: Destinations.PAGE, payload: data }
   chrome.tabs.query({}, tabs => {
     // TODO think about direct communication with tab
     tabs.forEach(({ id }) => {
       if (id) {
-        chrome.tabs.sendMessage(id, data)
+        chrome.tabs.sendMessage(id, message)
       }
     }) // Send message to all tabs
   })
@@ -93,6 +113,7 @@ const handleLocalInit = async (_data: any, sendResponse: Function) => {
     sendResponse({ mnemonic: generated })
   }
 }
+
 const handleP2PInit = async (_data: any, sendResponse: Function) => {
   console.log('handshake info', walletClient.getHandshakeInfo())
 
@@ -104,7 +125,7 @@ const handleP2PInit = async (_data: any, sendResponse: Function) => {
       walletClient
         .listenForEncryptedMessage(pubkey, message => {
           console.log('got message!', message)
-          sendToPage({ method: 'toPage', payload: message })
+          sendToPage(message)
         })
         .catch(console.error)
     })
@@ -115,26 +136,96 @@ const handleP2PInit = async (_data: any, sendResponse: Function) => {
 
   sendResponse({ qr: walletClient.getHandshakeInfo() })
 }
-const handleResponse = async (data: any, _sendResponse: Function) => {
-  console.log('handleResponse')
-  if (data.request.type === MessageTypes.PermissionResponse) {
-    console.log('GET PERMISSION RESPONSE', data)
-    const serialized = new Serializer().serialize(data.request)
-    const res = { method: 'toPage', payload: serialized }
-    console.log('LOCAL REQUEST', res)
-    sendToPage(res)
-  } else if (data.request.type === MessageTypes.OperationRequest) {
-    console.log('GET OPERATION REQUEST', data)
-    const tezosProtocol = new TezosProtocol()
 
-    const forgedTx = await tezosProtocol.forgeAndWrapOperations(data.request.wrappedOperation)
-    console.log(forgedTx)
-  } else if (data.request.type === MessageTypes.SignPayloadRequest) {
-    console.log('GET SIGN REQUEST', data)
-  } else if (data.request.type === MessageTypes.BroadcastRequest) {
-    console.log('GET BROADCAST REQUEST', data)
-  }
+const sign = async (forgedTx: string): Promise<string> => {
+  const mnemonic: string = await storage.get('mnemonic' as any)
+  const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
+  const privatekey: Buffer = protocol.getPrivateKeyFromHexSecret(seed.toString('hex'), protocol.standardDerivationPath)
+
+  return protocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
 }
+
+const broadcast = async (signedTx: string): Promise<string> => {
+  return protocol.broadcastTransaction(signedTx)
+}
+
+const beaconMessageHandlerNotSupported: (
+  data: BaseMessage,
+  sendResponse: Function
+) => Promise<void> = (): Promise<void> => Promise.resolve()
+
+type BeaconMessageHandlerFunction = (data: BaseMessage, sendResponse: Function) => Promise<void>
+
+const beaconMessageHandler: { [key in MessageTypes]: BeaconMessageHandlerFunction } = {
+  [MessageTypes.PermissionResponse]: async (data: any, sendResponse: Function): Promise<void> => {
+    console.log('beaconMessageHandler permission-response', data)
+    sendToPage(new Serializer().serialize(data))
+    sendResponse()
+  },
+  [MessageTypes.OperationRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+    console.log('beaconMessageHandler operation-request', data)
+    const tezosProtocol = new TezosProtocol()
+    const mnemonic = await storage.get('mnemonic' as any)
+    const seed = await bip39.mnemonicToSeed(mnemonic)
+
+    const publicKey = tezosProtocol.getPublicKeyFromHexSecret(
+      seed.toString('hex'),
+      tezosProtocol.standardDerivationPath
+    )
+    const operation = await tezosProtocol.prepareOperations(publicKey, data.operationDetails)
+
+    const forgedTx = await tezosProtocol.forgeAndWrapOperations(operation)
+    console.log(forgedTx)
+    const hash = await sign(forgedTx.binaryTransaction).then(broadcast)
+
+    console.log('broadcast: ', hash)
+    const response: OperationResponse = {
+      id: data.id,
+      type: MessageTypes.OperationResponse,
+      transactionHashes: [hash]
+    }
+
+    sendToPage(new Serializer().serialize(response))
+    sendResponse()
+  },
+  [MessageTypes.SignPayloadRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+    console.log('beaconMessageHandler sign-request', data)
+    const hash = await sign(data.payload[0])
+    console.log('broadcast: ', hash)
+    const response: SignPayloadResponse = {
+      id: data.id,
+      type: MessageTypes.SignPayloadResponse,
+      signature: [hash as any]
+    }
+
+    sendToPage(new Serializer().serialize(response))
+    sendResponse()
+  },
+  [MessageTypes.BroadcastRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+    console.log('beaconMessageHandler broadcast-request', data)
+    const hash = await broadcast(data.signedTransactions[0])
+    console.log('broadcast: ', hash)
+    const response: BroadcastResponse = {
+      id: data.id,
+      type: MessageTypes.BroadcastResponse,
+      transactionHashes: [hash]
+    }
+
+    sendToPage(new Serializer().serialize(response))
+    sendResponse()
+  },
+  [MessageTypes.PermissionRequest]: beaconMessageHandlerNotSupported,
+  [MessageTypes.OperationResponse]: beaconMessageHandlerNotSupported,
+  [MessageTypes.SignPayloadResponse]: beaconMessageHandlerNotSupported,
+  [MessageTypes.BroadcastResponse]: beaconMessageHandlerNotSupported
+}
+
+const handleResponse = async (data: any, sendResponse: Function): Promise<void> => {
+  console.log('handleResponse')
+  const handler: BeaconMessageHandlerFunction = beaconMessageHandler[data.request.type]
+  await handler(data.request, sendResponse)
+}
+
 const handleSaveMnemonic = async (data: any, sendResponse: Function) => {
   console.log('handleSaveMnemonic')
   storage.set('mnemonic' as any, data.payload.params.mnemonic)
@@ -161,9 +252,9 @@ const send = (message: string) => {
 }
 
 const messageHandlerMap = new Map<string, MessageHandler>()
-messageHandlerMap.set('toExtension', new ToExtensionMessageHandler())
-messageHandlerMap.set('toPage', new ToPageMessageHandler())
-messageHandlerMap.set('toBackground', new ToBackgroundMessageHandler())
+messageHandlerMap.set(Destinations.EXTENSION, new ToExtensionMessageHandler())
+messageHandlerMap.set(Destinations.PAGE, new ToPageMessageHandler())
+messageHandlerMap.set(Destinations.BACKGROUND, new ToBackgroundMessageHandler())
 
 chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
   console.log('background.js: receive ', sender, data)
