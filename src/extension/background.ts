@@ -22,6 +22,9 @@ client.init().then(transport => {
   client.
 })
 */
+
+// TODO: Refactor this file
+
 console.log('test')
 const walletClient = new WalletCommunicationClient('test', 'asdf', 1, true)
 walletClient.start()
