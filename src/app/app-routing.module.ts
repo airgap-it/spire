@@ -27,10 +27,6 @@ const routes: Routes = [
   {
     path: 'beacon-request',
     loadChildren: () => import('./pages/beacon-request/beacon-request.module').then(m => m.BeaconRequestPageModule)
-  },
-  {
-    path: 'transaction-detail',
-    loadChildren: () => import('./pages/transaction-detail/transaction-detail.module').then( m => m.TransactionDetailPageModule)
   }
 ]
 
