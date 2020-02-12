@@ -21,6 +21,11 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
 export class AppComponent {
   public appPages = [
     {
+      title: 'Home',
+      url: '/home',
+      icon: 'home'
+    },
+    {
       title: 'Pair',
       url: '/pair',
       icon: 'code-working'
@@ -29,12 +34,12 @@ export class AppComponent {
       title: 'Local Mnemonic',
       url: '/local-mnemonic',
       icon: 'list'
-    },
-    {
-      title: 'Settings',
-      url: '/settings',
-      icon: 'settings'
     }
+    // {
+    //   title: 'Settings',
+    //   url: '/settings',
+    //   icon: 'settings'
+    // }
   ]
 
   constructor(
