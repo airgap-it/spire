@@ -100,19 +100,6 @@ let globalPubkey
 const handleLedgerInit = async (_data: any, _sendResponse: Function) => {
   console.log('handleLedgerInit')
 }
-const handleLocalInit = async (_data: any, sendResponse: Function) => {
-  console.log('handleLocalInit')
-  const mnemonic = await storage.get('mnemonic' as any)
-  if (mnemonic) {
-    console.log('mnemonic read', mnemonic)
-    sendResponse({ mnemonic })
-  } else {
-    const generated = bip39.generateMnemonic()
-    console.log('mnemonic generated', generated)
-    console.log(sendResponse)
-    sendResponse({ mnemonic: generated })
-  }
-}
 
 const handleP2PInit = async (_data: any, sendResponse: Function) => {
   console.log('handshake info', walletClient.getHandshakeInfo())
@@ -226,18 +213,38 @@ const handleResponse = async (data: any, sendResponse: Function): Promise<void> 
   await handler(data.request, sendResponse)
 }
 
+const handleLocalInit = async (_data: any, sendResponse: Function) => {
+  console.log('handleLocalInit')
+  const mnemonic = await storage.get('mnemonic' as any)
+  if (mnemonic) {
+    console.log('mnemonic read', mnemonic)
+    sendResponse({ mnemonic })
+  } else {
+    handleGenerateMnemonic(_data, sendResponse)
+  }
+}
+
 const handleSaveMnemonic = async (data: any, sendResponse: Function) => {
   console.log('handleSaveMnemonic')
   storage.set('mnemonic' as any, data.payload.params.mnemonic)
   sendResponse({ result: true })
 }
 
+const handleGenerateMnemonic = async (_data: any, sendResponse: Function) => {
+  console.log('handleGenerateMnemonic')
+  const generated = bip39.generateMnemonic()
+  console.log('mnemonic generated', generated)
+  storage.set('mnemonic' as any, generated)
+  sendResponse({ mnemonic: generated })
+}
+
 const messageTypeHandler = new Map<string, Function>()
 messageTypeHandler.set(Methods.LEDGER_INIT, handleLedgerInit)
-messageTypeHandler.set(Methods.LOCAL_INIT, handleLocalInit)
+messageTypeHandler.set(Methods.LOCAL_GET_MNEMONIC, handleLocalInit)
+messageTypeHandler.set(Methods.LOCAL_SAVE_MNEMONIC, handleSaveMnemonic)
+messageTypeHandler.set(Methods.LOCAL_GENERATE_MNEMONIC, handleGenerateMnemonic)
 messageTypeHandler.set(Methods.P2P_INIT, handleP2PInit)
 messageTypeHandler.set(Methods.RESPONSE, handleResponse)
-messageTypeHandler.set(Methods.LOCAL_SAVE_MNEMONIC, handleSaveMnemonic)
 
 const handleMessage = async (data: any, sendResponse: any) => {
   console.log('handleMessage', data, sendResponse)
