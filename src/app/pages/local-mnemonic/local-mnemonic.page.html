@@ -17,8 +17,8 @@
     <ion-item class="ion-no-padding">
       <ion-textarea placeholder="Mnemonic" wrap="soft" [(ngModel)]="mnemonic"></ion-textarea>
     </ion-item>
-    <ion-button (click)="localWalletService.saveMnemonic(mnemonic)">Save</ion-button>
-    <ion-button (click)="localWalletService.generateMnemonic()">Generate</ion-button>
+    <ion-button (click)="saveMnemonic(mnemonic)">Save</ion-button>
+    <ion-button (click)="generateMnemonic()">Generate</ion-button>
   </ion-list>
 
   <ion-list>

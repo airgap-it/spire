@@ -2,8 +2,6 @@ import { Injectable, NgZone } from '@angular/core'
 import { AirGapMarketWallet, TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
-
-import { SettingsKey, StorageService } from './storage.service'
 import { Methods } from 'src/extension/Methods'
 
 @Injectable({
@@ -24,7 +22,7 @@ export class LocalWalletService {
 
   public wallet: AirGapMarketWallet | undefined
 
-  constructor(private readonly storageService: StorageService, private readonly ngZone: NgZone) {
+  constructor(private readonly ngZone: NgZone) {
     this.protocol = new TezosProtocol()
 
     this.mnemonic.subscribe(async (mnemonic: string) => {
@@ -51,18 +49,18 @@ export class LocalWalletService {
       })
     })
 
-    this.init()
+    this.getMnemonic()
   }
 
-  public async init(): Promise<void> {
-    const mnemonic = await this.storageService.get(SettingsKey.LOCAL_MNEMONIC)
-    if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      this._mnemonic.next(mnemonic)
-    }
+  public async getMnemonic(): Promise<void> {
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GET_MNEMONIC }, response => {
+      console.log('generateMnemonic response', response)
+      this._mnemonic.next(response.mnemonic)
+    })
   }
 
   public async generateMnemonic(): Promise<void> {
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_INIT }, response => {
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GENERATE_MNEMONIC }, response => {
       console.log('generateMnemonic response', response)
       this._mnemonic.next(response.mnemonic)
     })
@@ -76,7 +74,6 @@ export class LocalWalletService {
           console.log('saveMnemonic response', response)
         }
       )
-      this.storageService.set(SettingsKey.LOCAL_MNEMONIC, mnemonic)
       this._mnemonic.next(mnemonic)
     }
   }
