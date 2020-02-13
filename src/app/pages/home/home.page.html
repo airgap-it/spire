@@ -14,8 +14,7 @@
   <ion-row class="ion-padding-vertical">
     <ion-col>
       <p class="ion-text-center ion-no-margin"><small>Paired with</small></p>
-      <!--TODO: set current paired method name -->
-      <h3 class="ion-text-center ion-no-margin">Wallet</h3>
+      <h3 class="ion-text-center ion-no-margin">{{ currentSigningMethod }}</h3>
     </ion-col>
   </ion-row>
 
@@ -36,8 +35,7 @@
   </ion-list>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <!--TODO: open Modal -->
-    <ion-button shape="round" color="primary">
+    <ion-button (click)="showPairPage()" shape="round" color="primary">
       Pair Wallet
     </ion-button>
   </ion-fab>
