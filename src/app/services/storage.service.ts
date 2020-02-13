@@ -1,26 +1,20 @@
 import { Injectable } from '@angular/core'
 
-export enum SettingsKey {
-  COMMUNICATION_PRIVATE_SEED = 'COMMUNICATION_PRIVATE_SEED',
-  COMMUNICATION_WALLET_PUBKEYS = 'COMMUNICATION_WALLET_PUBKEYS',
-  LOCAL_MNEMONIC = 'LOCAL_MNEMONIC',
+export enum StorageKey {
+  DEV_SETTINGS_ENABLED = 'DEV_SETTINGS_ENABLED',
   SIGNING_METHOD = 'SIGNING_METHOD'
 }
 
-interface SettingsKeyReturnType {
-  [SettingsKey.COMMUNICATION_PRIVATE_SEED]: string | undefined
-  [SettingsKey.COMMUNICATION_WALLET_PUBKEYS]: string[]
-  [SettingsKey.LOCAL_MNEMONIC]: string | undefined
-  [SettingsKey.SIGNING_METHOD]: string | undefined
+interface StorageKeyReturnType {
+  [StorageKey.DEV_SETTINGS_ENABLED]: boolean
+  [StorageKey.SIGNING_METHOD]: string | undefined
 }
 
-type SettingsKeyReturnDefaults = { [key in SettingsKey]: SettingsKeyReturnType[key] }
+type StorageKeyReturnDefaults = { [key in StorageKey]: StorageKeyReturnType[key] }
 
-const defaultValues: SettingsKeyReturnDefaults = {
-  [SettingsKey.COMMUNICATION_PRIVATE_SEED]: undefined,
-  [SettingsKey.COMMUNICATION_WALLET_PUBKEYS]: [],
-  [SettingsKey.LOCAL_MNEMONIC]: undefined,
-  [SettingsKey.SIGNING_METHOD]: undefined
+const defaultValues: StorageKeyReturnDefaults = {
+  [StorageKey.DEV_SETTINGS_ENABLED]: false,
+  [StorageKey.SIGNING_METHOD]: undefined
 }
 
 @Injectable({
@@ -53,20 +47,20 @@ export class StorageService {
       }
     }
   }
-  public async get<K extends SettingsKey>(key: K): Promise<SettingsKeyReturnType[K]> {
-    const value: SettingsKeyReturnType[K] = (await this.storage.get(key)) || defaultValues[key]
+  public async get<K extends StorageKey>(key: K): Promise<StorageKeyReturnType[K]> {
+    const value: StorageKeyReturnType[K] = (await this.storage.get(key)) || defaultValues[key]
     console.log(`[SETTINGS_SERVICE:get] ${key}, returned: ${value}`)
 
     return value
   }
 
-  public async set<K extends SettingsKey>(key: K, value: SettingsKeyReturnType[K]): Promise<any> {
+  public async set<K extends StorageKey>(key: K, value: StorageKeyReturnType[K]): Promise<any> {
     console.log(`[SETTINGS_SERVICE:set] ${key}, ${value}`)
 
     return this.storage.set(key, value)
   }
 
-  public async delete<K extends SettingsKey>(key: K): Promise<boolean> {
+  public async delete<K extends StorageKey>(key: K): Promise<boolean> {
     try {
       await this.storage.remove(key)
 
