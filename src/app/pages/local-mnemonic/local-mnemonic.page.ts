@@ -10,6 +10,7 @@ import { LocalWalletService } from '../../services/local-wallet.service'
   styleUrls: ['local-mnemonic.page.scss']
 })
 export class LocalMnemonicPage {
+  public saveButtonDisabled: boolean = true
   public mnemonic: string = ''
 
   constructor(
@@ -19,6 +20,10 @@ export class LocalMnemonicPage {
     this.localWalletService.mnemonic.subscribe(mnemonic => {
       this.mnemonic = mnemonic
     })
+  }
+
+  public async mnemonicFocused(): Promise<void> {
+    this.saveButtonDisabled = false
   }
 
   public async generateMnemonic(): Promise<void> {
@@ -35,6 +40,7 @@ export class LocalMnemonicPage {
         {
           text: 'Yes',
           handler: async () => {
+            this.saveButtonDisabled = true
             await this.localWalletService.generateMnemonic()
           }
         }
@@ -58,6 +64,7 @@ export class LocalMnemonicPage {
         {
           text: 'Yes',
           handler: async () => {
+            this.saveButtonDisabled = true
             await this.localWalletService.saveMnemonic(mnemonic)
           }
         }
