@@ -2,8 +2,7 @@ import { Injectable, NgZone } from '@angular/core'
 import { AirGapMarketWallet, TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
-
-import { SettingsKey, StorageService } from './storage.service'
+import { Methods } from 'src/extension/Methods'
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +22,7 @@ export class LocalWalletService {
 
   public wallet: AirGapMarketWallet | undefined
 
-  constructor(private readonly storageService: StorageService, private readonly ngZone: NgZone) {
+  constructor(private readonly ngZone: NgZone) {
     this.protocol = new TezosProtocol()
 
     this.mnemonic.subscribe(async (mnemonic: string) => {
@@ -50,24 +49,31 @@ export class LocalWalletService {
       })
     })
 
-    this.init()
+    this.getMnemonic()
   }
 
-  public async init(): Promise<void> {
-    const mnemonic = await this.storageService.get(SettingsKey.LOCAL_MNEMONIC)
-    if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      this._mnemonic.next(mnemonic)
-    }
+  public async getMnemonic(): Promise<void> {
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GET_MNEMONIC }, response => {
+      console.log('generateMnemonic response', response)
+      this._mnemonic.next(response.mnemonic)
+    })
   }
 
   public async generateMnemonic(): Promise<void> {
-    const mnemonic = bip39.generateMnemonic()
-    await this.saveMnemonic(mnemonic)
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GENERATE_MNEMONIC }, response => {
+      console.log('generateMnemonic response', response)
+      this._mnemonic.next(response.mnemonic)
+    })
   }
 
   public async saveMnemonic(mnemonic: string): Promise<void> {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      this.storageService.set(SettingsKey.LOCAL_MNEMONIC, mnemonic)
+      chrome.runtime.sendMessage(
+        { method: 'toBackground', type: Methods.LOCAL_SAVE_MNEMONIC, payload: { params: { mnemonic } } },
+        response => {
+          console.log('saveMnemonic response', response)
+        }
+      )
       this._mnemonic.next(mnemonic)
     }
   }

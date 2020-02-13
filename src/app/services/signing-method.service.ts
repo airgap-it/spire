@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { ReplaySubject } from 'rxjs'
-import { SettingsKey, StorageService } from 'src/app/services/storage.service'
+import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 export enum SigningMethod {
   WALLET = 'WALLET',
@@ -19,7 +19,7 @@ export class SigningMethodService {
   }
 
   public async loadActiveSigningMethod() {
-    const signingMethod = await this.storageService.get(SettingsKey.SIGNING_METHOD)
+    const signingMethod = await this.storageService.get(StorageKey.SIGNING_METHOD)
     if (signingMethod) {
       this.signingMethod.next(signingMethod)
     }
@@ -31,6 +31,6 @@ export class SigningMethodService {
   }
 
   public async persistSigningMethod(signingMethod: string) {
-    this.storageService.set(SettingsKey.SIGNING_METHOD, signingMethod)
+    this.storageService.set(StorageKey.SIGNING_METHOD, signingMethod)
   }
 }

@@ -1,0 +1,41 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Beacon</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!--TODO: set current paired method image -->
+  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_wallets.png" /></ion-row>
+
+  <ion-row class="ion-padding-vertical">
+    <ion-col>
+      <p class="ion-text-center ion-no-margin"><small>Paired with</small></p>
+      <h3 class="ion-text-center ion-no-margin">{{ currentSigningMethod }}</h3>
+    </ion-col>
+  </ion-row>
+  <!-- TODO: list current connected dApps
+  <ion-list lines="none">
+    <ion-list-header>
+      Connected dApps
+    </ion-list-header>
+    <ion-item-sliding>
+      <ion-item>
+        Beacon dApp
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option color="danger">Delete</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+  -->
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-button (click)="showPairPage()" shape="round" color="primary">
+      Pair Wallet
+    </ion-button>
+  </ion-fab>
+</ion-content>
