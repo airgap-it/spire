@@ -10,12 +10,11 @@ import {
   SignPayloadRequest
 } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component, OnInit } from '@angular/core'
-import { ModalController, AlertController } from '@ionic/angular'
+import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 import { Methods } from 'src/extension/Methods'
-import { TezosSpendOperation } from 'airgap-coin-lib/dist/protocols/tezos/TezosProtocol'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -171,18 +170,10 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async operationRequest(request: OperationRequest): Promise<void> {
-    const operation = request.operationDetails[0] as TezosSpendOperation
-    this.transactions = [
-      {
-        from: [operation.source],
-        to: [operation.destination],
-        isInbound: false,
-        amount: operation.amount,
-        fee: operation.fee,
-        protocolIdentifier: 'xtz',
-        transactionDetails: operation
-      }
-    ]
+    this.transactions = this.protocol.getAirGapTxFromWrappedOperations({
+      branch: '',
+      contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
+    })
     console.log('transactions', this.transactions)
 
     this.responseHandler = async () => {
