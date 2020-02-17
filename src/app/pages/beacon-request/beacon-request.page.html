@@ -7,11 +7,26 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding-horizontal ion-padding-bottom">
   <!-- TODO: Add the name of the dApp somewhere: {{requesterName}} -->
   <ng-container *ngIf="request">
+    <ng-container *ngIf="request.type != 'permission_request'">
+      <ion-card>
+        <ion-card-content>
+          <ion-item lines="none" class="ion-no-padding">
+            <ion-avatar slot="start">
+              <identicon [address]="requesterName"></identicon>
+            </ion-avatar>
+            <ion-label class="ion-margin-start">
+              <p>Requested by dApp</p>
+              <h3>{{requesterName}}</h3>
+            </ion-label>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
     <div *ngIf="request.type === 'permission_request'" class="request--container">
-      <ion-row>
+      <ion-row class="ion-padding-top permission-request--container">
         <ion-col class="ion-text-center" size="3">
           <ion-avatar>
             <identicon [address]="requesterName"></identicon>
@@ -21,7 +36,7 @@
           <div class="divider--line"></div>
         </ion-col>
         <ion-col class="ion-text-center">
-          <ion-icon name="checkmark-circle-outline" color="secondary" size="large" class="ion-margin-top"></ion-icon>
+          <ion-icon name="checkmark-circle-outline" color="primary" size="large" class="ion-margin-top"></ion-icon>
         </ion-col>
         <ion-col>
           <div class="divider--line"></div>
