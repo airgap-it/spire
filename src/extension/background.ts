@@ -3,12 +3,13 @@
 import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
 import { ChromeStorage } from '@airgap/beacon-sdk/dist/client/storage/ChromeStorage'
 import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/client/WalletCommunicationClient'
+import { BroadcastBeaconError } from '@airgap/beacon-sdk/dist/messages/Errors'
 import {
   BaseMessage,
-  MessageTypes,
   BroadcastResponse,
-  SignPayloadResponse,
-  OperationResponse
+  MessageTypes,
+  OperationResponse,
+  SignPayloadResponse
 } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
@@ -77,7 +78,7 @@ const connectToPopup = cb => {
 const openPopup = message => {
   return new Promise((resolve, _reject) => {
     chrome.windows.create({
-      url: `./index.html/#/pair/?d=${message.payload}`,
+      url: `./index.html/#/home/?d=${message.payload}`,
       type: 'popup',
       height: 680,
       width: 420
@@ -163,13 +164,23 @@ const beaconMessageHandler: { [key in MessageTypes]: BeaconMessageHandlerFunctio
 
     const forgedTx = await tezosProtocol.forgeAndWrapOperations(operation)
     console.log(forgedTx)
-    const hash = await sign(forgedTx.binaryTransaction).then(broadcast)
 
-    console.log('broadcast: ', hash)
-    const response: OperationResponse = {
-      id: data.id,
-      type: MessageTypes.OperationResponse,
-      transactionHashes: [hash]
+    let response: OperationResponse | BroadcastBeaconError
+    try {
+      const hash = await sign(forgedTx.binaryTransaction).then(broadcast)
+      console.log('broadcast: ', hash)
+      response = {
+        id: data.id,
+        type: MessageTypes.OperationResponse,
+        transactionHashes: [hash]
+      }
+    } catch (error) {
+      console.log('sending ERROR', error)
+      response = {
+        id: data.id,
+        type: MessageTypes.OperationResponse,
+        error
+      }
     }
 
     sendToPage(new Serializer().serialize(response))
