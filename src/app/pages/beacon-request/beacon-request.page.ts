@@ -1,5 +1,5 @@
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/client/transports/ChromeMessageTransport'
-import { Transport } from '@airgap/beacon-sdk/dist/client/transports/Transport'
+import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
+import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import {
   BaseMessage,
   BroadcastRequest,

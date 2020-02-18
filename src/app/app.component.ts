@@ -1,4 +1,4 @@
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
+import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
 import { BaseMessage } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'

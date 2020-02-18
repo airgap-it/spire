@@ -1,5 +1,5 @@
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/client/storage/ChromeStorage'
+import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
+import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
 import { BaseMessage, MessageTypes } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'

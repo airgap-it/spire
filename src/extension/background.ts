@@ -1,8 +1,8 @@
 /// <reference types="chrome"/>
 
-import { Serializer } from '@airgap/beacon-sdk/dist/client/Serializer'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/client/storage/ChromeStorage'
-import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/client/WalletCommunicationClient'
+import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
+import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
+import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/WalletCommunicationClient'
 import { BroadcastBeaconError } from '@airgap/beacon-sdk/dist/messages/Errors'
 import {
   BaseMessage,
@@ -32,7 +32,7 @@ interface ExtensionMessage {
 }
 
 /*
-import {DAppClient} from '@airgap/beacon-sdk/dist/client/clients/DappClient'
+import {DAppClient} from '@airgap/beacon-sdk/dist/clients/DappClient'
 
 const client = new DAppClient('Beacon Extension')
 client.init().then(transport => {
