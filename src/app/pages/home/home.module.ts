@@ -1,20 +1,14 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common'
+import { NgModule } from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import { IonicModule } from '@ionic/angular'
+import { PipesModule } from 'src/app/pipes/pipes.module'
 
-import { IonicModule } from '@ionic/angular';
-
-import { HomePageRoutingModule } from './home-routing.module';
-
-import { HomePage } from './home.page';
+import { HomePageRoutingModule } from './home-routing.module'
+import { HomePage } from './home.page'
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    HomePageRoutingModule
-  ],
+  imports: [CommonModule, FormsModule, IonicModule, HomePageRoutingModule, PipesModule],
   declarations: [HomePage]
 })
 export class HomePageModule {}
