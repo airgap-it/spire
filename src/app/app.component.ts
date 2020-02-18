@@ -65,7 +65,7 @@ export class AppComponent {
 
       if (enabled) {
         this.appPages.push({
-          title: 'Local Mnemonic',
+          title: 'Local Secret',
           url: '/local-mnemonic',
           icon: 'key-outline'
         })
