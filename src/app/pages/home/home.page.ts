@@ -3,6 +3,7 @@ import { ModalController } from '@ionic/angular'
 import { SigningMethodService } from 'src/app/services/signing-method.service'
 
 import { PairPage } from '../pair/pair.page'
+import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 @Component({
   selector: 'app-home',
@@ -14,7 +15,8 @@ export class HomePage {
 
   constructor(
     private readonly signingMethodService: SigningMethodService,
-    private readonly modalController: ModalController
+    private readonly modalController: ModalController,
+    private readonly storageService: StorageService
   ) {
     this.signingMethodService.signingMethod.asObservable().subscribe(method => {
       if (method === 'WALLET') {
@@ -25,6 +27,8 @@ export class HomePage {
         this.currentSigningMethod = method
       }
     })
+
+    this.checkOnboarding().catch(console.error)
   }
 
   public async showPairPage(): Promise<void> {
@@ -33,5 +37,14 @@ export class HomePage {
     })
 
     return modal.present()
+  }
+
+  public async checkOnboarding(): Promise<void> {
+    const hasOnboarded: boolean = await this.storageService.get(StorageKey.HAS_ONBOARDED)
+
+    if (!hasOnboarded) {
+      await this.showPairPage()
+      await this.storageService.set(StorageKey.HAS_ONBOARDED, true)
+    }
   }
 }
