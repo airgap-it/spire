@@ -32,7 +32,9 @@
     <ion-row class="ion-padding-bottom">
       <ion-col>
         <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
-        <h3 class="ion-text-center ion-no-margin">{{ getBalance(localWalletService.wallet) }}</h3>
+        <h3 class="ion-text-center ion-no-margin">
+          {{ getBalance(localWalletService.wallet) | amountConverter: { protocolIdentifier: 'xtz', maxDigits: 10 } }}
+        </h3>
       </ion-col>
     </ion-row>
   </ng-container>

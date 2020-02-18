@@ -60,9 +60,11 @@ export class HomePage {
     }
   }
 
-  public getBalance(wallet: AirGapMarketWallet | undefined): void {
+  public getBalance(wallet: AirGapMarketWallet | undefined): string {
     if (wallet) {
       return wallet.currentBalance
+    } else {
+      return ''
     }
   }
 }
