@@ -18,16 +18,25 @@
     </ion-col>
   </ion-row>
 
-  <ion-row *ngIf="currentSigningMethod !== 'Wallet'" class="ion-padding-vertical">
-    <ion-col>
-      <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
-      <h3 class="ion-text-center ion-no-margin">{{ getBalance(localWalletService.wallet) }}</h3>
-    </ion-col>
-    <ion-col>
-      <p class="ion-text-center ion-no-margin"><small>Address</small></p>
-      <h3 class="ion-text-center ion-no-margin">{{ localWalletService.address | async }}</h3>
-    </ion-col>
-  </ion-row>
+  <ng-container *ngIf="currentSigningMethod !== 'Wallet'">
+    <ion-row>
+      <ion-col>
+        <p class="ion-text-center ion-no-margin"><small>Address</small></p>
+        <div class="ion-justify-content-center ion-align-items-center address--container">
+          <identicon [address]="localWalletService.address | async"></identicon>
+          <h6>{{ localWalletService.address | async }}</h6>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="ion-padding-bottom">
+      <ion-col>
+        <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
+        <h3 class="ion-text-center ion-no-margin">{{ getBalance(localWalletService.wallet) }}</h3>
+      </ion-col>
+    </ion-row>
+  </ng-container>
+
   <!-- TODO: list current connected dApps
   <ion-list lines="none">
     <ion-list-header>
@@ -45,7 +54,7 @@
   -->
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-button (click)="showPairPage()" shape="round" color="primary">
+    <ion-button (click)="showPairPage()" color="primary">
       Pair Wallet
     </ion-button>
   </ion-fab>

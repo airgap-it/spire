@@ -47,9 +47,19 @@ ion-list-header ion-label {
 
 beacon-request {
   .permission-request--container {
+    identicon {
+      img {
+        width: 64px;
+        height: 64px;
+      }
+    }
+  }
+}
+beacon-from-to {
+  identicon {
     img {
-      width: 64px;
-      height: 64px;
+      width: 48px;
+      height: 48px;
     }
   }
 }

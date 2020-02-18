@@ -2,8 +2,8 @@ img {
   overflow: hidden;
   box-shadow: inset #ffffff33 0 2px 2px, inset rgba(0, 0, 0, 0.3) 0 -1px 8px;
   border-radius: 50%;
-  min-width: 48px;
-  min-height: 48px;
+  min-width: 32px;
+  min-height: 32px;
 }
 div {
   background-image: url('/assets/img/identicon_placeholder.png');
@@ -11,6 +11,6 @@ div {
   border-radius: 50%;
   width: inherit;
   height: inherit;
-  min-width: 48px;
-  min-height: 48px;
+  min-width: 32px;
+  min-height: 32px;
 }
