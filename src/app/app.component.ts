@@ -20,9 +20,9 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
 export class AppComponent {
   public appPages = [
     {
-      title: 'Home',
+      title: 'Overview',
       url: '/home',
-      icon: 'home'
+      icon: 'layers-outline'
     },
     {
       title: 'Pair',
@@ -48,9 +48,9 @@ export class AppComponent {
   public initializeApp() {
     const menu = [
       {
-        title: 'Home',
+        title: 'Overview',
         url: '/home',
-        icon: 'home'
+        icon: 'layers-outline'
       }
 
       // {
@@ -67,7 +67,7 @@ export class AppComponent {
         this.appPages.push({
           title: 'Local Mnemonic',
           url: '/local-mnemonic',
-          icon: 'list'
+          icon: 'key-outline'
         })
       }
     })
