@@ -1,9 +1,9 @@
 import { Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { SigningMethodService } from 'src/app/services/signing-method.service'
+import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 import { PairPage } from '../pair/pair.page'
-import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 @Component({
   selector: 'app-home',

@@ -38,12 +38,10 @@
     <ion-col>
       <ion-item lines="none" class="ion-no-padding">
         <ion-label>Enable Developer Mode</ion-label>
-        <ion-toggle [checked]="!developerModeEnabled" (click)="settingsService.toggleDevSettingsEnabled()"></ion-toggle>
+        <ion-toggle [checked]="developerModeEnabled" (ionChange)="toggleDeveloperMode($event)"></ion-toggle>
       </ion-item>
     </ion-col>
   </ion-row>
-
-  <!--TODO: show only if development mode is activated -->
 
   <ng-container *ngIf="developerModeEnabled">
     <ion-row class="ion-justify-content-center ion-padding-top">

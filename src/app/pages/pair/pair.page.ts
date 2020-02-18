@@ -52,7 +52,11 @@ export class PairPage {
     })
   }
 
-  public async pairLocalMnemonic() {
+  public async toggleDeveloperMode(event: CustomEvent): Promise<void> {
+    this.settingsService.setToggleDevSettingsEnabled(event.detail.checked)
+  }
+
+  public async pairLocalMnemonic(): Promise<void> {
     this.router.navigate(['local-mnemonic'])
     this.signingMethodService.setSigningMethod(SigningMethod.LOCAL_MNEMONIC)
     this.dismiss()

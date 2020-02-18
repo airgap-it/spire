@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core'
 import { Observable, ReplaySubject } from 'rxjs'
-import { take } from 'rxjs/operators'
 
 import { StorageKey, StorageService } from './storage.service'
 
@@ -21,12 +20,8 @@ export class SettingsService {
     return this._devSettingsEnabled.asObservable()
   }
 
-  public toggleDevSettingsEnabled(): void {
-    this.getDevSettingsEnabled()
-      .pipe(take(1))
-      .subscribe(async (enabled: boolean) => {
-        this._devSettingsEnabled.next(!enabled)
-        await this.storageService.set(StorageKey.DEV_SETTINGS_ENABLED, !enabled)
-      })
+  public setToggleDevSettingsEnabled(value: boolean): void {
+    this._devSettingsEnabled.next(value)
+    this.storageService.set(StorageKey.DEV_SETTINGS_ENABLED, value).catch(console.error)
   }
 }
