@@ -17,6 +17,17 @@
       <h3 class="ion-text-center ion-no-margin">{{ currentSigningMethod }}</h3>
     </ion-col>
   </ion-row>
+
+  <ion-row *ngIf="currentSigningMethod !== 'Wallet'" class="ion-padding-vertical">
+    <ion-col>
+      <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
+      <h3 class="ion-text-center ion-no-margin">{{ getBalance(localWalletService.wallet) }}</h3>
+    </ion-col>
+    <ion-col>
+      <p class="ion-text-center ion-no-margin"><small>Address</small></p>
+      <h3 class="ion-text-center ion-no-margin">{{ localWalletService.address | async }}</h3>
+    </ion-col>
+  </ion-row>
   <!-- TODO: list current connected dApps
   <ion-list lines="none">
     <ion-list-header>
