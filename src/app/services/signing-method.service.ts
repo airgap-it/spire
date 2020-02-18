@@ -3,6 +3,7 @@ import { ReplaySubject } from 'rxjs'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 export enum SigningMethod {
+  UNPAIRED = 'UNPAIRED',
   WALLET = 'WALLET',
   LEDGER = 'LEDGER',
   LOCAL_MNEMONIC = 'LOCAL_MNEMONIC'
@@ -22,6 +23,8 @@ export class SigningMethodService {
     const signingMethod = await this.storageService.get(StorageKey.SIGNING_METHOD)
     if (signingMethod) {
       this.signingMethod.next(signingMethod)
+    } else {
+      this.signingMethod.next(SigningMethod.UNPAIRED)
     }
   }
 

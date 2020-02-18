@@ -7,6 +7,7 @@ import { SigningMethod, SigningMethodService } from 'src/app/services/signing-me
 import { Methods } from 'src/extension/Methods'
 
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
+import { map } from 'rxjs/operators'
 
 @Component({
   selector: 'beacon-pair',
@@ -16,6 +17,7 @@ import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-con
 export class PairPage {
   public currentSigningMethod: Observable<string | undefined>
   public developerModeEnabled: boolean = false
+  public dismissEnabled: Observable<boolean>
 
   constructor(
     public readonly settingsService: SettingsService,
@@ -24,6 +26,9 @@ export class PairPage {
     private readonly signingMethodService: SigningMethodService
   ) {
     this.currentSigningMethod = this.signingMethodService.signingMethod.asObservable()
+    this.dismissEnabled = this.signingMethodService.signingMethod
+      .asObservable()
+      .pipe(map(signingMethod => signingMethod !== SigningMethod.UNPAIRED))
     this.settingsService.getDevSettingsEnabled().subscribe((enabled: boolean) => {
       this.developerModeEnabled = enabled
     })

@@ -3,7 +3,7 @@
     <ion-title>
       Pair
     </ion-title>
-    <ion-buttons slot="end">
+    <ion-buttons *ngIf="dismissEnabled | async" slot="end">
       <ion-button (click)="dismiss()"><ion-icon name="close"></ion-icon></ion-button>
     </ion-buttons>
   </ion-toolbar>
