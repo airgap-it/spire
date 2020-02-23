@@ -77,9 +77,24 @@ let popupId: number | undefined
 //   })
 // }
 
+const queue: any[] = []
+
+chrome.runtime.onMessage.addListener(function(message, _sender, _sendResponse) {
+  console.log('got message from popup', message)
+  while (queue.length > 0) {
+    console.log('items in queue', queue.length)
+    const item = queue.pop()
+    chrome.runtime.sendMessage({ data: item })
+  }
+})
+
 const openPopup = message => {
   if (popupId) {
     chrome.windows.update(popupId, { focused: true })
+    console.log('sending message')
+    chrome.runtime.sendMessage({ data: message })
+    console.log(' message sent')
+
     return
   }
   const cb = currentPopup => {
@@ -96,9 +111,11 @@ const openPopup = message => {
     const POPUP_HEIGHT: number = 680
     const POPUP_WIDTH: number = 420
 
+    queue.push(message.payload)
+
     chrome.windows.create(
       {
-        url: `${chrome.extension.getURL('index.html')}/#/home/?d=${message.payload}`,
+        url: `${chrome.extension.getURL('index.html')}`,
         type: 'popup',
         focused: true,
         height: POPUP_HEIGHT,

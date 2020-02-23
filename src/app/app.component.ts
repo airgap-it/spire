@@ -83,6 +83,16 @@ export class AppComponent {
         this.beaconRequest(deserialized)
       }
     })
+
+    chrome.runtime.sendMessage({ data: 'Handshake' })
+    chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+      console.log('GOT DATA FROM BACKGROUND', message.data)
+      const serializer = new Serializer()
+
+      const deserialized = serializer.deserialize(message.data) as BaseMessage
+
+      this.beaconRequest(deserialized)
+    })
   }
 
   public async beaconRequest(request: BaseMessage): Promise<void> {
