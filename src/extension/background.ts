@@ -62,30 +62,70 @@ const sendToPage = (data: string): void => {
   })
 }
 
-const connectToPopup = cb => {
-  chrome.runtime.onConnect.addListener(port => {
-    port.onMessage.addListener((message, sender) => {
-      console.log('Popup message!', message, sender)
-      cb()
-    })
-    port.onDisconnect.addListener(async _event => {
-      console.log('Popup disconnected!')
-    })
-    port.postMessage('MY MESSAGE')
-  })
-}
+let popupId: number | undefined
+
+// const connectToPopup = cb => {
+//   chrome.runtime.onConnect.addListener(port => {
+//     port.onMessage.addListener((message, sender) => {
+//       console.log('Popup message!', message, sender)
+//       cb()
+//     })
+//     port.onDisconnect.addListener(async _event => {
+//       console.log('Popup disconnected!')
+//     })
+//     port.postMessage('MY MESSAGE')
+//   })
+// }
+
+const queue: any[] = []
+
+chrome.runtime.onMessage.addListener(function(message, _sender, _sendResponse) {
+  console.log('got message from popup', message)
+  while (queue.length > 0) {
+    console.log('items in queue', queue.length)
+    const item = queue.pop()
+    chrome.runtime.sendMessage({ data: item })
+  }
+})
 
 const openPopup = message => {
-  return new Promise((resolve, _reject) => {
-    chrome.windows.create({
-      url: `./index.html/#/home/?d=${message.payload}`,
-      type: 'popup',
-      height: 680,
-      width: 420
-    })
-    connectToPopup(res => {
-      resolve(res)
-    })
+  if (popupId) {
+    chrome.windows.update(popupId, { focused: true })
+    console.log('sending message')
+    chrome.runtime.sendMessage({ data: message })
+    console.log(' message sent')
+
+    return
+  }
+  const cb = currentPopup => {
+    popupId = currentPopup.id
+    console.log('popupInfo', currentPopup)
+  }
+
+  chrome.windows.onRemoved.addListener(removedPopupId => {
+    console.log('popup removed!', removedPopupId)
+    popupId = undefined
+  })
+
+  return new Promise((_resolve, _reject) => {
+    const POPUP_HEIGHT: number = 680
+    const POPUP_WIDTH: number = 420
+
+    queue.push(message.payload)
+
+    chrome.windows.create(
+      {
+        url: `${chrome.extension.getURL('index.html')}`,
+        type: 'popup',
+        focused: true,
+        height: POPUP_HEIGHT,
+        width: POPUP_WIDTH
+      },
+      cb
+    )
+    // connectToPopup(res => {
+    //   resolve(res)
+    // })
   })
 }
 
