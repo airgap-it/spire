@@ -7,7 +7,7 @@ import { BroadcastBeaconError } from '@airgap/beacon-sdk/dist/messages/Errors'
 import {
   BaseMessage,
   BroadcastResponse,
-  MessageTypes,
+  MessageType,
   OperationResponse,
   SignPayloadResponse
 } from '@airgap/beacon-sdk/dist/messages/Messages'
@@ -184,13 +184,13 @@ const beaconMessageHandlerNotSupported: (
 
 type BeaconMessageHandlerFunction = (data: BaseMessage, sendResponse: Function) => Promise<void>
 
-const beaconMessageHandler: { [key in MessageTypes]: BeaconMessageHandlerFunction } = {
-  [MessageTypes.PermissionResponse]: async (data: any, sendResponse: Function): Promise<void> => {
+const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction } = {
+  [MessageType.PermissionResponse]: async (data: any, sendResponse: Function): Promise<void> => {
     console.log('beaconMessageHandler permission-response', data)
     sendToPage(new Serializer().serialize(data))
     sendResponse()
   },
-  [MessageTypes.OperationRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+  [MessageType.OperationRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     console.log('beaconMessageHandler operation-request', data)
     const tezosProtocol = new TezosProtocol()
     const mnemonic = await storage.get('mnemonic' as any)
@@ -211,51 +211,55 @@ const beaconMessageHandler: { [key in MessageTypes]: BeaconMessageHandlerFunctio
       console.log('broadcast: ', hash)
       response = {
         id: data.id,
-        type: MessageTypes.OperationResponse,
+        senderId: 'Beacon Extension',
+        type: MessageType.OperationResponse,
         transactionHashes: [hash]
       }
     } catch (error) {
       console.log('sending ERROR', error)
       response = {
         id: data.id,
-        type: MessageTypes.OperationResponse,
-        error
+        senderId: 'Beacon Extension',
+        type: MessageType.OperationResponse,
+        errorType: error
       }
     }
 
     sendToPage(new Serializer().serialize(response))
     sendResponse()
   },
-  [MessageTypes.SignPayloadRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+  [MessageType.SignPayloadRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     console.log('beaconMessageHandler sign-request', data)
     const hash = await sign(data.payload[0])
     console.log('broadcast: ', hash)
     const response: SignPayloadResponse = {
       id: data.id,
-      type: MessageTypes.SignPayloadResponse,
+      senderId: 'Beacon Extension',
+      type: MessageType.SignPayloadResponse,
       signature: [hash as any]
     }
 
     sendToPage(new Serializer().serialize(response))
     sendResponse()
   },
-  [MessageTypes.BroadcastRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+  [MessageType.BroadcastRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     console.log('beaconMessageHandler broadcast-request', data)
     const hash = await broadcast(data.signedTransactions[0])
     console.log('broadcast: ', hash)
     const response: BroadcastResponse = {
       id: data.id,
-      type: MessageTypes.BroadcastResponse,
+      senderId: 'Beacon Extension',
+      type: MessageType.BroadcastResponse,
       transactionHashes: [hash]
     }
 
     sendToPage(new Serializer().serialize(response))
     sendResponse()
   },
-  [MessageTypes.PermissionRequest]: beaconMessageHandlerNotSupported,
-  [MessageTypes.OperationResponse]: beaconMessageHandlerNotSupported,
-  [MessageTypes.SignPayloadResponse]: beaconMessageHandlerNotSupported,
-  [MessageTypes.BroadcastResponse]: beaconMessageHandlerNotSupported
+  [MessageType.PermissionRequest]: beaconMessageHandlerNotSupported,
+  [MessageType.OperationResponse]: beaconMessageHandlerNotSupported,
+  [MessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
+  [MessageType.BroadcastResponse]: beaconMessageHandlerNotSupported
 }
 
 const handleResponse = async (data: any, sendResponse: Function): Promise<void> => {

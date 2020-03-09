@@ -1,6 +1,6 @@
+import { BaseMessage, MessageType } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
 import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
-import { BaseMessage, MessageTypes } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
@@ -29,7 +29,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
       console.log('sending to popup')
       const deserialized = new Serializer().deserialize(data.payload) as BaseMessage
 
-      if (deserialized.type === MessageTypes.OperationRequest) {
+      if (deserialized.type === MessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async () => {
           const tezosProtocol = new TezosProtocol()
