@@ -1,16 +1,20 @@
 /// <reference types="chrome"/>
 
-import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
-import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/WalletCommunicationClient'
 import { BroadcastBeaconError } from '@airgap/beacon-sdk/dist/messages/Errors'
 import {
   BaseMessage,
+  BroadcastRequest,
   BroadcastResponse,
   MessageType,
+  Network,
+  NetworkType,
+  OperationRequest,
   OperationResponse,
   SignPayloadResponse
 } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
+import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
+import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/WalletCommunicationClient'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
@@ -43,7 +47,7 @@ client.init().then(transport => {
 
 // TODO: Refactor this file
 
-const protocol: TezosProtocol = new TezosProtocol()
+const globalProtocol: TezosProtocol = new TezosProtocol() // TODO: Remove this
 
 console.log('test')
 const walletClient = new WalletCommunicationClient('test', 'asdf', 1, true)
@@ -168,12 +172,37 @@ const handleP2PInit = async (_data: any, sendResponse: Function) => {
 const sign = async (forgedTx: string): Promise<string> => {
   const mnemonic: string = await storage.get('mnemonic' as any)
   const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
-  const privatekey: Buffer = protocol.getPrivateKeyFromHexSecret(seed.toString('hex'), protocol.standardDerivationPath)
+  const privatekey: Buffer = globalProtocol.getPrivateKeyFromHexSecret(
+    seed.toString('hex'),
+    globalProtocol.standardDerivationPath
+  )
 
-  return protocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
+  return globalProtocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
 }
 
-const broadcast = async (signedTx: string): Promise<string> => {
+const getProtocolForNetwork = async (network: Network): Promise<TezosProtocol> => {
+  const rpcUrls: { [key in NetworkType]: string } = {
+    [NetworkType.MAIN]: 'https://tezos-node.prod.gke.papers.tech',
+    [NetworkType.BABYLON]: 'https://tezos-babylonnet-node-1.kubernetes.papers.tech',
+    [NetworkType.CARTHAGE]: 'https://tezos-carthagenet-node-1.kubernetes.papers.tech',
+    [NetworkType.CUSTOM]: ''
+  }
+
+  const apiUrls: { [key in NetworkType]: string } = {
+    [NetworkType.MAIN]: 'https://tezos-mainnet-conseil-1.kubernetes.papers.tech',
+    [NetworkType.BABYLON]: 'https://tezos-babylonnet-conseil-1.kubernetes.papers.tech',
+    [NetworkType.CARTHAGE]: 'https://tezos-carthagenet-conseil-1.kubernetes.papers.tech',
+    [NetworkType.CUSTOM]: ''
+  }
+  const rpcUrl: string = network.rpcUrl ? network.rpcUrl : rpcUrls[network.type]
+  const apiUrl: string = apiUrls[network.type]
+
+  return new TezosProtocol(rpcUrl, apiUrl)
+}
+
+const broadcast = async (network: Network, signedTx: string): Promise<string> => {
+  const protocol: TezosProtocol = await getProtocolForNetwork(network)
+
   return protocol.broadcastTransaction(signedTx)
 }
 
@@ -191,6 +220,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
     sendResponse()
   },
   [MessageType.OperationRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+    const operationRequest: OperationRequest = data
     console.log('beaconMessageHandler operation-request', data)
     const tezosProtocol = new TezosProtocol()
     const mnemonic = await storage.get('mnemonic' as any)
@@ -207,7 +237,9 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
 
     let response: OperationResponse | BroadcastBeaconError
     try {
-      const hash = await sign(forgedTx.binaryTransaction).then(broadcast)
+      const hash = await sign(forgedTx.binaryTransaction).then(signedTx => {
+        return broadcast(operationRequest.network as any, signedTx) // TODO: Fix type
+      })
       console.log('broadcast: ', hash)
       response = {
         id: data.id,
@@ -231,7 +263,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
   [MessageType.SignPayloadRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     console.log('beaconMessageHandler sign-request', data)
     const hash = await sign(data.payload[0])
-    console.log('broadcast: ', hash)
+    console.log('signed: ', hash)
     const response: SignPayloadResponse = {
       id: data.id,
       senderId: 'Beacon Extension',
@@ -243,8 +275,9 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
     sendResponse()
   },
   [MessageType.BroadcastRequest]: async (data: any, sendResponse: Function): Promise<void> => {
+    const broadcastRequest: BroadcastRequest = data
     console.log('beaconMessageHandler broadcast-request', data)
-    const hash = await broadcast(data.signedTransactions[0])
+    const hash = await broadcast(broadcastRequest.network as any, data.signedTransactions[0]) // TODO: Fix types
     console.log('broadcast: ', hash)
     const response: BroadcastResponse = {
       id: data.id,

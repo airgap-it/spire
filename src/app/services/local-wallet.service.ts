@@ -23,7 +23,7 @@ export class LocalWalletService {
   public wallet: AirGapMarketWallet | undefined
 
   constructor(private readonly ngZone: NgZone) {
-    this.protocol = new TezosProtocol()
+    this.protocol = new TezosProtocol() // This protocol is only used to calculate addresses, so it is not different on testnets
 
     this.mnemonic.subscribe(async (mnemonic: string) => {
       console.log('SUBSCRIBE TRIGGERED')
