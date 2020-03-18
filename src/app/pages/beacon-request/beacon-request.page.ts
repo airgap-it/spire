@@ -1,9 +1,7 @@
-import { BeaconErrorType, NetworkNotSupportedError } from '@airgap/beacon-sdk/dist/messages/Errors'
 import {
   BaseMessage,
   BroadcastRequest,
   MessageType,
-  NetworkType,
   OperationRequest,
   PermissionRequest,
   PermissionResponse,

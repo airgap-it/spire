@@ -10,13 +10,24 @@
 <ion-content>
   <ion-list>
     <ion-item>
-      <!--
-      <ion-label>Enable Developer Mode</ion-label>
-      <ion-toggle
-        [ngModel]="settingsService.getDevSettingsEnabled() | async"
-        (ionChange)="settingsService.toggleDevSettingsEnabled()"
-      ></ion-toggle>
-      -->
+      <ion-label>Network</ion-label>
+      <ion-select [(ngModel)]="networkType" placeholder="Select one">
+        <ion-select-option value="mainnet">Mainnet</ion-select-option>
+        <ion-select-option value="babylonnet">Babylonnet</ion-select-option>
+        <ion-select-option value="carthagenet">Carthagenet</ion-select-option>
+        <ion-select-option value="custom">Custom</ion-select-option>
+      </ion-select>
     </ion-item>
+    <ng-container *ngIf="networkType === 'custom'">
+      <ion-item>
+        <ion-label>Name (optional)</ion-label>
+        <ion-input [(ngModel)]="networkName"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>RPC Url</ion-label>
+        <ion-input [(ngModel)]="networkRpcUrl"></ion-input>
+      </ion-item>
+    </ng-container>
+    <ion-button (click)="updateNetwork()">Save</ion-button>
   </ion-list>
 </ion-content>
