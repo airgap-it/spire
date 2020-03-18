@@ -93,22 +93,21 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async permissionRequest(request: PermissionRequest): Promise<void> {
-    if (request.network.type === NetworkType.BABYLON) {
-      console.error('Only mainnet and babylonnet is currently supported')
-      const response: NetworkNotSupportedError = {
-        id: request.id,
-        senderId: 'Beacon Extension',
-        type: MessageType.PermissionResponse,
-        errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
-      }
+    // console.error('Only mainnet and babylonnet is currently supported')
+    // const response: NetworkNotSupportedError = {
+    //   id: request.id,
+    //   senderId: 'Beacon Extension',
+    //   type: MessageType.PermissionResponse,
+    //   errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
+    // }
 
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
-        console.log(res)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
-    }
+    // chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
+    //   console.log(res)
+    //   setTimeout(() => {
+    //     window.close()
+    //   }, 1000)
+    // })
+
     this.requestedNetwork = request.network
     this.localWalletService.publicKey.pipe(take(1)).subscribe(pubKey => {
       this.inputs = [
