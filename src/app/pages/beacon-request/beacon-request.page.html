@@ -63,6 +63,9 @@
         would like to connect to your account.
       </h2>
       <p class="ion-padding-top">
+        Network: {{ requestedNetwork ? requestedNetwork.type : 'unknown' }}
+      </p>
+      <p class="ion-padding-top">
         This website is requesting the following permissions. Always make sure you trust the websites you interact with.
       </p>
       <ion-row class="ion-no-padding">
@@ -91,6 +94,7 @@
     </div>
 
     <div *ngIf="request.type === 'operation_request'" class="request--container">
+      Network: {{$any(request).network.type}}
       <ng-container *ngFor="let transaction of transactions">
         <beacon-from-to [transaction]="transaction"></beacon-from-to>
       </ng-container>
