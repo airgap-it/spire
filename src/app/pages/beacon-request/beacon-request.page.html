@@ -8,7 +8,6 @@
 </ion-header>
 
 <ion-content class="ion-padding-horizontal ion-padding-bottom">
-  <!-- TODO: Add the name of the dApp somewhere: {{requesterName}} -->
   <ng-container *ngIf="request">
     <ng-container *ngIf="request.type != 'permission_request'">
       <ion-card>
@@ -21,6 +20,9 @@
               <p>Requested by dApp</p>
               <h3>{{requesterName}}</h3>
             </ion-label>
+            <ion-badge color="primary">
+              {{$any(request).network.type}}
+            </ion-badge>
           </ion-item>
         </ion-card-content>
       </ion-card>
@@ -62,9 +64,9 @@
         <span class="style__strong color__primary">{{ requesterName }}</span>
         would like to connect to your account.
       </h2>
-      <p class="ion-padding-top">
-        Network: {{ requestedNetwork ? requestedNetwork.type : 'unknown' }}
-      </p>
+      <ion-badge color="primary">
+        {{ requestedNetwork ? requestedNetwork.type : 'unknown' }}
+      </ion-badge>
       <p class="ion-padding-top">
         This website is requesting the following permissions. Always make sure you trust the websites you interact with.
       </p>
@@ -94,7 +96,6 @@
     </div>
 
     <div *ngIf="request.type === 'operation_request'" class="request--container">
-      Network: {{$any(request).network.type}}
       <ng-container *ngFor="let transaction of transactions">
         <beacon-from-to [transaction]="transaction"></beacon-from-to>
       </ng-container>
