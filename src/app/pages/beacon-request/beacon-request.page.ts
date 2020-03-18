@@ -8,7 +8,8 @@ import {
   PermissionRequest,
   PermissionResponse,
   PermissionScope,
-  SignPayloadRequest
+  SignPayloadRequest,
+  Network
 } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
 import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
@@ -35,6 +36,7 @@ export class BeaconRequestPage implements OnInit {
   public request: BaseMessage | undefined
   public requesterName: string = ''
   public address: string = ''
+  public requestedNetwork: Network | undefined
   public inputs?: any
   public transactions: IAirGapTransaction[] | undefined
 
@@ -91,6 +93,23 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async permissionRequest(request: PermissionRequest): Promise<void> {
+    if (request.network.type === NetworkType.BABYLON) {
+      console.error('Only mainnet and babylonnet is currently supported')
+      const response: NetworkNotSupportedError = {
+        id: request.id,
+        senderId: 'Beacon Extension',
+        type: MessageType.PermissionResponse,
+        errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
+      }
+
+      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
+        console.log(res)
+        setTimeout(() => {
+          window.close()
+        }, 1000)
+      })
+    }
+    this.requestedNetwork = request.network
     this.localWalletService.publicKey.pipe(take(1)).subscribe(pubKey => {
       this.inputs = [
         {
@@ -131,31 +150,20 @@ export class BeaconRequestPage implements OnInit {
       ]
 
       this.responseHandler = async () => {
-        let response: PermissionResponse | NetworkNotSupportedError | undefined
-        if (request.network.type !== NetworkType.MAIN && request.network.type !== NetworkType.BABYLON) {
-          console.error('Only mainnet and babylonnet is currently supported')
-
-          response = {
-            id: request.id,
-            senderId: 'Beacon Extension',
-            type: MessageType.PermissionResponse,
-            errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
-          }
-        } else {
-          response = {
-            id: request.id,
-            senderId: 'Beacon Extension',
-            type: MessageType.PermissionResponse,
-            permissions: {
-              accountIdentifier: `${pubKey}-${request.network.type}`,
-              pubkey: pubKey,
-              network: {
-                type: request.network.type
-              },
-              scopes: this.inputs.filter(input => input.checked).map(input => input.value)
-            }
+        const response: PermissionResponse = {
+          id: request.id,
+          senderId: 'Beacon Extension',
+          type: MessageType.PermissionResponse,
+          permissions: {
+            accountIdentifier: `${pubKey}-${request.network.type}`,
+            pubkey: pubKey,
+            network: {
+              ...request.network
+            },
+            scopes: this.inputs.filter(input => input.checked).map(input => input.value)
           }
         }
+
         chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
           console.log(res)
           setTimeout(() => {
