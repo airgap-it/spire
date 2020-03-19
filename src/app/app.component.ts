@@ -38,7 +38,7 @@ export class AppComponent {
       {
         title: 'Settings',
         url: '/settings',
-        icon: 'settings'
+        icon: 'settings-outline'
       }
     ]
 
