@@ -7,11 +7,14 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
   <ion-list>
-    <ion-item>
+    <ion-list-header class="ion-no-padding">
       <ion-label>Network</ion-label>
-      <ion-select [(ngModel)]="networkType" (ionChange)="updateNetworkType()" placeholder="Select one">
+    </ion-list-header>
+    <ion-item class="ion-no-padding ion-margin-bottom" lines="none">
+      <ion-label>Active Network</ion-label>
+      <ion-select [(ngModel)]="networkType" (ionChange)="updateNetworkType()" placeholder="Select Network">
         <ion-select-option value="mainnet">Mainnet</ion-select-option>
         <ion-select-option value="babylonnet">Babylonnet</ion-select-option>
         <ion-select-option value="carthagenet">Carthagenet</ion-select-option>
@@ -19,12 +22,16 @@
       </ion-select>
     </ion-item>
     <ng-container *ngIf="networkType === 'custom'">
-      <ion-item>
+      <ion-list-header class="ion-no-padding">
         <ion-label>Name (optional)</ion-label>
+      </ion-list-header>
+      <ion-item class="ion-no-padding ion-margin-bottom">
         <ion-input [(ngModel)]="networkName"></ion-input>
       </ion-item>
-      <ion-item>
+      <ion-list-header class="ion-no-padding">
         <ion-label>RPC Url</ion-label>
+      </ion-list-header>
+      <ion-item class="ion-no-padding ion-margin-bottom">
         <ion-input [(ngModel)]="networkRpcUrl"></ion-input>
       </ion-item>
       <ion-button (click)="updateNetwork()">Save</ion-button>
