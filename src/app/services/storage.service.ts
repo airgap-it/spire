@@ -1,5 +1,5 @@
+import { Network, NetworkType } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Injectable } from '@angular/core'
-import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
 
 export enum StorageKey {
   DEV_SETTINGS_ENABLED = 'DEV_SETTINGS_ENABLED',
@@ -12,7 +12,7 @@ interface StorageKeyReturnType {
   [StorageKey.DEV_SETTINGS_ENABLED]: boolean
   [StorageKey.SIGNING_METHOD]: string | undefined
   [StorageKey.HAS_ONBOARDED]: boolean
-  [StorageKey.ACTIVE_NETWORK]: Network | undefined
+  [StorageKey.ACTIVE_NETWORK]: Network
 }
 
 type StorageKeyReturnDefaults = { [key in StorageKey]: StorageKeyReturnType[key] }
@@ -21,7 +21,7 @@ const defaultValues: StorageKeyReturnDefaults = {
   [StorageKey.DEV_SETTINGS_ENABLED]: false,
   [StorageKey.SIGNING_METHOD]: undefined,
   [StorageKey.HAS_ONBOARDED]: false,
-  [StorageKey.ACTIVE_NETWORK]: undefined
+  [StorageKey.ACTIVE_NETWORK]: { type: NetworkType.MAIN }
 }
 
 @Injectable({
