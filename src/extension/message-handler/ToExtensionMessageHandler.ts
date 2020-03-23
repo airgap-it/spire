@@ -1,8 +1,10 @@
-import { BaseMessage, MessageType } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { BaseMessage, MessageType, OperationRequest } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
 import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
+
+import { getProtocolForNetwork } from '../utils'
 
 import { MessageHandler } from './MessageHandler'
 
@@ -32,16 +34,13 @@ export class ToExtensionMessageHandler extends MessageHandler {
       if (deserialized.type === MessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async () => {
-          const tezosProtocol = new TezosProtocol()
+          const protocol: TezosProtocol = await getProtocolForNetwork((deserialized as OperationRequest).network as any)
           const mnemonic = await storage.get('mnemonic' as any)
           const seed = await bip39.mnemonicToSeed(mnemonic)
 
-          const publicKey = tezosProtocol.getPublicKeyFromHexSecret(
-            seed.toString('hex'),
-            tezosProtocol.standardDerivationPath
-          )
+          const publicKey = protocol.getPublicKeyFromHexSecret(seed.toString('hex'), protocol.standardDerivationPath)
           ;(deserialized as any).operationDetails = (
-            await tezosProtocol.prepareOperations(publicKey, (deserialized as any).operationDetails)
+            await protocol.prepareOperations(publicKey, (deserialized as any).operationDetails)
           ).contents
           const serialized = new Serializer().serialize(deserialized)
           openPopup({ ...data, payload: serialized })

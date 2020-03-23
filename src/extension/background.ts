@@ -7,7 +7,6 @@ import {
   BroadcastResponse,
   MessageType,
   Network,
-  NetworkType,
   OperationRequest,
   OperationResponse,
   SignPayloadResponse
@@ -23,6 +22,7 @@ import { ToBackgroundMessageHandler } from './message-handler/ToBackgroundMessag
 import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageHandler'
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { Methods } from './Methods'
+import { getProtocolForNetwork } from './utils'
 
 export enum Destinations {
   BACKGROUND = 'toBackground',
@@ -180,26 +180,6 @@ const sign = async (forgedTx: string): Promise<string> => {
   return globalProtocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
 }
 
-const getProtocolForNetwork = async (network: Network): Promise<TezosProtocol> => {
-  const rpcUrls: { [key in NetworkType]: string } = {
-    [NetworkType.MAIN]: 'https://tezos-node.prod.gke.papers.tech',
-    [NetworkType.BABYLON]: 'https://tezos-babylonnet-node-1.kubernetes.papers.tech',
-    [NetworkType.CARTHAGE]: 'https://tezos-carthagenet-node-1.kubernetes.papers.tech',
-    [NetworkType.CUSTOM]: ''
-  }
-
-  const apiUrls: { [key in NetworkType]: string } = {
-    [NetworkType.MAIN]: 'https://tezos-mainnet-conseil-1.kubernetes.papers.tech',
-    [NetworkType.BABYLON]: 'https://tezos-babylonnet-conseil-1.kubernetes.papers.tech',
-    [NetworkType.CARTHAGE]: 'https://tezos-carthagenet-conseil-1.kubernetes.papers.tech',
-    [NetworkType.CUSTOM]: ''
-  }
-  const rpcUrl: string = network.rpcUrl ? network.rpcUrl : rpcUrls[network.type]
-  const apiUrl: string = apiUrls[network.type]
-
-  return new TezosProtocol(rpcUrl, apiUrl)
-}
-
 const broadcast = async (network: Network, signedTx: string): Promise<string> => {
   const protocol: TezosProtocol = await getProtocolForNetwork(network)
 
@@ -222,17 +202,15 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
   [MessageType.OperationRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     const operationRequest: OperationRequest = data
     console.log('beaconMessageHandler operation-request', data)
-    const tezosProtocol = new TezosProtocol()
+    const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network as any)
+
     const mnemonic = await storage.get('mnemonic' as any)
     const seed = await bip39.mnemonicToSeed(mnemonic)
 
-    const publicKey = tezosProtocol.getPublicKeyFromHexSecret(
-      seed.toString('hex'),
-      tezosProtocol.standardDerivationPath
-    )
-    const operation = await tezosProtocol.prepareOperations(publicKey, data.operationDetails)
+    const publicKey = protocol.getPublicKeyFromHexSecret(seed.toString('hex'), protocol.standardDerivationPath)
+    const operation = await protocol.prepareOperations(publicKey, data.operationDetails)
 
-    const forgedTx = await tezosProtocol.forgeAndWrapOperations(operation)
+    const forgedTx = await protocol.forgeAndWrapOperations(operation)
     console.log(forgedTx)
 
     let response: OperationResponse | BroadcastBeaconError
