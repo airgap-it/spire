@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { IonicModule } from '@ionic/angular'
+import { PipesModule } from 'src/app/pipes/pipes.module'
 
 import { LocalMnemonicPage } from './local-mnemonic.page'
 
@@ -16,7 +17,8 @@ import { LocalMnemonicPage } from './local-mnemonic.page'
         path: '',
         component: LocalMnemonicPage
       }
-    ])
+    ]),
+    PipesModule
   ],
   declarations: [LocalMnemonicPage]
 })

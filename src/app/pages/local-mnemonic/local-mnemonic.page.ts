@@ -1,10 +1,10 @@
-import { Component, NgZone } from '@angular/core'
-import { AlertController } from '@ionic/angular'
-
-import { LocalWalletService } from '../../services/local-wallet.service'
 import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { ChangeDetectorRef, Component } from '@angular/core'
+import { AlertController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { SettingsService } from 'src/app/services/settings.service'
+
+import { LocalWalletService } from '../../services/local-wallet.service'
 
 @Component({
   selector: 'beacon-local-mnemonic',
@@ -20,16 +20,14 @@ export class LocalMnemonicPage {
     public readonly alertController: AlertController,
     public readonly localWalletService: LocalWalletService,
     private readonly settingsService: SettingsService,
-    private readonly ngZone: NgZone
+    private readonly ref: ChangeDetectorRef
   ) {
     this.localWalletService.mnemonic.subscribe(mnemonic => {
       this.mnemonic = mnemonic
     })
     this.localWalletService.address.subscribe(async address => {
-      this.ngZone.run(async () => {
-        this.balance = await this.getBalance(address)
-        console.log('BALANCE', this.balance)
-      })
+      this.balance = await this.getBalance(address)
+      this.ref.detectChanges()
     })
   }
 

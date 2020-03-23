@@ -1,13 +1,13 @@
-import { Component, NgZone } from '@angular/core'
+import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
+import { TezosProtocol } from 'airgap-coin-lib'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
+import { SettingsService } from 'src/app/services/settings.service'
 import { SigningMethodService } from 'src/app/services/signing-method.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 import { PairPage } from '../pair/pair.page'
-import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
-import { TezosProtocol } from 'airgap-coin-lib'
-import { SettingsService } from 'src/app/services/settings.service'
 
 enum SigningMethods {
   WALLET = 'WALLET',
@@ -32,7 +32,7 @@ export class HomePage {
     private readonly modalController: ModalController,
     private readonly storageService: StorageService,
     private readonly settingsService: SettingsService,
-    private readonly ngZone: NgZone
+    private readonly ref: ChangeDetectorRef
   ) {
     this.settingsService.getNetwork().then(network => (this.network = network))
     this.signingMethodService.signingMethod.asObservable().subscribe(method => {
@@ -49,11 +49,9 @@ export class HomePage {
 
     this.checkOnboarding().catch(console.error)
 
-    this.localWalletService.address.subscribe(address => {
-      this.ngZone.run(async () => {
-        this.balance = await this.getBalance(address)
-        console.log('BALANCE', this.balance)
-      })
+    this.localWalletService.address.subscribe(async address => {
+      this.balance = await this.getBalance(address)
+      this.ref.detectChanges()
     })
   }
 
