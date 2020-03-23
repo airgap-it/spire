@@ -1,7 +1,8 @@
+import { Network, NetworkType } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component } from '@angular/core'
+import { ToastController } from '@ionic/angular'
 
 import { SettingsService } from '../../services/settings.service'
-import { NetworkType, Network } from '@airgap/beacon-sdk/dist/messages/Messages'
 
 @Component({
   selector: 'beacon-settings',
@@ -13,7 +14,7 @@ export class SettingsPage {
   public networkName: string | undefined
   public networkRpcUrl: string | undefined
 
-  constructor(public readonly settingsService: SettingsService) {
+  constructor(public readonly settingsService: SettingsService, private readonly toastController: ToastController) {
     this.settingsService
       .getNetwork()
       .then((network: Network | undefined) => {
@@ -26,11 +27,25 @@ export class SettingsPage {
       .catch(console.error)
   }
 
+  public async updateNetworkType() {
+    if (this.networkType === NetworkType.CUSTOM) {
+      return
+    } else {
+      this.updateNetwork()
+    }
+  }
+
   public async updateNetwork(): Promise<void> {
-    return this.settingsService.setNetwork({
-      type: this.networkType,
-      name: this.networkName,
-      rpcUrl: this.networkRpcUrl
-    })
+    return this.settingsService
+      .setNetwork({
+        type: this.networkType,
+        name: this.networkName,
+        rpcUrl: this.networkRpcUrl
+      })
+      .then(async () => {
+        const toast = await this.toastController.create({ message: 'Network updated', duration: 1000 })
+
+        return toast.present()
+      })
   }
 }

@@ -11,7 +11,7 @@
   <ion-list>
     <ion-item>
       <ion-label>Network</ion-label>
-      <ion-select [(ngModel)]="networkType" placeholder="Select one">
+      <ion-select [(ngModel)]="networkType" (ionChange)="updateNetworkType()" placeholder="Select one">
         <ion-select-option value="mainnet">Mainnet</ion-select-option>
         <ion-select-option value="babylonnet">Babylonnet</ion-select-option>
         <ion-select-option value="carthagenet">Carthagenet</ion-select-option>
@@ -27,7 +27,7 @@
         <ion-label>RPC Url</ion-label>
         <ion-input [(ngModel)]="networkRpcUrl"></ion-input>
       </ion-item>
+      <ion-button (click)="updateNetwork()">Save</ion-button>
     </ng-container>
-    <ion-button (click)="updateNetwork()">Save</ion-button>
   </ion-list>
 </ion-content>
