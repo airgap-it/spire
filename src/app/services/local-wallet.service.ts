@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core'
-import { AirGapMarketWallet, TezosProtocol } from 'airgap-coin-lib'
+import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
 import { Methods } from 'src/extension/Methods'
@@ -19,8 +19,6 @@ export class LocalWalletService {
   public privateKey: Observable<string> = this._privateKey.asObservable()
   public publicKey: Observable<string> = this._publicKey.asObservable()
   public address: Observable<string> = this._address.asObservable()
-
-  public wallet: AirGapMarketWallet | undefined
 
   constructor(private readonly ngZone: NgZone) {
     this.protocol = new TezosProtocol() // This protocol is only used to calculate addresses, so it is not different on testnets
@@ -43,9 +41,6 @@ export class LocalWalletService {
         this._privateKey.next(privateKey)
         this._publicKey.next(publicKey)
         this._address.next(address)
-
-        this.wallet = new AirGapMarketWallet('xtz', publicKey, false, this.protocol.standardDerivationPath)
-        this.wallet.synchronize()
       })
     })
 

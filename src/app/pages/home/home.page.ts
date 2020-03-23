@@ -1,11 +1,13 @@
-import { Component } from '@angular/core'
+import { Component, NgZone } from '@angular/core'
 import { ModalController } from '@ionic/angular'
-import { AirGapMarketWallet } from 'airgap-coin-lib'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 import { SigningMethodService } from 'src/app/services/signing-method.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
 import { PairPage } from '../pair/pair.page'
+import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { TezosProtocol } from 'airgap-coin-lib'
+import { SettingsService } from 'src/app/services/settings.service'
 
 enum SigningMethods {
   WALLET = 'WALLET',
@@ -21,13 +23,18 @@ enum SigningMethods {
 export class HomePage {
   public signingMethods: typeof SigningMethods = SigningMethods
   public currentSigningMethod: string = 'Unpaired'
+  public balance: string = ''
+  public network: Network | undefined
 
   constructor(
     public readonly localWalletService: LocalWalletService,
     private readonly signingMethodService: SigningMethodService,
     private readonly modalController: ModalController,
-    private readonly storageService: StorageService
+    private readonly storageService: StorageService,
+    private readonly settingsService: SettingsService,
+    private readonly ngZone: NgZone
   ) {
+    this.settingsService.getNetwork().then(network => (this.network = network))
     this.signingMethodService.signingMethod.asObservable().subscribe(method => {
       if (method === SigningMethods.WALLET) {
         this.currentSigningMethod = 'Wallet'
@@ -41,6 +48,13 @@ export class HomePage {
     })
 
     this.checkOnboarding().catch(console.error)
+
+    this.localWalletService.address.subscribe(address => {
+      this.ngZone.run(async () => {
+        this.balance = await this.getBalance(address)
+        console.log('BALANCE', this.balance)
+      })
+    })
   }
 
   public async showPairPage(): Promise<void> {
@@ -60,9 +74,20 @@ export class HomePage {
     }
   }
 
-  public getBalance(wallet: AirGapMarketWallet | undefined): string {
-    if (wallet) {
-      return wallet.currentBalance
+  public async getBalance(address: string | null): Promise<string> {
+    console.log('getBalance', address)
+    if (!address) {
+      return ''
+    }
+    const network: Network | undefined = await this.settingsService.getNetwork()
+
+    if (network) {
+      const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
+
+      const amount = await protocol.getBalanceOfAddresses([address])
+      console.log('getBalance', amount)
+
+      return amount
     } else {
       return ''
     }

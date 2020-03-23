@@ -17,6 +17,12 @@
       <h3 class="ion-text-center ion-no-margin">{{ currentSigningMethod }}</h3>
     </ion-col>
   </ion-row>
+  <ion-row *ngIf="network" class="ion-padding-vertical">
+    <ion-col>
+      <p class="ion-text-center ion-no-margin"><small>Network</small></p>
+      <h3 class="ion-text-center ion-no-margin">{{ (network).type }}</h3>
+    </ion-col>
+  </ion-row>
 
   <ng-container *ngIf="currentSigningMethod !== 'Wallet'">
     <ion-row>
@@ -33,7 +39,7 @@
       <ion-col>
         <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
         <h3 class="ion-text-center ion-no-margin">
-          {{ getBalance(localWalletService.wallet) | amountConverter: { protocolIdentifier: 'xtz', maxDigits: 10 } }}
+          {{ balance | amountConverter: { protocolIdentifier: 'xtz', maxDigits: 10 } }}
         </h3>
       </ion-col>
     </ion-row>
