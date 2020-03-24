@@ -18,24 +18,7 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
   styleUrls: ['app.component.scss']
 })
 export class AppComponent {
-  public appPages = [
-    {
-      title: 'Overview',
-      url: '/home',
-      icon: 'layers-outline'
-    },
-    {
-      title: 'Pair',
-      url: '/pair',
-      icon: 'code-working'
-    }
-
-    // {
-    //   title: 'Settings',
-    //   url: '/settings',
-    //   icon: 'settings'
-    // }
-  ]
+  public appPages: { title: string; url: string; icon: string }[] = []
 
   constructor(
     private readonly activatedRoute: ActivatedRoute,
@@ -51,13 +34,12 @@ export class AppComponent {
         title: 'Overview',
         url: '/home',
         icon: 'layers-outline'
+      },
+      {
+        title: 'Settings',
+        url: '/settings',
+        icon: 'settings-outline'
       }
-
-      // {
-      //   title: 'Settings',
-      //   url: '/settings',
-      //   icon: 'settings'
-      // }
     ]
 
     this.settingsService.getDevSettingsEnabled().subscribe(enabled => {

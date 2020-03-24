@@ -66,7 +66,9 @@
   </ion-list>
   <ion-row>
     <ion-col class="ion-no-padding">
-      <p color="medium" class="ion-no-margin ion-text">{{ getBalance(localWalletService.wallet) }}</p>
+      <p color="medium" class="ion-no-margin ion-text">
+        {{ balance | amountConverter: { protocolIdentifier: 'xtz', maxDigits: 10 } }}
+      </p>
     </ion-col>
   </ion-row>
 </ion-content>

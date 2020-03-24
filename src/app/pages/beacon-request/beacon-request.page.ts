@@ -1,14 +1,16 @@
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
-import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import {
   BaseMessage,
   BroadcastRequest,
-  MessageTypes,
+  MessageType,
   OperationRequest,
   PermissionRequest,
   PermissionResponse,
-  SignPayloadRequest
+  PermissionScope,
+  SignPayloadRequest,
+  Network
 } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
+import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
@@ -32,6 +34,7 @@ export class BeaconRequestPage implements OnInit {
   public request: BaseMessage | undefined
   public requesterName: string = ''
   public address: string = ''
+  public requestedNetwork: Network | undefined
   public inputs?: any
   public transactions: IAirGapTransaction[] | undefined
 
@@ -51,25 +54,25 @@ export class BeaconRequestPage implements OnInit {
 
   public ngOnInit() {
     console.log('new request', this.request)
-    if (isUnknownObject(this.request) && this.request.type === MessageTypes.PermissionRequest) {
+    if (isUnknownObject(this.request) && this.request.type === MessageType.PermissionRequest) {
       this.title = 'Permission Request'
-      this.requesterName = ((this.request as any) as PermissionRequest).name
+      this.requesterName = ((this.request as any) as PermissionRequest).senderName
       this.permissionRequest((this.request as any) as PermissionRequest)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageTypes.SignPayloadRequest) {
+    if (isUnknownObject(this.request) && this.request.type === MessageType.SignPayloadRequest) {
       this.title = 'Sign Payload Request'
       this.requesterName = 'dApp Name (placeholder)'
       this.signRequest((this.request as any) as SignPayloadRequest)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageTypes.OperationRequest) {
+    if (isUnknownObject(this.request) && this.request.type === MessageType.OperationRequest) {
       this.title = 'Operation Request'
       this.requesterName = 'dApp Name (placeholder)'
       this.operationRequest((this.request as any) as OperationRequest)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageTypes.BroadcastRequest) {
+    if (isUnknownObject(this.request) && this.request.type === MessageType.BroadcastRequest) {
       this.title = 'Broadcast Request'
       this.requesterName = 'dApp Name (placeholder)'
       this.broadcastRequest((this.request as any) as BroadcastRequest)
@@ -88,6 +91,22 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async permissionRequest(request: PermissionRequest): Promise<void> {
+    // console.error('Only mainnet and babylonnet is currently supported')
+    // const response: NetworkNotSupportedError = {
+    //   id: request.id,
+    //   senderId: 'Beacon Extension',
+    //   type: MessageType.PermissionResponse,
+    //   errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
+    // }
+
+    // chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
+    //   console.log(res)
+    //   setTimeout(() => {
+    //     window.close()
+    //   }, 1000)
+    // })
+
+    this.requestedNetwork = request.network
     this.localWalletService.publicKey.pipe(take(1)).subscribe(pubKey => {
       this.inputs = [
         {
@@ -96,7 +115,7 @@ export class BeaconRequestPage implements OnInit {
           label: 'Read Address',
           value: 'read_address',
           icon: 'eye',
-          checked: request.scope.indexOf('read_address') >= 0
+          checked: request.scopes.indexOf(PermissionScope.READ_ADDRESS) >= 0
         },
 
         {
@@ -105,7 +124,7 @@ export class BeaconRequestPage implements OnInit {
           label: 'Sign transactions',
           value: 'sign',
           icon: 'create',
-          checked: request.scope.indexOf('sign') >= 0
+          checked: request.scopes.indexOf(PermissionScope.SIGN) >= 0
         },
 
         {
@@ -114,7 +133,7 @@ export class BeaconRequestPage implements OnInit {
           label: 'Operation request',
           value: 'operation_request',
           icon: 'color-wand',
-          checked: request.scope.indexOf('operation_request') >= 0
+          checked: request.scopes.indexOf(PermissionScope.OPERATION_REQUEST) >= 0
         },
 
         {
@@ -123,17 +142,21 @@ export class BeaconRequestPage implements OnInit {
           label: 'Threshold',
           value: 'threshold',
           icon: 'code-working',
-          checked: request.scope.indexOf('threshold') >= 0
+          checked: request.scopes.indexOf(PermissionScope.THRESHOLD) >= 0
         }
       ]
 
       this.responseHandler = async () => {
         const response: PermissionResponse = {
           id: request.id,
-          type: MessageTypes.PermissionResponse,
+          senderId: 'Beacon Extension',
+          type: MessageType.PermissionResponse,
           permissions: {
+            accountIdentifier: `${pubKey}-${request.network.type}`,
             pubkey: pubKey,
-            networks: ['mainnet'],
+            network: {
+              ...request.network
+            },
             scopes: this.inputs.filter(input => input.checked).map(input => input.value)
           }
         }
@@ -154,7 +177,7 @@ export class BeaconRequestPage implements OnInit {
     console.log('sign payload', request.payload[0])
     this.transactions = await this.protocol.getTransactionDetails({
       publicKey: '',
-      transaction: { binaryTransaction: request.payload[0] as any }
+      transaction: { binaryTransaction: request.payload[0] }
     })
     console.log(this.transactions)
     this.responseHandler = async () => {
@@ -193,7 +216,7 @@ export class BeaconRequestPage implements OnInit {
     console.log('signedTx', signedTransaction)
     this.transactions = await this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
-      transaction: (signedTransaction as any) as string
+      transaction: signedTransaction
     })
     console.log(this.transactions)
     this.responseHandler = async () => {

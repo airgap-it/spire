@@ -1,7 +1,9 @@
-import { Component } from '@angular/core'
+import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
-import { AirGapMarketWallet } from 'airgap-coin-lib'
+import { TezosProtocol } from 'airgap-coin-lib'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
+import { SettingsService } from 'src/app/services/settings.service'
 import { SigningMethodService } from 'src/app/services/signing-method.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
@@ -21,13 +23,18 @@ enum SigningMethods {
 export class HomePage {
   public signingMethods: typeof SigningMethods = SigningMethods
   public currentSigningMethod: string = 'Unpaired'
+  public balance: string = ''
+  public network: Network | undefined
 
   constructor(
     public readonly localWalletService: LocalWalletService,
     private readonly signingMethodService: SigningMethodService,
     private readonly modalController: ModalController,
-    private readonly storageService: StorageService
+    private readonly storageService: StorageService,
+    private readonly settingsService: SettingsService,
+    private readonly ref: ChangeDetectorRef
   ) {
+    this.settingsService.getNetwork().then(network => (this.network = network))
     this.signingMethodService.signingMethod.asObservable().subscribe(method => {
       if (method === SigningMethods.WALLET) {
         this.currentSigningMethod = 'Wallet'
@@ -41,6 +48,11 @@ export class HomePage {
     })
 
     this.checkOnboarding().catch(console.error)
+
+    this.localWalletService.address.subscribe(async address => {
+      this.balance = await this.getBalance(address)
+      this.ref.detectChanges()
+    })
   }
 
   public async showPairPage(): Promise<void> {
@@ -60,9 +72,20 @@ export class HomePage {
     }
   }
 
-  public getBalance(wallet: AirGapMarketWallet | undefined): string {
-    if (wallet) {
-      return wallet.currentBalance
+  public async getBalance(address: string | null): Promise<string> {
+    console.log('getBalance', address)
+    if (!address) {
+      return ''
+    }
+    const network: Network | undefined = await this.settingsService.getNetwork()
+
+    if (network) {
+      const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
+
+      const amount = await protocol.getBalanceOfAddresses([address])
+      console.log('getBalance', amount)
+
+      return amount
     } else {
       return ''
     }

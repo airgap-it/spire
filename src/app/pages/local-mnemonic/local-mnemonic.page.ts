@@ -1,6 +1,8 @@
-import { Component } from '@angular/core'
+import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { ChangeDetectorRef, Component } from '@angular/core'
 import { AlertController } from '@ionic/angular'
-import { AirGapMarketWallet } from 'airgap-coin-lib'
+import { TezosProtocol } from 'airgap-coin-lib'
+import { SettingsService } from 'src/app/services/settings.service'
 
 import { LocalWalletService } from '../../services/local-wallet.service'
 
@@ -12,13 +14,20 @@ import { LocalWalletService } from '../../services/local-wallet.service'
 export class LocalMnemonicPage {
   public saveButtonDisabled: boolean = true
   public mnemonic: string = ''
+  public balance: string = ''
 
   constructor(
     public readonly alertController: AlertController,
-    public readonly localWalletService: LocalWalletService
+    public readonly localWalletService: LocalWalletService,
+    private readonly settingsService: SettingsService,
+    private readonly ref: ChangeDetectorRef
   ) {
     this.localWalletService.mnemonic.subscribe(mnemonic => {
       this.mnemonic = mnemonic
+    })
+    this.localWalletService.address.subscribe(async address => {
+      this.balance = await this.getBalance(address)
+      this.ref.detectChanges()
     })
   }
 
@@ -74,9 +83,22 @@ export class LocalMnemonicPage {
     await alert.present()
   }
 
-  public getBalance(wallet: AirGapMarketWallet | undefined): void {
-    if (wallet) {
-      return wallet.currentBalance
+  public async getBalance(address: string | null): Promise<string> {
+    console.log('getBalance', address)
+    if (!address) {
+      return ''
+    }
+    const network: Network | undefined = await this.settingsService.getNetwork()
+
+    if (network) {
+      const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
+
+      const amount = await protocol.getBalanceOfAddresses([address])
+      console.log('getBalance', amount)
+
+      return amount
+    } else {
+      return ''
     }
   }
 }
