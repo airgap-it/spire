@@ -1,8 +1,8 @@
 {
-  "name": "tezos-poc-extension",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "name": "beacon-extension",
+  "version": "0.4",
+  "author": "AirGap",
+  "homepage": "https://airgap.it/",
   "scripts": {
     "postinstall": "node scripts/patch-crypto.js && npm run prepare-prod-build",
     "ng": "ng",
@@ -85,5 +85,5 @@
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~3.7.5"
   },
-  "description": "An Ionic project"
+  "description": "Beacon connects Tezos decetralized applications with wallets."
 }
