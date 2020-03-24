@@ -177,7 +177,7 @@ export class BeaconRequestPage implements OnInit {
     console.log('sign payload', request.payload[0])
     this.transactions = await this.protocol.getTransactionDetails({
       publicKey: '',
-      transaction: { binaryTransaction: request.payload[0] as any }
+      transaction: { binaryTransaction: request.payload[0] }
     })
     console.log(this.transactions)
     this.responseHandler = async () => {
@@ -216,7 +216,7 @@ export class BeaconRequestPage implements OnInit {
     console.log('signedTx', signedTransaction)
     this.transactions = await this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
-      transaction: (signedTransaction as any) as string
+      transaction: signedTransaction
     })
     console.log(this.transactions)
     this.responseHandler = async () => {

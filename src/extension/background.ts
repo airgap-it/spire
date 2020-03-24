@@ -202,7 +202,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
   [MessageType.OperationRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     const operationRequest: OperationRequest = data
     console.log('beaconMessageHandler operation-request', data)
-    const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network as any)
+    const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network)
 
     const mnemonic = await storage.get('mnemonic' as any)
     const seed = await bip39.mnemonicToSeed(mnemonic)
@@ -216,7 +216,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
     let response: OperationResponse | BroadcastBeaconError
     try {
       const hash = await sign(forgedTx.binaryTransaction).then(signedTx => {
-        return broadcast(operationRequest.network as any, signedTx) // TODO: Fix type
+        return broadcast(operationRequest.network, signedTx)
       })
       console.log('broadcast: ', hash)
       response = {
@@ -246,7 +246,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
       id: data.id,
       senderId: 'Beacon Extension',
       type: MessageType.SignPayloadResponse,
-      signature: [hash as any]
+      signature: hash
     }
 
     sendToPage(new Serializer().serialize(response))
@@ -255,7 +255,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
   [MessageType.BroadcastRequest]: async (data: any, sendResponse: Function): Promise<void> => {
     const broadcastRequest: BroadcastRequest = data
     console.log('beaconMessageHandler broadcast-request', data)
-    const hash = await broadcast(broadcastRequest.network as any, data.signedTransactions[0]) // TODO: Fix types
+    const hash = await broadcast(broadcastRequest.network, data.signedTransactions[0])
     console.log('broadcast: ', hash)
     const response: BroadcastResponse = {
       id: data.id,

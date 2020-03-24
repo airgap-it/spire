@@ -10,7 +10,7 @@ import { SettingsService } from '../../services/settings.service'
   styleUrls: ['./settings.page.scss']
 })
 export class SettingsPage {
-  public networkType: NetworkType = NetworkType.MAIN
+  public networkType: NetworkType = NetworkType.MAINNET
   public networkName: string | undefined
   public networkRpcUrl: string | undefined
 

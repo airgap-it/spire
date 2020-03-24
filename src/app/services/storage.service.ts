@@ -21,7 +21,7 @@ const defaultValues: StorageKeyReturnDefaults = {
   [StorageKey.DEV_SETTINGS_ENABLED]: false,
   [StorageKey.SIGNING_METHOD]: undefined,
   [StorageKey.HAS_ONBOARDED]: false,
-  [StorageKey.ACTIVE_NETWORK]: { type: NetworkType.MAIN }
+  [StorageKey.ACTIVE_NETWORK]: { type: NetworkType.MAINNET }
 }
 
 @Injectable({

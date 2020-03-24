@@ -34,13 +34,14 @@ export class ToExtensionMessageHandler extends MessageHandler {
       if (deserialized.type === MessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async () => {
-          const protocol: TezosProtocol = await getProtocolForNetwork((deserialized as OperationRequest).network as any)
+          const operationRequest = deserialized as OperationRequest
+          const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network)
           const mnemonic = await storage.get('mnemonic' as any)
           const seed = await bip39.mnemonicToSeed(mnemonic)
 
           const publicKey = protocol.getPublicKeyFromHexSecret(seed.toString('hex'), protocol.standardDerivationPath)
-          ;(deserialized as any).operationDetails = (
-            await protocol.prepareOperations(publicKey, (deserialized as any).operationDetails)
+          operationRequest.operationDetails = (
+            await protocol.prepareOperations(publicKey, (operationRequest as any).operationDetails)
           ).contents
           const serialized = new Serializer().serialize(deserialized)
           openPopup({ ...data, payload: serialized })
