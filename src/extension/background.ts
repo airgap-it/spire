@@ -23,6 +23,7 @@ import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageH
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { Methods } from './Methods'
 import { getProtocolForNetwork } from './utils'
+import { BeaconLedgerBridge } from './ledger-bridge'
 
 export enum Destinations {
   BACKGROUND = 'toBackground',
@@ -83,7 +84,7 @@ let popupId: number | undefined
 
 const queue: any[] = []
 
-chrome.runtime.onMessage.addListener(function(message, _sender, _sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
   console.log('got message from popup', message)
   while (queue.length > 0) {
     console.log('items in queue', queue.length)
@@ -142,8 +143,12 @@ const storage = new ChromeStorage()
 
 let globalPubkey
 
+const bridge = new BeaconLedgerBridge('https://localhost:8080')
+
 const handleLedgerInit = async (_data: any, _sendResponse: Function) => {
-  console.log('handleLedgerInit')
+  const publicKey = await bridge.getAddress()
+  storage.set('ledger-publicKey' as any, publicKey)
+  _sendResponse({ publicKey: publicKey })
 }
 
 const handleP2PInit = async (_data: any, sendResponse: Function) => {
@@ -169,15 +174,24 @@ const handleP2PInit = async (_data: any, sendResponse: Function) => {
   sendResponse({ qr: walletClient.getHandshakeInfo() })
 }
 
-const sign = async (forgedTx: string): Promise<string> => {
-  const mnemonic: string = await storage.get('mnemonic' as any)
-  const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
-  const privatekey: Buffer = globalProtocol.getPrivateKeyFromHexSecret(
-    seed.toString('hex'),
-    globalProtocol.standardDerivationPath
-  )
+const useLedger: boolean = true
 
-  return globalProtocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
+const sign = async (forgedTx: string): Promise<string> => {
+  if (!useLedger) {
+    const mnemonic: string = await storage.get('mnemonic' as any)
+    const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
+    const privatekey: Buffer = globalProtocol.getPrivateKeyFromHexSecret(
+      seed.toString('hex'),
+      globalProtocol.standardDerivationPath
+    )
+
+    return globalProtocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
+  } else {
+    console.log('WILL SIGN', forgedTx)
+    const signature = await bridge.signOperation(forgedTx)
+    console.log('SIGNATURE', signature)
+    return signature
+  }
 }
 
 const broadcast = async (network: Network, signedTx: string): Promise<string> => {
@@ -314,7 +328,7 @@ messageTypeHandler.set(Methods.RESPONSE, handleResponse)
 
 const handleMessage = async (data: any, sendResponse: any) => {
   console.log('handleMessage', data, sendResponse)
-  const handler = messageTypeHandler.get(data.type) || ((_data: any, _sendResponse: Function) => {})
+  const handler = messageTypeHandler.get(data.type) || ((_data: any, _sendResponse: Function) => { })
   console.log('handler', handler)
   handler(data, sendResponse)
 }

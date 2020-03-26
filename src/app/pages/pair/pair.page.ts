@@ -54,6 +54,7 @@ export class PairPage {
     chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LEDGER_INIT }, response => {
       console.log(response)
       this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
+      this.dismiss()
     })
   }
 
