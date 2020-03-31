@@ -1,0 +1,29 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>Ledger</ion-title>
+		<ion-buttons slot="end">
+			<ion-button (click)="dismiss()">
+				<ion-icon name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+
+	<ng-container *ngIf="isLoading">
+		<ion-spinner></ion-spinner>
+	</ng-container>
+
+	<ng-container *ngIf="!isLoading && !address">
+		Could not connect to the ledger. Please make sure your ledger is connected to the computer and you started the Tezos
+		app on the ledger.
+		<ion-button (click)="connect()">Try again</ion-button>
+	</ng-container>
+
+	<ng-container *ngIf="address">
+		Successfully connected to address {{address}}. Redirecting...
+	</ng-container>
+
+</ion-content>
