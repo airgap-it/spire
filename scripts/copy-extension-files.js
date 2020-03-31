@@ -4,7 +4,7 @@ const toCopy = ['background.js', 'inject.js', 'runtime.js']
 
 const files = fs.readdirSync('./www').filter(file => file.endsWith('.js'))
 files.forEach(file => {
-	const shouldCopy = toCopy.find(toCopyFile => file.startsWith(`${toCopyFile.split('.')[0]}-latest`))
+	const shouldCopy = toCopy.find(toCopyFile => file.startsWith(`${toCopyFile.split('.')[0]}-esnext`))
 	if (shouldCopy) {
 		console.log('copying', `./www/${file}`, `./www/${shouldCopy}`)
 		fs.copyFileSync(`./www/${file}`, `./www/${shouldCopy}`)
@@ -33,7 +33,7 @@ if (index.indexOf('::-webkit-scrollbar') < 0) {
 	if (index === indexWithCss) {
 		throw new Error('Could not inject extension css!')
 	}
-	
-	fs.writeFileSync('./www/index.html', indexWithCss)	
+
+	fs.writeFileSync('./www/index.html', indexWithCss)
 }
 
