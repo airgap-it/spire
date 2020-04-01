@@ -17,6 +17,8 @@ import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 import { Methods } from 'src/extension/Methods'
+import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
+import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -31,6 +33,7 @@ export class BeaconRequestPage implements OnInit {
   public title: string = ''
   public protocol: TezosProtocol = new TezosProtocol()
 
+  public signingMethod: SigningMethod | undefined
   public request: BaseMessage | undefined
   public requesterName: string = ''
   public address: string = ''
@@ -45,7 +48,8 @@ export class BeaconRequestPage implements OnInit {
   constructor(
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
-    private readonly localWalletService: LocalWalletService
+    private readonly localWalletService: LocalWalletService,
+    private readonly signingMethodService: SigningMethodService
   ) {
     this.localWalletService.address.pipe(take(1)).subscribe(address => {
       this.address = address
@@ -161,14 +165,7 @@ export class BeaconRequestPage implements OnInit {
           }
         }
 
-        chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
-          console.log(res)
-          setTimeout(() => {
-            window.close()
-          }, 1000)
-        })
-
-        await this.showSuccessAlert()
+        this.sendResponse(response)
       }
     })
   }
@@ -181,14 +178,28 @@ export class BeaconRequestPage implements OnInit {
     })
     console.log(this.transactions)
     this.responseHandler = async () => {
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-        console.log(response)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
+      this.signingMethodService.signingMethod.pipe(take(1)).subscribe(async signingMethod => {
+        if (signingMethod === SigningMethod.LOCAL_MNEMONIC) {
+          this.sendResponse(request)
+        } else {
+          const modal = await this.modalController.create({
+            component: AddLedgerConnectionPage,
+            componentProps: {
+              request,
+              targetMethod: Methods.RESPONSE
+            }
+          })
 
-      await this.showSuccessAlert()
+          modal.onWillDismiss().then(({ data: closeParent }) => {
+            if (closeParent) {
+              setTimeout(() => {
+                this.dismiss()
+              }, 500)
+            }
+          })
+          return modal.present()
+        }
+      })
     }
   }
 
@@ -200,14 +211,28 @@ export class BeaconRequestPage implements OnInit {
     console.log('transactions', this.transactions)
 
     this.responseHandler = async () => {
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-        console.log(response)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
+      this.signingMethodService.signingMethod.pipe(take(1)).subscribe(async signingMethod => {
+        if (signingMethod === SigningMethod.LOCAL_MNEMONIC) {
+          this.sendResponse(request)
+        } else {
+          const modal = await this.modalController.create({
+            component: AddLedgerConnectionPage,
+            componentProps: {
+              request,
+              targetMethod: Methods.RESPONSE
+            }
+          })
 
-      await this.showSuccessAlert()
+          modal.onWillDismiss().then(({ data: closeParent }) => {
+            if (closeParent) {
+              setTimeout(() => {
+                this.dismiss()
+              }, 500)
+            }
+          })
+          return modal.present()
+        }
+      })
     }
   }
 
@@ -220,15 +245,19 @@ export class BeaconRequestPage implements OnInit {
     })
     console.log(this.transactions)
     this.responseHandler = async () => {
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-        console.log(response)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
-
-      await this.showSuccessAlert()
+      this.sendResponse(request)
     }
+  }
+
+  private async sendResponse(request: any) {
+    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
+      console.log(response)
+      setTimeout(() => {
+        window.close()
+      }, 1000)
+    })
+
+    await this.showSuccessAlert()
   }
 
   private async showSuccessAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {

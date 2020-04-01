@@ -54,6 +54,9 @@ export class PairPage {
 	public async pairHardwareWallet() {
 		const modal = await this.modalController.create({
 			component: AddLedgerConnectionPage,
+			componentProps: {
+				targetMethod: Methods.LEDGER_INIT
+			}
 		})
 
 		modal.onWillDismiss().then(({ data: closeParent }) => {

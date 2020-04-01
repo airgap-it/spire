@@ -1,12 +1,11 @@
 import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
 import { BaseMessage } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
 import { ModalController } from '@ionic/angular'
-import { map } from 'rxjs/operators'
 
 import { BeaconRequestPage } from './pages/beacon-request/beacon-request.page'
 import { SettingsService } from './services/settings.service'
+import { SigningMethod } from './services/signing-method.service'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -21,7 +20,6 @@ export class AppComponent {
   public appPages: { title: string; url: string; icon: string }[] = []
 
   constructor(
-    private readonly activatedRoute: ActivatedRoute,
     private readonly modalController: ModalController,
     private readonly settingsService: SettingsService
   ) {
@@ -54,17 +52,18 @@ export class AppComponent {
       }
     })
 
-    const data = this.activatedRoute.queryParamMap.pipe(map(params => params.get('d')))
-    data.subscribe(res => {
-      if (res) {
-        console.log('d', res)
-        const serializer = new Serializer()
+    // TODO: I think this can be deleted
+    // const data = this.activatedRoute.queryParamMap.pipe(map(params => params.get('d')))
+    // data.subscribe(res => {
+    //   if (res) {
+    //     console.log('d', res)
+    //     const serializer = new Serializer()
 
-        const deserialized = serializer.deserialize(res) as BaseMessage
+    //     const deserialized = serializer.deserialize(res) as BaseMessage
 
-        this.beaconRequest(deserialized)
-      }
-    })
+    //     this.beaconRequest(deserialized, SigningMethod.LEDGER)
+    //   }
+    // })
 
     chrome.runtime.sendMessage({ data: 'Handshake' })
     chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
@@ -73,14 +72,15 @@ export class AppComponent {
 
       const deserialized = serializer.deserialize(message.data) as BaseMessage
 
-      this.beaconRequest(deserialized)
+      this.beaconRequest(deserialized, SigningMethod.LEDGER)
     })
   }
 
-  public async beaconRequest(request: BaseMessage): Promise<void> {
+  public async beaconRequest(request: BaseMessage, signingMethod: SigningMethod): Promise<void> {
     const modal = await this.modalController.create({
       component: BeaconRequestPage,
       componentProps: {
+        signingMethod,
         request
       }
     })

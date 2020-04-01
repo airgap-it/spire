@@ -16,14 +16,14 @@
 		<ion-spinner></ion-spinner>
 	</ng-container>
 
-	<ng-container *ngIf="!isLoading && !address">
+	<ng-container *ngIf="!isLoading && !success">
 		Could not connect to the ledger. Please make sure your ledger is connected to the computer and you started the Tezos
 		app on the ledger.
 		<ion-button (click)="connect()">Try again</ion-button>
 	</ng-container>
 
-	<ng-container *ngIf="address">
-		Successfully connected to address {{address}}. Redirecting...
+	<ng-container *ngIf="success">
+		Successfully received ledger response. Redirecting...
 	</ng-container>
 
 </ion-content>

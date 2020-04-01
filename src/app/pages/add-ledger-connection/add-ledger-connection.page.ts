@@ -9,8 +9,11 @@ import { Methods } from 'src/extension/Methods';
 	styleUrls: ['./add-ledger-connection.page.scss'],
 })
 export class AddLedgerConnectionPage implements OnInit {
+	public targetMethod: Methods = Methods.LEDGER_INIT
+	public request: any | undefined
+
 	public isLoading: boolean = true
-	public address: string = ''
+	public success: boolean = false
 	public error: string = ''
 
 	constructor(private readonly modalController: ModalController, private readonly signingMethodService: SigningMethodService, private readonly cdr: ChangeDetectorRef) { }
@@ -22,13 +25,14 @@ export class AddLedgerConnectionPage implements OnInit {
 	public async connect(): Promise<void> {
 		this.isLoading = true
 
-		chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LEDGER_INIT }, response => {
+		console.log('sending', { method: 'toBackground', type: this.targetMethod, request: this.request })
+		chrome.runtime.sendMessage({ method: 'toBackground', type: this.targetMethod, request: this.request }, response => {
 			console.log('LEDGER RESPONSE', response)
 			this.isLoading = false
 			if (response.error) {
 
 			} else {
-				this.address = response.address
+				this.success = true
 				this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
 				setTimeout(() => {
 					this.dismiss(true)
@@ -36,6 +40,7 @@ export class AddLedgerConnectionPage implements OnInit {
 			}
 			this.cdr.detectChanges()
 		})
+
 	}
 
 	public async dismiss(closeParent = false): Promise<void> {

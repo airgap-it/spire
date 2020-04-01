@@ -295,7 +295,7 @@ const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction
 }
 
 const handleResponse = async (data: any, sendResponse: Function): Promise<void> => {
-	console.log('handleResponse')
+	console.log('handleResponse', data)
 	const handler: BeaconMessageHandlerFunction = beaconMessageHandler[data.request.type]
 	await handler(data.request, sendResponse)
 }
