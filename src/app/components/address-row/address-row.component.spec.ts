@@ -1,24 +1,24 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { IonicModule } from '@ionic/angular'
 
-import { AddressRowComponent } from './address-row.component';
+import { AddressRowComponent } from './address-row.component'
 
 describe('AddressRowComponent', () => {
-  let component: AddressRowComponent;
-  let fixture: ComponentFixture<AddressRowComponent>;
+  let component: AddressRowComponent
+  let fixture: ComponentFixture<AddressRowComponent>
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddressRowComponent ],
+      declarations: [AddressRowComponent],
       imports: [IonicModule.forRoot()]
-    }).compileComponents();
+    }).compileComponents()
 
-    fixture = TestBed.createComponent(AddressRowComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+    fixture = TestBed.createComponent(AddressRowComponent)
+    component = fixture.componentInstance
+    fixture.detectChanges()
+  }))
 
   it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    expect(component).toBeTruthy()
+  })
+})

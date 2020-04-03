@@ -45,6 +45,8 @@ export class BeaconRequestPage implements OnInit {
 
   public transport: Transport = new ChromeMessageTransport('Beacon Extension')
 
+  public confirmButtonText: string = 'Confirm'
+
   constructor(
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
@@ -53,6 +55,11 @@ export class BeaconRequestPage implements OnInit {
   ) {
     this.localWalletService.address.pipe(take(1)).subscribe(address => {
       this.address = address
+    })
+    this.signingMethodService.signingMethod.pipe(take(1)).subscribe(async signingMethod => {
+      if (signingMethod === SigningMethod.LEDGER) {
+        this.confirmButtonText = 'Sign with Ledger'
+      }
     })
   }
 

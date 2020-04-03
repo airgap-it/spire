@@ -19,10 +19,7 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
 export class AppComponent {
   public appPages: { title: string; url: string; icon: string }[] = []
 
-  constructor(
-    private readonly modalController: ModalController,
-    private readonly settingsService: SettingsService
-  ) {
+  constructor(private readonly modalController: ModalController, private readonly settingsService: SettingsService) {
     this.initializeApp()
   }
 

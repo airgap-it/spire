@@ -1,4 +1,3 @@
-
 enum Action {
   GET_ADDRESS = 'getAddress',
   SIGN_TRANSACTION = 'signTransaction',
@@ -21,13 +20,15 @@ interface BeaconLedgerBridgeVersionResponse {
 }
 
 export class BeaconLedgerBridge {
-
   private static TARGET = 'BEACON-SDK-LEDGER-BRIDGE'
 
   private iframe: HTMLIFrameElement
 
   private get origin(): string {
-    return this.bridgeURL.split('/').slice(0, 3).join('/')
+    return this.bridgeURL
+      .split('/')
+      .slice(0, 3)
+      .join('/')
   }
 
   constructor(private bridgeURL: string) {

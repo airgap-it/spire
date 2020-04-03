@@ -1,24 +1,24 @@
 <ion-header class="ion-no-border">
-	<ion-toolbar>
-		<ion-title>Pair Wallet</ion-title>
-		<ion-buttons slot="end">
-			<ion-button (click)="dismiss()">
-				<ion-icon name="close"></ion-icon>
-			</ion-button>
-		</ion-buttons>
-	</ion-toolbar>
+  <ion-toolbar>
+    <ion-title>Pair Wallet</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-	<h3>Scan the QR code with your wallet</h3>
-	<p>In your mobile wallet, open the QR scanner to pair with Beacon.</p>
+  <h3>Scan the QR code with your wallet</h3>
+  <p>In your mobile wallet, open the QR scanner to pair with Beacon.</p>
 
-	<ion-row class="ion-justify-content-center ion-padding-vertical">
-		<qr-code *ngIf="handshakeData" [value]="handshakeData" [size]="256" [level]="'M'"></qr-code>
-	</ion-row>
+  <ion-row class="ion-justify-content-center ion-padding-vertical">
+    <qr-code *ngIf="handshakeData" [value]="handshakeData" [size]="256" [level]="'M'"></qr-code>
+  </ion-row>
 
-	<h5 class="ion-padding-top">Do you have a wallet on the same device?</h5>
-	<p>If you have a wallet installed on this device like Galleon, you can also pair it with Beacon.</p>
+  <h5 class="ion-padding-top">Do you have a wallet on the same device?</h5>
+  <p>If you have a wallet installed on this device like Galleon, you can also pair it with Beacon.</p>
 
-	<ion-button (click)="dismiss()" expand="block" disabled>Pair Same Device</ion-button>
+  <ion-button (click)="dismiss()" expand="block" disabled>Pair Same Device</ion-button>
 </ion-content>
