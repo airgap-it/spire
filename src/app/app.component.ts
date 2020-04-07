@@ -1,11 +1,13 @@
 import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
-import { BaseMessage } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { BaseMessage } from '@airgap/beacon-sdk/dist/types/Messages'
 import { Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 
 import { BeaconRequestPage } from './pages/beacon-request/beacon-request.page'
+import { ChromeMessagingService } from './services/chrome-messaging.service'
 import { SettingsService } from './services/settings.service'
 import { SigningMethod } from './services/signing-method.service'
+import { Action } from 'src/extension/Methods'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -19,7 +21,11 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
 export class AppComponent {
   public appPages: { title: string; url: string; icon: string }[] = []
 
-  constructor(private readonly modalController: ModalController, private readonly settingsService: SettingsService) {
+  constructor(
+    private readonly modalController: ModalController,
+    private readonly settingsService: SettingsService,
+    private readonly chromeMessagingService: ChromeMessagingService
+  ) {
     this.initializeApp()
   }
 
@@ -63,6 +69,7 @@ export class AppComponent {
     // })
 
     chrome.runtime.sendMessage({ data: 'Handshake' })
+    this.chromeMessagingService.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
       console.log('GOT DATA FROM BACKGROUND', message.data)
       const serializer = new Serializer()

@@ -1,7 +1,9 @@
-import { Network, NetworkType } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { Network, NetworkType } from '@airgap/beacon-sdk/dist/types/Messages'
 import { TezosProtocol } from 'airgap-coin-lib'
 
-export const getProtocolForNetwork = async (network: Network): Promise<TezosProtocol> => {
+export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol> = async (
+  network: Network
+): Promise<TezosProtocol> => {
   const rpcUrls: { [key in NetworkType]: string } = {
     [NetworkType.MAINNET]: 'https://tezos-node.prod.gke.papers.tech',
     [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-node-1.kubernetes.papers.tech',

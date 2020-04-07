@@ -1,4 +1,4 @@
-import { Network, NetworkType } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { Network, NetworkType } from '@airgap/beacon-sdk/dist/types/Messages'
 import { Injectable } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { Observable, ReplaySubject } from 'rxjs'

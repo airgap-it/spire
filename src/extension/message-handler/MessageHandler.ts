@@ -1,14 +1,15 @@
+import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
+import { Logger } from '../Logger'
+
+const logger: Logger = new Logger('MessageHandler')
+
 export class MessageHandler {
-  public handle(
-    data: unknown,
-    sendResponse: Function,
-    _relay: Function,
-    _openPopup: Function,
-    _sendToPage: Function,
-    _handleMessage: Function,
+  public async handle(
+    data: ExtensionMessage<unknown>,
+    sendResponse: (response?: unknown) => void,
     _beaconConnected: boolean
-  ) {
-    console.log('unknown data', data)
+  ): Promise<void> {
+    logger.log('unknown data', data)
     sendResponse()
   }
 }

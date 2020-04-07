@@ -8,7 +8,7 @@ import {
   PermissionScope,
   SignPayloadRequest,
   Network
-} from '@airgap/beacon-sdk/dist/messages/Messages'
+} from '@airgap/beacon-sdk/dist/types/Messages'
 import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
 import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import { Component, OnInit } from '@angular/core'
@@ -16,9 +16,10 @@ import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
-import { Methods } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
 import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -51,7 +52,8 @@ export class BeaconRequestPage implements OnInit {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly localWalletService: LocalWalletService,
-    private readonly signingMethodService: SigningMethodService
+    private readonly signingMethodService: SigningMethodService,
+    private readonly chromeMessagingService: ChromeMessagingService
   ) {
     this.localWalletService.address.pipe(take(1)).subscribe(address => {
       this.address = address
@@ -193,7 +195,7 @@ export class BeaconRequestPage implements OnInit {
             component: AddLedgerConnectionPage,
             componentProps: {
               request,
-              targetMethod: Methods.RESPONSE
+              targetMethod: Action.RESPONSE
             }
           })
 
@@ -226,7 +228,7 @@ export class BeaconRequestPage implements OnInit {
             component: AddLedgerConnectionPage,
             componentProps: {
               request,
-              targetMethod: Methods.RESPONSE
+              targetMethod: Action.RESPONSE
             }
           })
 
@@ -256,13 +258,17 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  private async sendResponse(request: any) {
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-      console.log(response)
-      setTimeout(() => {
-        window.close()
-      }, 1000)
-    })
+  private async sendResponse(request: any): Promise<void> {
+    const response: ExtensionMessageOutputPayload<Action.RESPONSE> = await this.chromeMessagingService.sendChromeMessage(
+      Action.RESPONSE,
+      {
+        request
+      }
+    )
+    console.log(response)
+    setTimeout(() => {
+      window.close()
+    }, 1000)
 
     await this.showSuccessAlert()
   }

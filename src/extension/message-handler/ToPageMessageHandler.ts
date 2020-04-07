@@ -1,18 +1,24 @@
+import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
+
+import { Logger } from '../Logger'
+
 import { MessageHandler } from './MessageHandler'
 
+const logger: Logger = new Logger('ToPageMessageHandler')
+
 export class ToPageMessageHandler extends MessageHandler {
-  public handle(
-    data: any,
-    sendResponse: Function,
-    _relay: Function,
-    _openPopup: Function,
-    sendToPage: Function,
-    _handleMessage: Function,
+  constructor(private readonly sendToPage: (message: string) => void) {
+    super()
+  }
+
+  public async handle(
+    data: ExtensionMessage<string>,
+    sendResponse: (response?: unknown) => void,
     _beaconConnected: boolean
-  ) {
-    console.log('ToPageMessageHandler')
+  ): Promise<void> {
+    logger.log('ToPageMessageHandler', data)
     // Events need to be sent to the page
-    sendToPage(data)
+    this.sendToPage(data.payload)
     sendResponse()
   }
 }

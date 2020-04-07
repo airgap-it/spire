@@ -2,7 +2,9 @@ import { Injectable, NgZone } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
-import { Methods } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
+
+import { ChromeMessagingService } from './chrome-messaging.service'
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +22,7 @@ export class LocalWalletService {
   public publicKey: Observable<string> = this._publicKey.asObservable()
   public address: Observable<string> = this._address.asObservable()
 
-  constructor(private readonly ngZone: NgZone) {
+  constructor(private readonly ngZone: NgZone, private readonly chromeMessagingService: ChromeMessagingService) {
     this.protocol = new TezosProtocol() // This protocol is only used to calculate addresses, so it is not different on testnets
 
     this.mnemonic.subscribe(async (mnemonic: string) => {
@@ -48,27 +50,38 @@ export class LocalWalletService {
   }
 
   public async getMnemonic(): Promise<void> {
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GET_MNEMONIC }, response => {
-      console.log('generateMnemonic response', response)
-      this._mnemonic.next(response.mnemonic)
-    })
+    const response: ExtensionMessageOutputPayload<Action.MNEMONIC_GET> = await this.chromeMessagingService.sendChromeMessage(
+      Action.MNEMONIC_GET,
+      undefined
+    )
+    console.log('generateMnemonic response', response)
+    if (response.data) {
+      this._mnemonic.next(response.data.mnemonic)
+    }
   }
 
   public async generateMnemonic(): Promise<void> {
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GENERATE_MNEMONIC }, response => {
-      console.log('generateMnemonic response', response)
-      this._mnemonic.next(response.mnemonic)
-    })
+    const response: ExtensionMessageOutputPayload<Action.MNEMONIC_GENERATE> = await this.chromeMessagingService.sendChromeMessage(
+      Action.MNEMONIC_GENERATE,
+      undefined
+    )
+    console.log('generateMnemonic response', response)
+    if (response.data) {
+      this._mnemonic.next(response.data.mnemonic)
+    }
   }
 
   public async saveMnemonic(mnemonic: string): Promise<void> {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      chrome.runtime.sendMessage(
-        { method: 'toBackground', type: Methods.LOCAL_SAVE_MNEMONIC, payload: { params: { mnemonic } } },
-        response => {
-          console.log('saveMnemonic response', response)
+      const response: ExtensionMessageOutputPayload<Action.MNEMONIC_SAVE> = await this.chromeMessagingService.sendChromeMessage(
+        Action.MNEMONIC_SAVE,
+        {
+          params: { mnemonic }
         }
       )
+
+      console.log('saveMnemonic response', response)
+
       this._mnemonic.next(mnemonic)
     }
   }

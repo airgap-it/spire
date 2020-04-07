@@ -12,6 +12,7 @@
     "test": "ng test",
     "test-ci": "ng test --code-coverage --watch=false",
     "lint": "ng lint",
+    "lint-fix": "ng lint --fix",
     "lint-ci": "ng lint app --format json > ./lintReport.json || true",
     "e2e": "ng e2e",
     "prettier": "npx prettier --write 'src/**/*'",
@@ -24,7 +25,7 @@
   },
   "private": true,
   "dependencies": {
-    "@airgap/beacon-sdk": "0.0.2",
+    "@airgap/beacon-sdk": "0.0.3-beta.0",
     "@angular/common": "^9.1.0",
     "@angular/core": "^9.1.0",
     "@angular/forms": "^9.1.0",

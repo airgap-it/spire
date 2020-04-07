@@ -2,13 +2,14 @@ import { Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
 import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
 import { SettingsService } from 'src/app/services/settings.service'
 import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
-import { Methods } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
 
-import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
-import { map } from 'rxjs/operators'
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
+import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 
 @Component({
   selector: 'beacon-pair',
@@ -23,6 +24,7 @@ export class PairPage {
   constructor(
     public readonly settingsService: SettingsService,
     private readonly modalController: ModalController,
+    private readonly chromeMessagingService: ChromeMessagingService,
     private readonly router: Router,
     private readonly signingMethodService: SigningMethodService
   ) {
@@ -37,25 +39,28 @@ export class PairPage {
 
   public async pairWallet() {
     this.signingMethodService.setSigningMethod(SigningMethod.WALLET)
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.P2P_INIT }, async response => {
-      console.log(response)
 
-      const modal = await this.modalController.create({
-        component: AddWalletConnectionPage,
-        componentProps: {
-          handshakeData: JSON.stringify(response.qr)
-        }
-      })
+    const response: ExtensionMessageOutputPayload<Action.P2P_INIT> = await this.chromeMessagingService.sendChromeMessage(
+      Action.P2P_INIT,
+      undefined
+    )
+    console.log(response)
 
-      return modal.present()
+    const modal = await this.modalController.create({
+      component: AddWalletConnectionPage,
+      componentProps: {
+        handshakeData: JSON.stringify(response.data ? response.data.qr : {})
+      }
     })
+
+    return modal.present()
   }
 
   public async pairHardwareWallet() {
     const modal = await this.modalController.create({
       component: AddLedgerConnectionPage,
       componentProps: {
-        targetMethod: Methods.LEDGER_INIT
+        targetMethod: Action.LEDGER_INIT
       }
     })
 

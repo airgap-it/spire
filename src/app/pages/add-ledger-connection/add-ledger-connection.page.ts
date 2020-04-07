@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'
-import { SigningMethodService, SigningMethod } from 'src/app/services/signing-method.service'
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
-import { Methods } from 'src/extension/Methods'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
+import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
 
 @Component({
   selector: 'app-add-ledger-connection',
@@ -9,8 +10,8 @@ import { Methods } from 'src/extension/Methods'
   styleUrls: ['./add-ledger-connection.page.scss']
 })
 export class AddLedgerConnectionPage implements OnInit {
-  public targetMethod: Methods = Methods.LEDGER_INIT
-  public request: any | undefined
+  public targetMethod: Action = Action.LEDGER_INIT
+  public request: unknown | undefined
 
   public isLoading: boolean = true
   public success: boolean = false
@@ -19,32 +20,38 @@ export class AddLedgerConnectionPage implements OnInit {
   constructor(
     private readonly modalController: ModalController,
     private readonly signingMethodService: SigningMethodService,
+    private readonly chromeMessagingService: ChromeMessagingService,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
-    this.connect()
+  public async ngOnInit(): Promise<void> {
+    return this.connect()
   }
 
   public async connect(): Promise<void> {
     this.isLoading = true
 
-    chrome.runtime.sendMessage({ method: 'toBackground', type: this.targetMethod, request: this.request }, response => {
-      console.log('LEDGER RESPONSE', response)
-      this.isLoading = false
-      if (response.error) {
-      } else {
-        this.success = true
-        this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
-        setTimeout(() => {
-          this.dismiss(true)
-        }, 2000)
+    const response: ExtensionMessageOutputPayload<Action> = await this.chromeMessagingService.sendChromeMessage(
+      this.targetMethod,
+      {
+        request: this.request
       }
-      this.cdr.detectChanges()
-    })
+    )
+    console.log('LEDGER RESPONSE', response)
+
+    this.isLoading = false
+    if (response.error) {
+    } else {
+      this.success = true
+      this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
+      setTimeout(() => {
+        return this.dismiss(true)
+      }, 2000)
+    }
+    this.cdr.detectChanges()
   }
 
-  public async dismiss(closeParent = false): Promise<void> {
+  public async dismiss(closeParent: boolean = false): Promise<void> {
     await this.modalController.dismiss(closeParent)
   }
 }
