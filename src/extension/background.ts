@@ -13,7 +13,7 @@ import { MessageHandler } from './message-handler/MessageHandler'
 import { ToBackgroundMessageHandler } from './message-handler/ToBackgroundMessageHandler'
 import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageHandler'
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
-import { Action, ExtensionMessageOutputPayload, ExtensionMessageInputPayload } from './Methods'
+import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from './Methods'
 import { PopupManager } from './PopupManager'
 
 // TODO: Refactor this file

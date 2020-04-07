@@ -20,9 +20,9 @@ interface BeaconLedgerBridgeVersionResponse {
 }
 
 export class BeaconLedgerBridge {
-  private static TARGET = 'BEACON-SDK-LEDGER-BRIDGE'
+  private static readonly TARGET = 'BEACON-SDK-LEDGER-BRIDGE'
 
-  private iframe: HTMLIFrameElement
+  private readonly iframe: HTMLIFrameElement
 
   private get origin(): string {
     return this.bridgeURL
@@ -31,33 +31,33 @@ export class BeaconLedgerBridge {
       .join('/')
   }
 
-  constructor(private bridgeURL: string) {
+  constructor(private readonly bridgeURL: string) {
     this.iframe = document.createElement('iframe')
     this.iframe.src = bridgeURL
     document.head.appendChild(this.iframe)
   }
 
-  async getAddress(derivationPath: string = "44'/1729'/0'/0'"): Promise<string> {
-    return await this.sendMessage({
+  public async getAddress(derivationPath: string = "44'/1729'/0'/0'"): Promise<string> {
+    return this.sendMessage({
       action: Action.GET_ADDRESS,
       params: {
-        derivationPath: derivationPath
+        derivationPath
       }
     })
   }
 
-  async signOperation(operation: string, derivationPath: string = "44'/1729'/0'/0'"): Promise<string> {
-    return await this.sendMessage({
+  public async signOperation(operation: string, derivationPath: string = "44'/1729'/0'/0'"): Promise<string> {
+    return this.sendMessage({
       action: Action.SIGN_TRANSACTION,
       params: {
-        derivationPath: derivationPath,
-        operation: operation
+        derivationPath,
+        operation
       }
     })
   }
 
-  async getVersion(): Promise<BeaconLedgerBridgeVersionResponse> {
-    return await this.sendMessage({
+  public async getVersion(): Promise<BeaconLedgerBridgeVersionResponse> {
+    return this.sendMessage({
       action: Action.GET_VERSION
     })
   }
@@ -69,6 +69,7 @@ export class BeaconLedgerBridge {
       action: message.action,
       params: message.params
     }
+
     return new Promise((resolve, reject) => {
       const handler = (event: any) => {
         if (event.origin !== this.origin) {
@@ -85,6 +86,7 @@ export class BeaconLedgerBridge {
         } else {
           reject(response.error)
         }
+
         return true
       }
       window.addEventListener('message', handler)
@@ -96,6 +98,7 @@ export class BeaconLedgerBridge {
 
   private randomID(): string {
     const uint32 = window.crypto.getRandomValues(new Uint32Array(1))[0]
+
     return uint32.toString(16)
   }
 }

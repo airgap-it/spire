@@ -2,12 +2,12 @@ import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
 import { BaseMessage } from '@airgap/beacon-sdk/dist/types/Messages'
 import { Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
+import { Action } from 'src/extension/Methods'
 
 import { BeaconRequestPage } from './pages/beacon-request/beacon-request.page'
 import { ChromeMessagingService } from './services/chrome-messaging.service'
 import { SettingsService } from './services/settings.service'
 import { SigningMethod } from './services/signing-method.service'
-import { Action } from 'src/extension/Methods'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'

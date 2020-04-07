@@ -3,13 +3,13 @@ import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { SettingsService } from 'src/app/services/settings.service'
 import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
 import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
-import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 
 @Component({
   selector: 'beacon-pair',
@@ -71,6 +71,7 @@ export class PairPage {
         }, 500)
       }
     })
+
     return modal.present()
   }
 

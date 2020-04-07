@@ -1,25 +1,26 @@
+import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
+import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import {
   BaseMessage,
   BroadcastRequest,
   MessageType,
+  Network,
   OperationRequest,
   PermissionRequest,
   PermissionResponse,
   PermissionScope,
-  SignPayloadRequest,
-  Network
+  SignPayloadRequest
 } from '@airgap/beacon-sdk/dist/types/Messages'
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
-import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
-import { LocalWalletService } from 'src/app/services/local-wallet.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
-import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
-import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
+import { LocalWalletService } from 'src/app/services/local-wallet.service'
+import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
+
+import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
@@ -206,6 +207,7 @@ export class BeaconRequestPage implements OnInit {
               }, 500)
             }
           })
+
           return modal.present()
         }
       })
@@ -239,6 +241,7 @@ export class BeaconRequestPage implements OnInit {
               }, 500)
             }
           })
+
           return modal.present()
         }
       })
