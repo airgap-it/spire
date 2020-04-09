@@ -75,9 +75,7 @@ export class LocalWalletService {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
       const response: ExtensionMessageOutputPayload<Action.MNEMONIC_SAVE> = await this.chromeMessagingService.sendChromeMessage(
         Action.MNEMONIC_SAVE,
-        {
-          params: { mnemonic }
-        }
+        { mnemonic }
       )
 
       console.log('saveMnemonic response', response)

@@ -1,5 +1,8 @@
+import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
+
 export enum Action {
   HANDSHAKE = 'HANDSHAKE',
+  ACCOUNTS_GET = 'ACCOUNTS_GET',
   ACTIVE_ACCOUNT_GET = 'ACTIVE_ACCOUNT_GET',
   ACTIVE_ACCOUNT_SET = 'ACTIVE_ACCOUNT_SET',
   P2P_INIT = 'P2P_INIT',
@@ -14,21 +17,23 @@ export enum Action {
 
 export interface ActionInputTypesMap {
   [Action.HANDSHAKE]: undefined
+  [Action.ACCOUNTS_GET]: undefined
   [Action.ACTIVE_ACCOUNT_GET]: undefined
-  [Action.ACTIVE_ACCOUNT_SET]: undefined
+  [Action.ACTIVE_ACCOUNT_SET]: { account: AccountInfo }
   [Action.P2P_INIT]: undefined
   [Action.P2P_GET_PEERS]: undefined
   [Action.P2P_REMOVE_PEERS]: undefined
   [Action.LEDGER_INIT]: undefined
   [Action.MNEMONIC_GET]: undefined
   [Action.MNEMONIC_GENERATE]: undefined
-  [Action.MNEMONIC_SAVE]: { params: { mnemonic: string } }
+  [Action.MNEMONIC_SAVE]: { mnemonic: string }
   [Action.RESPONSE]: { request: unknown }
 }
 
 export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
-  [Action.ACTIVE_ACCOUNT_GET]: undefined
+  [Action.ACCOUNTS_GET]: { accounts: AccountInfo[] }
+  [Action.ACTIVE_ACCOUNT_GET]: { account: AccountInfo | undefined }
   [Action.ACTIVE_ACCOUNT_SET]: undefined
   [Action.P2P_INIT]: { qr: { name: string; pubKey: string; relayServer: string } }
   [Action.P2P_GET_PEERS]: undefined

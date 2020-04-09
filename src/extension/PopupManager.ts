@@ -20,6 +20,11 @@ export class PopupManager {
         chrome.runtime.sendMessage({ data: item })
       }
     })
+
+    chrome.windows.onRemoved.addListener((removedPopupId: number) => {
+      logger.log('sendToPopup', 'popup removed!', removedPopupId)
+      this.popupId = undefined
+    })
   }
 
   public async sendToPopup(message: ExtensionMessage<unknown>): Promise<void> {
@@ -27,7 +32,7 @@ export class PopupManager {
       chrome.windows.update(this.popupId, { focused: true })
       logger.log('sendToPopup', 'sending message')
       chrome.runtime.sendMessage({ data: message })
-      logger.log('sendToPopup', ' message sent')
+      logger.log('sendToPopup', 'message sent')
 
       return
     }
@@ -37,11 +42,6 @@ export class PopupManager {
       this.popupId = currentPopup ? currentPopup.id : undefined
       logger.log('sendToPopup', 'popupInfo', currentPopup)
     }
-
-    chrome.windows.onRemoved.addListener((removedPopupId: number) => {
-      logger.log('sendToPopup', 'popup removed!', removedPopupId)
-      this.popupId = undefined
-    })
 
     const POPUP_HEIGHT: number = 680
     const POPUP_WIDTH: number = 420
