@@ -13,13 +13,19 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
   return x !== null && typeof x === 'object'
 }
 
+interface MenuItem {
+  title: string
+  url: string
+  icon: string
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss']
 })
 export class AppComponent {
-  public appPages: { title: string; url: string; icon: string }[] = []
+  public appPages: MenuItem[] = []
 
   constructor(
     private readonly modalController: ModalController,
@@ -29,12 +35,17 @@ export class AppComponent {
     this.initializeApp()
   }
 
-  public initializeApp() {
-    const menu = [
+  public initializeApp(): void {
+    const menu: MenuItem[] = [
       {
         title: 'Overview',
         url: '/home',
         icon: 'layers-outline'
+      },
+      {
+        title: 'Permissions',
+        url: '/permission-list',
+        icon: 'settings-outline'
       },
       {
         title: 'Settings',
