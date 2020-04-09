@@ -7,6 +7,7 @@ import { SettingsService } from 'src/app/services/settings.service'
 import { SigningMethodService } from 'src/app/services/signing-method.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 
+import { AccountSelectPage } from '../account-select/account-select.page'
 import { PairPage } from '../pair/pair.page'
 
 enum SigningMethods {
@@ -70,6 +71,14 @@ export class HomePage {
       await this.showPairPage()
       await this.storageService.set(StorageKey.HAS_ONBOARDED, true)
     }
+  }
+
+  public async openAccountSelection(): Promise<void> {
+    const modal: HTMLIonModalElement = await this.modalController.create({
+      component: AccountSelectPage
+    })
+
+    return modal.present()
   }
 
   public async getBalance(address: string | null): Promise<string> {
