@@ -45,7 +45,7 @@ export class AppComponent {
       {
         title: 'Permissions',
         url: '/permission-list',
-        icon: 'settings-outline'
+        icon: 'options-outline'
       },
       {
         title: 'Settings',

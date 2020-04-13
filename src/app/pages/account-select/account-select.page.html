@@ -1,6 +1,6 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>My accounts</ion-title>
+    <ion-title>Accounts</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
         <ion-icon name="close"></ion-icon>
@@ -9,6 +9,6 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
   {{ accounts | json }}
 </ion-content>
