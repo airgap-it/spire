@@ -1,6 +1,6 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Accounts</ion-title>
+    <ion-title>Wallets</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
         <ion-icon name="close"></ion-icon>
@@ -10,5 +10,15 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <ion-list>
+    <ion-item-sliding *ngFor="let account of accounts">
+      <ion-item (click)="activateAccount(account)">
+        {{ account.pubkey }}
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option (click)="deleteAccount(account)" color="danger">Delete</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
   {{ accounts | json }}
 </ion-content>

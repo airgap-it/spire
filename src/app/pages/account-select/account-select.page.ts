@@ -26,6 +26,14 @@ export class AccountSelectPage {
       .catch(console.error)
   }
 
+  public async activateAccount(account: AccountInfo): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_ACCOUNT_SET, { account })
+  }
+
+  public async deleteAccount(account: AccountInfo): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.ACCOUNT_DELETE, { account })
+  }
+
   public async dismiss(closeParent: boolean = false): Promise<void> {
     await this.modalController.dismiss(closeParent)
   }
