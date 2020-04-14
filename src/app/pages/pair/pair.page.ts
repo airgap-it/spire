@@ -1,11 +1,8 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
-import { Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { SettingsService } from 'src/app/services/settings.service'
-import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
 import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
@@ -17,36 +14,33 @@ import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-con
   styleUrls: ['pair.page.scss']
 })
 export class PairPage {
-  public currentSigningMethod: Observable<string | undefined>
   public developerModeEnabled: boolean = false
-  public dismissEnabled: Observable<boolean>
+  public dismissEnabled: Promise<boolean>
 
   constructor(
     public readonly settingsService: SettingsService,
     private readonly modalController: ModalController,
     private readonly chromeMessagingService: ChromeMessagingService,
-    private readonly router: Router,
-    private readonly signingMethodService: SigningMethodService
+    private readonly router: Router
   ) {
-    this.currentSigningMethod = this.signingMethodService.signingMethod.asObservable()
-    this.dismissEnabled = this.signingMethodService.signingMethod
-      .asObservable()
-      .pipe(map(signingMethod => signingMethod !== SigningMethod.UNPAIRED))
+    this.dismissEnabled = this.chromeMessagingService
+      .sendChromeMessage(Action.ACCOUNTS_GET, undefined)
+      .then((accounts: ExtensionMessageOutputPayload<Action.ACCOUNTS_GET>) => {
+        return accounts.data ? accounts.data.accounts.length > 0 : false
+      })
     this.settingsService.getDevSettingsEnabled().subscribe((enabled: boolean) => {
       this.developerModeEnabled = enabled
     })
   }
 
-  public async pairWallet() {
-    this.signingMethodService.setSigningMethod(SigningMethod.WALLET)
-
+  public async pairWallet(): Promise<void> {
     const response: ExtensionMessageOutputPayload<Action.P2P_INIT> = await this.chromeMessagingService.sendChromeMessage(
       Action.P2P_INIT,
       undefined
     )
     console.log(response)
 
-    const modal = await this.modalController.create({
+    const modal: HTMLIonModalElement = await this.modalController.create({
       component: AddWalletConnectionPage,
       componentProps: {
         handshakeData: JSON.stringify(response.data ? response.data.qr : {})
@@ -56,21 +50,24 @@ export class PairPage {
     return modal.present()
   }
 
-  public async pairHardwareWallet() {
-    const modal = await this.modalController.create({
+  public async pairHardwareWallet(): Promise<void> {
+    const modal: HTMLIonModalElement = await this.modalController.create({
       component: AddLedgerConnectionPage,
       componentProps: {
         targetMethod: Action.LEDGER_INIT
       }
     })
 
-    modal.onWillDismiss().then(({ data: closeParent }) => {
-      if (closeParent) {
-        setTimeout(() => {
-          this.dismiss()
-        }, 500)
-      }
-    })
+    modal
+      .onWillDismiss()
+      .then(({ data: closeParent }) => {
+        if (closeParent) {
+          setTimeout(() => {
+            this.dismiss()
+          }, 500)
+        }
+      })
+      .catch(error => console.error(error))
 
     return modal.present()
   }
@@ -80,9 +77,8 @@ export class PairPage {
   }
 
   public async pairLocalMnemonic(): Promise<void> {
-    this.router.navigate(['local-mnemonic'])
-    this.signingMethodService.setSigningMethod(SigningMethod.LOCAL_MNEMONIC)
-    this.dismiss()
+    await this.dismiss()
+    await this.router.navigate(['local-mnemonic'])
   }
 
   public async dismiss(): Promise<void> {

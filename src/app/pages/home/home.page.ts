@@ -4,8 +4,8 @@ import { ModalController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 import { SettingsService } from 'src/app/services/settings.service'
-import { SigningMethodService } from 'src/app/services/signing-method.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
+import { getTezblockLinkForNetwork } from 'src/extension/utils'
 
 import { AccountSelectPage } from '../account-select/account-select.page'
 import { PairPage } from '../pair/pair.page'
@@ -25,33 +25,27 @@ export class HomePage {
   public signingMethods: typeof SigningMethods = SigningMethods
   public currentSigningMethod: string = 'Unpaired'
   public balance: string = ''
+  public tezblockLink: string = ''
   public network: Network | undefined
 
   constructor(
     public readonly localWalletService: LocalWalletService,
-    private readonly signingMethodService: SigningMethodService,
     private readonly modalController: ModalController,
     private readonly storageService: StorageService,
     private readonly settingsService: SettingsService,
     private readonly ref: ChangeDetectorRef
   ) {
     this.settingsService.getNetwork().then(network => (this.network = network))
-    this.signingMethodService.signingMethod.asObservable().subscribe(method => {
-      if (method === SigningMethods.WALLET) {
-        this.currentSigningMethod = 'Wallet'
-      } else if (method === SigningMethods.LOCAL_MNEMONIC) {
-        this.currentSigningMethod = 'Local Secret'
-      } else if (method === SigningMethods.LEDGER) {
-        this.currentSigningMethod = 'Ledger'
-      } else {
-        this.currentSigningMethod = method
-      }
-    })
 
     this.checkOnboarding().catch(console.error)
 
-    this.localWalletService.address.subscribe(async address => {
-      this.balance = await this.getBalance(address)
+    this.localWalletService.address.subscribe(async (address: string | null) => {
+      const [balance, tezblockLink]: [string, string] = await Promise.all([
+        this.getBalance(address),
+        this.getBlockexplorer(address)
+      ])
+      this.balance = balance
+      this.tezblockLink = tezblockLink
       this.ref.detectChanges()
     })
   }
@@ -91,12 +85,22 @@ export class HomePage {
     if (network) {
       const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
 
-      const amount = await protocol.getBalanceOfAddresses([address])
+      const amount: string = await protocol.getBalanceOfAddresses([address])
       console.log('getBalance', amount)
 
       return amount
     } else {
       return ''
     }
+  }
+
+  public async getBlockexplorer(address: string | null): Promise<string> {
+    const link: string = await getTezblockLinkForNetwork(this.network)
+
+    return `${link}${address}`
+  }
+
+  public async openBlockexplorer(): Promise<void> {
+    window.open(this.tezblockLink)
   }
 }

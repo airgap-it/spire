@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { SigningMethod, SigningMethodService } from 'src/app/services/signing-method.service'
 import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
 
 @Component({
@@ -19,7 +18,6 @@ export class AddLedgerConnectionPage implements OnInit {
 
   constructor(
     private readonly modalController: ModalController,
-    private readonly signingMethodService: SigningMethodService,
     private readonly chromeMessagingService: ChromeMessagingService,
     private readonly cdr: ChangeDetectorRef
   ) {}
@@ -43,7 +41,6 @@ export class AddLedgerConnectionPage implements OnInit {
     if (response.error) {
     } else {
       this.success = true
-      this.signingMethodService.setSigningMethod(SigningMethod.LEDGER)
       setTimeout(() => {
         return this.dismiss(true)
       }, 2000)
