@@ -1,8 +1,18 @@
 import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
+import { Network } from '@airgap/beacon-sdk/dist/types/Messages'
+
+export enum WalletType {
+  WALLET = 'P2P',
+  LEDGER = 'LEDGER',
+  LOCAL_MNEMONIC = 'LOCAL_MNEMONIC'
+}
 
 export enum Action {
   HANDSHAKE = 'HANDSHAKE',
   ACCOUNTS_GET = 'ACCOUNTS_GET',
+  ACCOUNT_DELETE = 'ACCOUNT_DELETE',
+  ACTIVE_NETWORK_GET = 'ACTIVE_NETWORK_GET',
+  ACTIVE_NETWORK_SET = 'ACTIVE_NETWORK_SET',
   ACTIVE_ACCOUNT_GET = 'ACTIVE_ACCOUNT_GET',
   ACTIVE_ACCOUNT_SET = 'ACTIVE_ACCOUNT_SET',
   P2P_INIT = 'P2P_INIT',
@@ -18,6 +28,9 @@ export enum Action {
 export interface ActionInputTypesMap {
   [Action.HANDSHAKE]: undefined
   [Action.ACCOUNTS_GET]: undefined
+  [Action.ACCOUNT_DELETE]: { account: AccountInfo }
+  [Action.ACTIVE_NETWORK_GET]: undefined
+  [Action.ACTIVE_NETWORK_SET]: { network: Network }
   [Action.ACTIVE_ACCOUNT_GET]: undefined
   [Action.ACTIVE_ACCOUNT_SET]: { account: AccountInfo }
   [Action.P2P_INIT]: undefined
@@ -33,6 +46,9 @@ export interface ActionInputTypesMap {
 export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
   [Action.ACCOUNTS_GET]: { accounts: AccountInfo[] }
+  [Action.ACCOUNT_DELETE]: undefined
+  [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }
+  [Action.ACTIVE_NETWORK_SET]: undefined
   [Action.ACTIVE_ACCOUNT_GET]: { account: AccountInfo | undefined }
   [Action.ACTIVE_ACCOUNT_SET]: undefined
   [Action.P2P_INIT]: { qr: { name: string; pubKey: string; relayServer: string } }

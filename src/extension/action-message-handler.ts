@@ -1,6 +1,7 @@
 import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
 import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
 import { StorageKey } from '@airgap/beacon-sdk/dist/storage/Storage'
+import { Network } from '@airgap/beacon-sdk/dist/types/Messages'
 import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/WalletCommunicationClient'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
@@ -178,9 +179,42 @@ const getAccounts: MessageHandlerFunction<Action.ACCOUNTS_GET> = async (
   sendResponse({ data: { accounts } })
 }
 
+const deleteAccount: MessageHandlerFunction<Action.ACCOUNT_DELETE> = async (
+  data: ExtensionMessageInputPayload<Action.ACCOUNT_DELETE>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACCOUNT_DELETE>) => void,
+  _context: ActionContext
+): Promise<void> => {
+  logger.log('deleteAccount', data.data.account)
+  sendResponse({ data: undefined })
+}
+
+const getActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> = async (
+  _data: ExtensionMessageInputPayload<Action.ACTIVE_NETWORK_GET>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_GET>) => void,
+  context: ActionContext
+): Promise<void> => {
+  logger.log('getActiveNetwork')
+  const activeNetwork: Network = await context.storage.get('ACTIVE_NETWORK' as any)
+
+  sendResponse({ data: { network: activeNetwork } })
+}
+
+const setActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_SET> = async (
+  data: ExtensionMessageInputPayload<Action.ACTIVE_NETWORK_SET>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_SET>) => void,
+  context: ActionContext
+): Promise<void> => {
+  logger.log('setActiveNetwork', data)
+  await context.storage.set('ACTIVE_NETWORK' as any, data.data.network)
+  sendResponse({ data: undefined })
+}
+
 export const messageTypeHandler: { [key in Action]: MessageHandlerFunction<any> } = {
   [Action.HANDSHAKE]: messageTypeHandlerNotSupported,
   [Action.ACCOUNTS_GET]: getAccounts,
+  [Action.ACCOUNT_DELETE]: deleteAccount,
+  [Action.ACTIVE_NETWORK_GET]: getActiveNetwork,
+  [Action.ACTIVE_NETWORK_SET]: setActiveNetwork,
   [Action.ACTIVE_ACCOUNT_GET]: getActiveAccount,
   [Action.ACTIVE_ACCOUNT_SET]: setActiveAccount,
   [Action.P2P_INIT]: p2pInit,
