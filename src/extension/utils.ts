@@ -22,3 +22,19 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
 
   return new TezosProtocol(rpcUrl, apiUrl)
 }
+
+export const getTezblockLinkForNetwork: (network: Network | undefined) => Promise<string> = async (
+  network: Network | undefined
+): Promise<string> => {
+  console.log('network', network)
+
+  const urls: { [key in NetworkType]: string } = {
+    [NetworkType.MAINNET]: 'https://tezblock.io/account/',
+    [NetworkType.BABYLONNET]: 'https://babylonnet.tezblock.io/account/',
+    [NetworkType.CARTHAGENET]: 'https://carthagenet.tezblock.io/account/',
+    [NetworkType.CUSTOM]: 'http://localhost:8100/account/'
+  }
+  const url: string = urls[network ? network.type : NetworkType.MAINNET]
+
+  return url
+}
