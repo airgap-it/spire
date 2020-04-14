@@ -21,4 +21,8 @@ export class PermissionListPage {
       })
       .catch(console.error)
   }
+
+  public async deleteAccount(account: AccountInfo): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.ACCOUNT_DELETE, { account })
+  }
 }
