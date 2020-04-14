@@ -1,17 +1,36 @@
+import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
 import { ExtensionMessage, ExtensionMessageTarget } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
+import { BaseMessage } from '@airgap/beacon-sdk/dist/types/Messages'
 import { Injectable } from '@angular/core'
+import { ModalController } from '@ionic/angular'
 import {
   Action,
   ActionInputTypesMap,
   ExtensionMessageInputPayload,
-  ExtensionMessageOutputPayload
+  ExtensionMessageOutputPayload,
+  WalletType
 } from 'src/extension/Methods'
+
+import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChromeMessagingService {
-  constructor() {}
+  constructor(private readonly modalController: ModalController) {
+    chrome.runtime.sendMessage({ data: 'Handshake' })
+    this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
+    chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+      console.log('GOT DATA FROM BACKGROUND', message.data)
+      const serializer: Serializer = new Serializer()
+
+      const deserialized: BaseMessage = serializer.deserialize(message.data) as BaseMessage
+
+      this.beaconRequest(deserialized, WalletType.LEDGER).catch((beaconRequestError: Error) => {
+        console.log('beaconRequestError', beaconRequestError)
+      })
+    })
+  }
 
   public sendChromeMessage<K extends Action>(
     action: K,
@@ -32,5 +51,17 @@ export class ChromeMessagingService {
         resolve(response)
       })
     })
+  }
+
+  private async beaconRequest(request: BaseMessage, walletType: WalletType): Promise<void> {
+    const modal: HTMLIonModalElement = await this.modalController.create({
+      component: BeaconRequestPage,
+      componentProps: {
+        walletType,
+        request
+      }
+    })
+
+    return modal.present()
   }
 }
