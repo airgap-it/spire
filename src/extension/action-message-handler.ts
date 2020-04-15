@@ -9,7 +9,7 @@ import * as bip39 from 'bip39'
 import { beaconMessageHandler, BeaconMessageHandlerFunction } from './beacon-message-handler'
 import { BeaconLedgerBridge } from './ledger-bridge'
 import { Logger } from './Logger'
-import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from './Methods'
+import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload, WalletInfo } from './Methods'
 
 const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
 
@@ -44,7 +44,7 @@ export const messageTypeHandlerNotSupported: MessageHandlerFunction<any> = async
 const handleLedgerInit: MessageHandlerFunction<Action.LEDGER_INIT> = async (
   _data: ExtensionMessageInputPayload<Action.LEDGER_INIT>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.LEDGER_INIT>) => void,
-  context: ActionContext
+  _context: ActionContext
 ): Promise<void> => {
   let publicKey: string | undefined
   try {
@@ -55,13 +55,12 @@ const handleLedgerInit: MessageHandlerFunction<Action.LEDGER_INIT> = async (
     return
   }
 
-  context.storage.set('ledger-publicKey' as any, publicKey).catch(logError)
   const protocol: TezosProtocol = new TezosProtocol()
   const address: string = await protocol.getAddressFromPublicKey(publicKey)
-  sendResponse({ data: { address } })
+  sendResponse({ data: { pubkey: publicKey, address } })
 }
 
-const p2pInit: MessageHandlerFunction<Action.P2P_INIT> = async (
+const handleP2pInit: MessageHandlerFunction<Action.P2P_INIT> = async (
   _data: ExtensionMessageInputPayload<Action.P2P_INIT>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.P2P_INIT>) => void,
   context: ActionContext
@@ -120,7 +119,7 @@ const handleGenerateMnemonic: MessageHandlerFunction<Action.MNEMONIC_GENERATE> =
   sendResponse({ data: { mnemonic: generated } })
 }
 
-const getMnemonic: MessageHandlerFunction<Action.MNEMONIC_GET> = async (
+const handleGetMnemonic: MessageHandlerFunction<Action.MNEMONIC_GET> = async (
   _data: ExtensionMessageInputPayload<Action.MNEMONIC_GET>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.MNEMONIC_GET>) => void,
   context: ActionContext
@@ -145,31 +144,27 @@ const handleSaveMnemonic: MessageHandlerFunction<Action.MNEMONIC_SAVE> = async (
   sendResponse({ data: { result: true } })
 }
 
-const getActiveAccount: MessageHandlerFunction<Action.ACTIVE_ACCOUNT_GET> = async (
-  _data: ExtensionMessageInputPayload<Action.ACTIVE_ACCOUNT_GET>,
-  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_ACCOUNT_GET>) => void,
+const handleGetActiveWallet: MessageHandlerFunction<Action.ACTIVE_WALLET_GET> = async (
+  _data: ExtensionMessageInputPayload<Action.ACTIVE_WALLET_GET>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('getActiveAccount')
-  const accountIdentifier: string | undefined = await context.storage.get(StorageKey.ACTIVE_ACCOUNT)
-  const accounts: AccountInfo[] = await context.storage.get(StorageKey.ACCOUNTS)
-  const account: AccountInfo | undefined = accounts.find(
-    (el: AccountInfo) => el.accountIdentifier === accountIdentifier
-  )
-  sendResponse({ data: { account } })
+  logger.log('getActiveWallet')
+  const activeWallet: WalletInfo = await context.storage.get('ACTIVE_WALLET' as any)
+  sendResponse({ data: { wallet: activeWallet } })
 }
 
-const setActiveAccount: MessageHandlerFunction<Action.ACTIVE_ACCOUNT_SET> = async (
-  data: ExtensionMessageInputPayload<Action.ACTIVE_ACCOUNT_SET>,
-  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_ACCOUNT_SET>) => void,
+const handleSetActiveWallet: MessageHandlerFunction<Action.ACTIVE_WALLET_SET> = async (
+  data: ExtensionMessageInputPayload<Action.ACTIVE_WALLET_SET>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_SET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('setActiveAccount')
-  await context.storage.set(StorageKey.ACTIVE_ACCOUNT, data.data.account.accountIdentifier)
+  logger.log('setActiveWallet')
+  await context.storage.set('ACTIVE_WALLET' as any, data.data.wallet)
   sendResponse({ data: undefined })
 }
 
-const getAccounts: MessageHandlerFunction<Action.ACCOUNTS_GET> = async (
+const handleGetAccounts: MessageHandlerFunction<Action.ACCOUNTS_GET> = async (
   _data: ExtensionMessageInputPayload<Action.ACCOUNTS_GET>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACCOUNTS_GET>) => void,
   context: ActionContext
@@ -179,7 +174,7 @@ const getAccounts: MessageHandlerFunction<Action.ACCOUNTS_GET> = async (
   sendResponse({ data: { accounts } })
 }
 
-const deleteAccount: MessageHandlerFunction<Action.ACCOUNT_DELETE> = async (
+const handleDeleteAccount: MessageHandlerFunction<Action.ACCOUNT_DELETE> = async (
   data: ExtensionMessageInputPayload<Action.ACCOUNT_DELETE>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACCOUNT_DELETE>) => void,
   _context: ActionContext
@@ -188,7 +183,7 @@ const deleteAccount: MessageHandlerFunction<Action.ACCOUNT_DELETE> = async (
   sendResponse({ data: undefined })
 }
 
-const getActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> = async (
+const handleGetActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> = async (
   _data: ExtensionMessageInputPayload<Action.ACTIVE_NETWORK_GET>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_GET>) => void,
   context: ActionContext
@@ -199,7 +194,7 @@ const getActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> = asyn
   sendResponse({ data: { network: activeNetwork } })
 }
 
-const setActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_SET> = async (
+const handleSetActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_SET> = async (
   data: ExtensionMessageInputPayload<Action.ACTIVE_NETWORK_SET>,
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_SET>) => void,
   context: ActionContext
@@ -209,19 +204,66 @@ const setActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_SET> = asyn
   sendResponse({ data: undefined })
 }
 
+const handleAddWallet: MessageHandlerFunction<Action.WALLET_ADD> = async (
+  data: ExtensionMessageInputPayload<Action.WALLET_ADD>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.WALLET_ADD>) => void,
+  context: ActionContext
+): Promise<void> => {
+  logger.log('addWallet', data)
+  const wallets: WalletInfo[] = (await context.storage.get('WALLETS' as any)) || []
+  if (!wallets.some((wallet: WalletInfo) => wallet.pubkey === data.data.wallet.pubkey)) {
+    wallets.push(data.data.wallet)
+    await context.storage.set('WALLETS' as any, wallets)
+    sendResponse({ data: { added: true } })
+  } else {
+    sendResponse({ data: { added: false } })
+  }
+}
+
+const handleDeleteWallet: MessageHandlerFunction<Action.WALLET_DELETE> = async (
+  data: ExtensionMessageInputPayload<Action.WALLET_DELETE>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.WALLET_DELETE>) => void,
+  context: ActionContext
+): Promise<void> => {
+  logger.log('setActiveNetwork', data)
+  const wallets: WalletInfo[] = (await context.storage.get('WALLETS' as any)) || []
+  const filteredWallets: WalletInfo[] = wallets.filter(
+    (wallet: WalletInfo) => wallet.pubkey !== data.data.wallet.pubkey
+  )
+  if (filteredWallets.length === wallets.length) {
+    sendResponse({ data: { deleted: false } })
+  } else {
+    await context.storage.set('WALLETS' as any, filteredWallets)
+    sendResponse({ data: { deleted: true } })
+  }
+}
+
+const handleGetWallets: MessageHandlerFunction<Action.WALLETS_GET> = async (
+  data: ExtensionMessageInputPayload<Action.WALLETS_GET>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => void,
+  context: ActionContext
+): Promise<void> => {
+  logger.log('setActiveNetwork', data)
+  const wallets: WalletInfo[] = await context.storage.get('WALLETS' as any)
+  sendResponse({ data: { wallets } })
+}
+
 export const messageTypeHandler: { [key in Action]: MessageHandlerFunction<any> } = {
   [Action.HANDSHAKE]: messageTypeHandlerNotSupported,
-  [Action.ACCOUNTS_GET]: getAccounts,
-  [Action.ACCOUNT_DELETE]: deleteAccount,
-  [Action.ACTIVE_NETWORK_GET]: getActiveNetwork,
-  [Action.ACTIVE_NETWORK_SET]: setActiveNetwork,
-  [Action.ACTIVE_ACCOUNT_GET]: getActiveAccount,
-  [Action.ACTIVE_ACCOUNT_SET]: setActiveAccount,
-  [Action.P2P_INIT]: p2pInit,
+  [Action.WALLET_ADD]: handleAddWallet,
+  [Action.WALLET_DELETE]: handleDeleteWallet,
+  [Action.WALLETS_GET]: handleGetWallets,
+  [Action.ACTIVE_WALLET_GET]: handleGetActiveWallet,
+  [Action.ACTIVE_WALLET_SET]: handleSetActiveWallet,
+  [Action.ACCOUNT_DELETE]: handleDeleteAccount,
+  [Action.ACCOUNTS_GET]: handleGetAccounts,
+  [Action.ACTIVE_NETWORK_GET]: handleGetActiveNetwork,
+  [Action.ACTIVE_NETWORK_SET]: handleSetActiveNetwork,
+  [Action.P2P_INIT]: handleP2pInit,
   [Action.P2P_GET_PEERS]: messageTypeHandlerNotSupported,
   [Action.P2P_REMOVE_PEERS]: messageTypeHandlerNotSupported,
   [Action.LEDGER_INIT]: handleLedgerInit,
-  [Action.MNEMONIC_GET]: getMnemonic,
+  [Action.MNEMONIC_GET]: handleGetMnemonic,
   [Action.MNEMONIC_GENERATE]: handleGenerateMnemonic,
   [Action.MNEMONIC_SAVE]: handleSaveMnemonic,
   [Action.RESPONSE]: handleResponse

@@ -10,10 +10,22 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <ion-list *ngIf="activeWallet">
+    <ion-list-header>
+      Active Wallet
+    </ion-list-header>
+    <ion-item>
+      {{ activeWallet.type }} - {{ activeWallet.pubkey }}
+    </ion-item>
+  </ion-list>
+
   <ion-list>
+    <ion-list-header>
+      Other wallets
+    </ion-list-header>
     <ion-item-sliding *ngFor="let wallet of wallets">
       <ion-item (click)="activateWallet(wallet)">
-        {{ wallet.pubkey }}
+        {{ wallet.type }} - {{ wallet.pubkey }}
       </ion-item>
       <ion-item-options side="end">
         <ion-item-option (click)="deleteWallet(wallet)" color="danger">Delete</ion-item-option>

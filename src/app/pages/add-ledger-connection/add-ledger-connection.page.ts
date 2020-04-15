@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/Methods'
 
 @Component({
   selector: 'app-add-ledger-connection',
@@ -41,6 +41,21 @@ export class AddLedgerConnectionPage implements OnInit {
     if (response.error) {
     } else {
       this.success = true
+      if (this.targetMethod === Action.LEDGER_INIT) {
+        const { data }: ExtensionMessageOutputPayload<Action.LEDGER_INIT> = response as ExtensionMessageOutputPayload<
+          Action.LEDGER_INIT
+        >
+        if (data) {
+          const walletInfo: WalletInfo = {
+            pubkey: data.pubkey,
+            type: WalletType.LEDGER,
+            added: new Date(),
+            senderId: ''
+          }
+          await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
+          await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
+        }
+      }
       setTimeout(() => {
         return this.dismiss(true)
       }, 2000)

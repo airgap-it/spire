@@ -2,19 +2,22 @@ import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
 import { Network } from '@airgap/beacon-sdk/dist/types/Messages'
 
 export enum WalletType {
-  WALLET = 'P2P',
+  P2P = 'P2P',
   LEDGER = 'LEDGER',
   LOCAL_MNEMONIC = 'LOCAL_MNEMONIC'
 }
 
 export enum Action {
   HANDSHAKE = 'HANDSHAKE',
+  WALLET_ADD = 'WALLET_ADD',
+  WALLET_DELETE = 'WALLET_DELETE',
+  WALLETS_GET = 'WALLETS_GET',
+  ACTIVE_WALLET_GET = 'ACTIVE_WALLET_GET',
+  ACTIVE_WALLET_SET = 'ACTIVE_WALLET_SET',
   ACCOUNTS_GET = 'ACCOUNTS_GET',
   ACCOUNT_DELETE = 'ACCOUNT_DELETE',
   ACTIVE_NETWORK_GET = 'ACTIVE_NETWORK_GET',
   ACTIVE_NETWORK_SET = 'ACTIVE_NETWORK_SET',
-  ACTIVE_ACCOUNT_GET = 'ACTIVE_ACCOUNT_GET',
-  ACTIVE_ACCOUNT_SET = 'ACTIVE_ACCOUNT_SET',
   P2P_INIT = 'P2P_INIT',
   P2P_GET_PEERS = 'P2P_GET_PEERS',
   P2P_REMOVE_PEERS = 'P2P_REMOVE_PEERS',
@@ -25,14 +28,24 @@ export enum Action {
   RESPONSE = 'REQUEST'
 }
 
+export interface WalletInfo {
+  pubkey: string
+  type: WalletType
+  added: Date
+  senderId: string
+}
+
 export interface ActionInputTypesMap {
   [Action.HANDSHAKE]: undefined
+  [Action.WALLET_ADD]: { wallet: WalletInfo }
+  [Action.WALLET_DELETE]: { wallet: WalletInfo }
+  [Action.WALLETS_GET]: undefined
+  [Action.ACTIVE_WALLET_GET]: undefined
+  [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo }
   [Action.ACCOUNTS_GET]: undefined
   [Action.ACCOUNT_DELETE]: { account: AccountInfo }
   [Action.ACTIVE_NETWORK_GET]: undefined
   [Action.ACTIVE_NETWORK_SET]: { network: Network }
-  [Action.ACTIVE_ACCOUNT_GET]: undefined
-  [Action.ACTIVE_ACCOUNT_SET]: { account: AccountInfo }
   [Action.P2P_INIT]: undefined
   [Action.P2P_GET_PEERS]: undefined
   [Action.P2P_REMOVE_PEERS]: undefined
@@ -45,16 +58,19 @@ export interface ActionInputTypesMap {
 
 export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
+  [Action.WALLET_ADD]: { added: boolean }
+  [Action.WALLET_DELETE]: { deleted: boolean }
+  [Action.WALLETS_GET]: { wallets: WalletInfo[] }
+  [Action.ACTIVE_WALLET_GET]: { wallet: WalletInfo }
+  [Action.ACTIVE_WALLET_SET]: undefined
   [Action.ACCOUNTS_GET]: { accounts: AccountInfo[] }
   [Action.ACCOUNT_DELETE]: undefined
   [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }
   [Action.ACTIVE_NETWORK_SET]: undefined
-  [Action.ACTIVE_ACCOUNT_GET]: { account: AccountInfo | undefined }
-  [Action.ACTIVE_ACCOUNT_SET]: undefined
   [Action.P2P_INIT]: { qr: { name: string; pubKey: string; relayServer: string } }
   [Action.P2P_GET_PEERS]: undefined
   [Action.P2P_REMOVE_PEERS]: undefined
-  [Action.LEDGER_INIT]: { address: string }
+  [Action.LEDGER_INIT]: { pubkey: string; address: string }
   [Action.MNEMONIC_GET]: { mnemonic: string }
   [Action.MNEMONIC_GENERATE]: { mnemonic: string }
   [Action.MNEMONIC_SAVE]: { result: boolean }
