@@ -11,14 +11,14 @@
 
 <ion-content class="ion-padding">
   <ion-list>
-    <ion-item-sliding *ngFor="let account of accounts">
-      <ion-item (click)="activateAccount(account)">
-        {{ account.pubkey }}
+    <ion-item-sliding *ngFor="let wallet of wallets">
+      <ion-item (click)="activateWallet(wallet)">
+        {{ wallet.pubkey }}
       </ion-item>
       <ion-item-options side="end">
-        <ion-item-option (click)="deleteAccount(account)" color="danger">Delete</ion-item-option>
+        <ion-item-option (click)="deleteWallet(wallet)" color="danger">Delete</ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
   </ion-list>
-  {{ accounts | json }}
+  {{ wallets | json }}
 </ion-content>

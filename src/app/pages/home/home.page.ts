@@ -7,7 +7,7 @@ import { SettingsService } from 'src/app/services/settings.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 import { getTezblockLinkForNetwork } from 'src/extension/utils'
 
-import { AccountSelectPage } from '../account-select/account-select.page'
+import { WalletSelectPage } from '../wallet-select/wallet-select.page'
 import { PairPage } from '../pair/pair.page'
 
 enum SigningMethods {
@@ -67,9 +67,9 @@ export class HomePage {
     }
   }
 
-  public async openAccountSelection(): Promise<void> {
+  public async openWalletSelection(): Promise<void> {
     const modal: HTMLIonModalElement = await this.modalController.create({
-      component: AccountSelectPage
+      component: WalletSelectPage
     })
 
     return modal.present()

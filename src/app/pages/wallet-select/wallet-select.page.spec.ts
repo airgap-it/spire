@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 import { IonicModule } from '@ionic/angular'
 
-import { AccountSelectPage } from './account-select.page'
+import { WalletSelectPage } from '../wallet-select.page'
 
-describe('AccountSelectPage', () => {
-  let component: AccountSelectPage
-  let fixture: ComponentFixture<AccountSelectPage>
+describe('WalletSelectPage', () => {
+  let component: WalletSelectPage
+  let fixture: ComponentFixture<WalletSelectPage>
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AccountSelectPage],
+      declarations: [WalletSelectPage],
       imports: [IonicModule.forRoot()]
     }).compileComponents()
 
-    fixture = TestBed.createComponent(AccountSelectPage)
+    fixture = TestBed.createComponent(WalletSelectPage)
     component = fixture.componentInstance
     fixture.detectChanges()
   }))
