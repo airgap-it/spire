@@ -1,4 +1,4 @@
-import { Network, NetworkType } from '@airgap/beacon-sdk/dist/types/Messages'
+import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { Observable, ReplaySubject } from 'rxjs'
@@ -48,15 +48,15 @@ export class SettingsService {
   public async getProtocolForNetwork(network: Network): Promise<TezosProtocol> {
     const rpcUrls: { [key in NetworkType]: string } = {
       [NetworkType.MAINNET]: 'https://tezos-node.prod.gke.papers.tech',
-      [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-node-1.kubernetes.papers.tech',
-      [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-node-1.kubernetes.papers.tech',
+      // [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-node-1.kubernetes.papers.tech',
+      // [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-node-1.kubernetes.papers.tech',
       [NetworkType.CUSTOM]: ''
     }
 
     const apiUrls: { [key in NetworkType]: string } = {
       [NetworkType.MAINNET]: 'https://tezos-mainnet-conseil-1.kubernetes.papers.tech',
-      [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-conseil-1.kubernetes.papers.tech',
-      [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-conseil-1.kubernetes.papers.tech',
+      // [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-conseil-1.kubernetes.papers.tech',
+      // [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-conseil-1.kubernetes.papers.tech',
       [NetworkType.CUSTOM]: ''
     }
     const rpcUrl: string = network.rpcUrl ? network.rpcUrl : rpcUrls[network.type]

@@ -1,17 +1,17 @@
-import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
-import { BroadcastBeaconError } from '@airgap/beacon-sdk/dist/types/Errors'
 import {
-  BaseMessage,
+  BeaconBaseMessage,
+  BeaconErrorMessage,
+  BeaconMessageType,
   BroadcastRequest,
   BroadcastResponse,
-  MessageType,
+  ChromeStorage,
   Network,
   OperationRequest,
   OperationResponse,
+  Serializer,
   SignPayloadRequest,
   SignPayloadResponse
-} from '@airgap/beacon-sdk/dist/types/Messages'
+} from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 import { RawTezosTransaction } from 'airgap-coin-lib/dist/serializer/types'
@@ -58,29 +58,29 @@ const sign: (forgedTx: string) => Promise<string> = async (forgedTx: string): Pr
 }
 
 const beaconMessageHandlerNotSupported: (
-  data: BaseMessage,
+  data: BeaconBaseMessage,
   sendToPage: (message: string) => void,
   sendResponse: () => void
 ) => Promise<void> = (): Promise<void> => Promise.resolve()
 
 export type BeaconMessageHandlerFunction = (
-  data: BaseMessage,
+  data: BeaconBaseMessage,
   sendToPage: (message: string) => void,
   sendResponse: () => void
 ) => Promise<void>
 
-export const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerFunction } = {
-  [MessageType.PermissionResponse]: async (
-    data: BaseMessage,
+export const beaconMessageHandler: { [key in BeaconMessageType]: BeaconMessageHandlerFunction } = {
+  [BeaconMessageType.PermissionResponse]: async (
+    data: BeaconBaseMessage,
     sendToPage: (message: string) => void,
     sendResponse: Function
   ): Promise<void> => {
     logger.log('beaconMessageHandler permission-response', data)
-    sendToPage(new Serializer().serialize(data))
+    sendToPage(await new Serializer().serialize(data))
     sendResponse()
   },
-  [MessageType.OperationRequest]: async (
-    data: BaseMessage,
+  [BeaconMessageType.OperationRequest]: async (
+    data: BeaconBaseMessage,
     sendToPage: (message: string) => void,
     sendResponse: () => void
   ): Promise<void> => {
@@ -100,7 +100,7 @@ export const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerF
     const forgedTx: RawTezosTransaction = await protocol.forgeAndWrapOperations(operation)
     logger.log(JSON.stringify(forgedTx))
 
-    let response: OperationResponse | BroadcastBeaconError
+    let response: OperationResponse | BeaconErrorMessage
     try {
       const hash: string = await sign(forgedTx.binaryTransaction).then((signedTx: string) => {
         return broadcast(operationRequest.network, signedTx)
@@ -108,63 +108,63 @@ export const beaconMessageHandler: { [key in MessageType]: BeaconMessageHandlerF
       logger.log('broadcast: ', hash)
       response = {
         id: data.id,
-        senderId: 'Beacon Extension',
-        type: MessageType.OperationResponse,
-        transactionHashes: [hash]
+        beaconId: 'Beacon Extension',
+        type: BeaconMessageType.OperationResponse,
+        transactionHash: hash
       }
     } catch (error) {
       logger.log('sending ERROR', error)
       response = {
         id: data.id,
-        senderId: 'Beacon Extension',
-        type: MessageType.OperationResponse,
+        beaconId: 'Beacon Extension',
+        type: BeaconMessageType.OperationResponse,
         errorType: error
       }
     }
 
-    sendToPage(new Serializer().serialize(response))
+    sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
-  [MessageType.SignPayloadRequest]: async (
-    data: BaseMessage,
+  [BeaconMessageType.SignPayloadRequest]: async (
+    data: BeaconBaseMessage,
     sendToPage: (message: string) => void,
     sendResponse: () => void
   ): Promise<void> => {
     const signRequest: SignPayloadRequest = data as SignPayloadRequest
     logger.log('beaconMessageHandler sign-request', data)
-    const hash: string = await sign(signRequest.payload[0])
-    logger.log('signed: ', hash)
+    const signature: string = await sign(signRequest.payload[0])
+    logger.log('signed: ', signature)
     const response: SignPayloadResponse = {
       id: data.id,
-      senderId: 'Beacon Extension',
-      type: MessageType.SignPayloadResponse,
-      signature: hash
+      beaconId: 'Beacon Extension',
+      type: BeaconMessageType.SignPayloadResponse,
+      signature
     }
 
-    sendToPage(new Serializer().serialize(response))
+    sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
-  [MessageType.BroadcastRequest]: async (
-    data: BaseMessage,
+  [BeaconMessageType.BroadcastRequest]: async (
+    data: BeaconBaseMessage,
     sendToPage: (message: string) => void,
     sendResponse: () => void
   ): Promise<void> => {
     const broadcastRequest: BroadcastRequest = data as BroadcastRequest
     logger.log('beaconMessageHandler broadcast-request', broadcastRequest)
-    const hash: string = await broadcast(broadcastRequest.network, broadcastRequest.signedTransactions[0])
+    const hash: string = await broadcast(broadcastRequest.network, broadcastRequest.signedTransaction)
     logger.log('broadcast: ', hash)
     const response: BroadcastResponse = {
       id: data.id,
-      senderId: 'Beacon Extension',
-      type: MessageType.BroadcastResponse,
-      transactionHashes: [hash]
+      beaconId: 'Beacon Extension',
+      type: BeaconMessageType.BroadcastResponse,
+      transactionHash: hash
     }
 
-    sendToPage(new Serializer().serialize(response))
+    sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
-  [MessageType.PermissionRequest]: beaconMessageHandlerNotSupported,
-  [MessageType.OperationResponse]: beaconMessageHandlerNotSupported,
-  [MessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
-  [MessageType.BroadcastResponse]: beaconMessageHandlerNotSupported
+  [BeaconMessageType.PermissionRequest]: beaconMessageHandlerNotSupported,
+  [BeaconMessageType.OperationResponse]: beaconMessageHandlerNotSupported,
+  [BeaconMessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
+  [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported
 }

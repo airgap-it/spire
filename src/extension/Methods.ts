@@ -1,5 +1,11 @@
-import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
-import { Network } from '@airgap/beacon-sdk/dist/types/Messages'
+import { AccountInfo, Network } from '@airgap/beacon-sdk'
+
+export interface WalletInfo {
+  pubkey: string
+  type: WalletType
+  added: Date
+  senderId: string
+}
 
 export enum WalletType {
   P2P = 'P2P',
@@ -26,13 +32,6 @@ export enum Action {
   MNEMONIC_GENERATE = 'MNEMONIC_GENERATE',
   MNEMONIC_SAVE = 'MNEMONIC_SAVE',
   RESPONSE = 'REQUEST'
-}
-
-export interface WalletInfo {
-  pubkey: string
-  type: WalletType
-  added: Date
-  senderId: string
 }
 
 export interface ActionInputTypesMap {

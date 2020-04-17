@@ -1,16 +1,16 @@
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
-import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
 import {
-  BaseMessage,
+  BeaconBaseMessage,
+  BeaconMessageType,
   BroadcastRequest,
-  MessageType,
+  ChromeMessageTransport,
   Network,
   OperationRequest,
   PermissionRequest,
   PermissionResponse,
   PermissionScope,
-  SignPayloadRequest
-} from '@airgap/beacon-sdk/dist/types/Messages'
+  SignPayloadRequest,
+  Transport
+} from '@airgap/beacon-sdk'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
@@ -35,7 +35,7 @@ export class BeaconRequestPage implements OnInit {
   public protocol: TezosProtocol = new TezosProtocol()
 
   public walletType: WalletType | undefined
-  public request: BaseMessage | undefined
+  public request: BeaconBaseMessage | undefined
   public requesterName: string = ''
   public address: string = ''
   public requestedNetwork: Network | undefined
@@ -64,25 +64,25 @@ export class BeaconRequestPage implements OnInit {
 
   public ngOnInit(): void {
     console.log('new request', this.request)
-    if (isUnknownObject(this.request) && this.request.type === MessageType.PermissionRequest) {
+    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.PermissionRequest) {
       this.title = 'Permission Request'
-      this.requesterName = ((this.request as any) as PermissionRequest).senderName
+      this.requesterName = ((this.request as any) as PermissionRequest).appMetadata.name
       this.permissionRequest((this.request as any) as PermissionRequest)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageType.SignPayloadRequest) {
+    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.SignPayloadRequest) {
       this.title = 'Sign Payload Request'
       this.requesterName = 'dApp Name (placeholder)'
       this.signRequest((this.request as any) as SignPayloadRequest)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageType.OperationRequest) {
+    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.OperationRequest) {
       this.title = 'Operation Request'
       this.requesterName = 'dApp Name (placeholder)'
       this.operationRequest((this.request as any) as OperationRequest)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageType.BroadcastRequest) {
+    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.BroadcastRequest) {
       this.title = 'Broadcast Request'
       this.requesterName = 'dApp Name (placeholder)'
       this.broadcastRequest((this.request as any) as BroadcastRequest)
@@ -105,7 +105,7 @@ export class BeaconRequestPage implements OnInit {
     // const response: NetworkNotSupportedError = {
     //   id: request.id,
     //   senderId: 'Beacon Extension',
-    //   type: MessageType.PermissionResponse,
+    //   type: BeaconMessageType.PermissionResponse,
     //   errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
     // }
 
@@ -159,16 +159,14 @@ export class BeaconRequestPage implements OnInit {
       this.responseHandler = async (): Promise<void> => {
         const response: PermissionResponse = {
           id: request.id,
-          senderId: 'Beacon Extension',
-          type: MessageType.PermissionResponse,
-          permissions: {
-            accountIdentifier: `${pubKey}-${request.network.type}`,
-            pubkey: pubKey,
-            network: {
-              ...request.network
-            },
-            scopes: this.inputs.filter(input => input.checked).map(input => input.value)
-          }
+          beaconId: 'Beacon Extension', // TODO: Use Beacon ID
+          type: BeaconMessageType.PermissionResponse,
+          accountIdentifier: `${pubKey}-${request.network.type}`,
+          pubkey: pubKey,
+          network: {
+            ...request.network
+          },
+          scopes: this.inputs.filter(input => input.checked).map(input => input.value)
         }
 
         this.sendResponse(response)
@@ -247,11 +245,10 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async broadcastRequest(request: BroadcastRequest): Promise<void> {
-    const signedTransaction = request.signedTransactions[0]
-    console.log('signedTx', signedTransaction)
+    console.log('signedTx', request.signedTransaction)
     this.transactions = await this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
-      transaction: signedTransaction
+      transaction: request.signedTransaction
     })
     console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {

@@ -1,4 +1,4 @@
-import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
+import { AccountInfo } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'

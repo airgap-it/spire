@@ -1,4 +1,4 @@
-import { Network, NetworkType } from '@airgap/beacon-sdk/dist/types/Messages'
+import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { ToastController } from '@ionic/angular'
 

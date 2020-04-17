@@ -1,7 +1,11 @@
-import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
-import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
-import { BaseMessage, MessageType, OperationRequest } from '@airgap/beacon-sdk/dist/types/Messages'
+import {
+  BeaconBaseMessage,
+  BeaconMessageType,
+  ChromeStorage,
+  ExtensionMessage,
+  OperationRequest,
+  Serializer
+} from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
@@ -36,9 +40,11 @@ export class ToExtensionMessageHandler extends MessageHandler {
       this.sendToBeacon(data.payload as string)
     } else {
       logger.log('not beacon', 'sending to popup')
-      const deserialized: BaseMessage = new Serializer().deserialize(data.payload as string) as BaseMessage
+      const deserialized: BeaconBaseMessage = (await new Serializer().deserialize(
+        data.payload as string
+      )) as BeaconBaseMessage
 
-      if (deserialized.type === MessageType.OperationRequest) {
+      if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async (): Promise<void> => {
           const operationRequest: OperationRequest = deserialized as OperationRequest
@@ -53,7 +59,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
           operationRequest.operationDetails = (
             await protocol.prepareOperations(publicKey, operationRequest.operationDetails)
           ).contents
-          const serialized: string = new Serializer().serialize(deserialized)
+          const serialized: string = await new Serializer().serialize(deserialized)
 
           return this.sendToPopup({ ...data, payload: serialized })
         })().catch((operationPrepareError: Error) => {

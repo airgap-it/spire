@@ -1,4 +1,4 @@
-import { Network } from '@airgap/beacon-sdk/dist/types/Messages'
+import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { AlertController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'

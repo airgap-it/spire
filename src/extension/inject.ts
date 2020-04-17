@@ -1,6 +1,6 @@
 /// <reference types="chrome"/>
 
-import { ExtensionMessage, ExtensionMessageTarget } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
+import { ExtensionMessage, ExtensionMessageTarget } from '@airgap/beacon-sdk'
 
 // Handle message from page and redirect to background.js script
 window.addEventListener(

@@ -1,11 +1,18 @@
-import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
-import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
-import { Storage, StorageKey } from '@airgap/beacon-sdk/dist/storage/Storage'
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
-import { ExtensionMessage, ExtensionMessageTarget } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
-import { BaseMessage, MessageType, PermissionResponse } from '@airgap/beacon-sdk/dist/types/Messages'
-import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/WalletCommunicationClient'
+import {
+  AccountInfo,
+  BeaconBaseMessage,
+  BeaconMessageType,
+  ChromeMessageTransport,
+  ChromeStorage,
+  ExtensionMessage,
+  ExtensionMessageTarget,
+  Origin,
+  PermissionResponse,
+  Serializer,
+  Storage,
+  StorageKey,
+  WalletCommunicationClient
+} from '@airgap/beacon-sdk'
 
 import { MessageHandlerFunction, messageTypeHandler, messageTypeHandlerNotSupported } from './action-message-handler'
 import { Logger } from './Logger'
@@ -151,13 +158,17 @@ export class ExtensionClient {
   }
 
   private async processMessage(data: string): Promise<void> {
-    const beaconMessage: BaseMessage = new Serializer().deserialize(data) as BaseMessage
-    if (beaconMessage.type === MessageType.PermissionResponse) {
+    const beaconMessage: BeaconBaseMessage = (await new Serializer().deserialize(data)) as BeaconBaseMessage
+    if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
       const permissionResponse: PermissionResponse = beaconMessage as PermissionResponse
       const account: AccountInfo = {
-        ...permissionResponse.permissions,
-        senderId: '',
-        firstConnected: new Date()
+        ...permissionResponse,
+        origin: {
+          type: Origin.EXTENSION, // TODO: Fix
+          id: permissionResponse.beaconId
+        },
+        beaconId: '',
+        connectedAt: new Date()
       }
       await this.addAccount(account)
     }

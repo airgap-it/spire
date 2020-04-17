@@ -1,8 +1,4 @@
-import { AccountInfo } from '@airgap/beacon-sdk/dist/clients/Client'
-import { ChromeStorage } from '@airgap/beacon-sdk/dist/storage/ChromeStorage'
-import { StorageKey } from '@airgap/beacon-sdk/dist/storage/Storage'
-import { Network } from '@airgap/beacon-sdk/dist/types/Messages'
-import { WalletCommunicationClient } from '@airgap/beacon-sdk/dist/WalletCommunicationClient'
+import { AccountInfo, ChromeStorage, Network, StorageKey, WalletCommunicationClient } from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
