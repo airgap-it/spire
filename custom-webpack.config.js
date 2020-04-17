@@ -1,3 +1,4 @@
 module.exports = {
-	entry: { background: 'src/extension/background.ts', inject: 'src/extension/inject.ts' },
+  node: { fs: 'empty' },
+  entry: { background: 'src/extension/background.ts', inject: 'src/extension/inject.ts' }
 }
