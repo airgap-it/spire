@@ -46,6 +46,8 @@ const handleLedgerInit: MessageHandlerFunction<Action.LEDGER_INIT> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.LEDGER_INIT>) => void,
   _context: ActionContext
 ): Promise<void> => {
+  logger.log('handleLedgerInit')
+
   let publicKey: string | undefined
   try {
     publicKey = await bridge.getAddress()
@@ -65,7 +67,7 @@ const handleP2pInit: MessageHandlerFunction<Action.P2P_INIT> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.P2P_INIT>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('handleP2PInit', 'handshake info', context.p2pClient.getHandshakeInfo())
+  logger.log('handleP2pInit', 'handshake info', context.p2pClient.getHandshakeInfo())
 
   context.p2pClient
     .listenForChannelOpening((pubkey: string) => {
@@ -124,7 +126,7 @@ const handleGetMnemonic: MessageHandlerFunction<Action.MNEMONIC_GET> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.MNEMONIC_GET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('getMnemonic')
+  logger.log('handleGetMnemonic')
   const mnemonic: string = await context.storage.get('mnemonic' as any)
   if (mnemonic) {
     logger.log('mnemonic read', mnemonic)
@@ -149,7 +151,7 @@ const handleGetActiveWallet: MessageHandlerFunction<Action.ACTIVE_WALLET_GET> = 
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('getActiveWallet')
+  logger.log('handleGetActiveWallet')
   const activeWallet: WalletInfo = await context.storage.get('ACTIVE_WALLET' as any)
   sendResponse({ data: { wallet: activeWallet } })
 }
@@ -159,7 +161,7 @@ const handleSetActiveWallet: MessageHandlerFunction<Action.ACTIVE_WALLET_SET> = 
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_SET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('setActiveWallet')
+  logger.log('handleSetActiveWallet')
   await context.storage.set('ACTIVE_WALLET' as any, data.data.wallet)
   sendResponse({ data: undefined })
 }
@@ -169,7 +171,7 @@ const handleGetAccounts: MessageHandlerFunction<Action.ACCOUNTS_GET> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACCOUNTS_GET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('getAccounts')
+  logger.log('handleGetAccounts')
   const accounts: AccountInfo[] = await context.storage.get(StorageKey.ACCOUNTS)
   sendResponse({ data: { accounts } })
 }
@@ -179,7 +181,7 @@ const handleDeleteAccount: MessageHandlerFunction<Action.ACCOUNT_DELETE> = async
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACCOUNT_DELETE>) => void,
   _context: ActionContext
 ): Promise<void> => {
-  logger.log('deleteAccount', data.data.account)
+  logger.log('handleDeleteAccount', data.data.account)
   sendResponse({ data: undefined })
 }
 
@@ -188,7 +190,7 @@ const handleGetActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> 
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_GET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('getActiveNetwork')
+  logger.log('handleGetActiveNetwork')
   const activeNetwork: Network = await context.storage.get('ACTIVE_NETWORK' as any)
 
   sendResponse({ data: { network: activeNetwork } })
@@ -199,7 +201,7 @@ const handleSetActiveNetwork: MessageHandlerFunction<Action.ACTIVE_NETWORK_SET> 
   sendResponse: (message: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_SET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('setActiveNetwork', data)
+  logger.log('handleSetActiveNetwork', data)
   await context.storage.set('ACTIVE_NETWORK' as any, data.data.network)
   sendResponse({ data: undefined })
 }
@@ -209,7 +211,7 @@ const handleAddWallet: MessageHandlerFunction<Action.WALLET_ADD> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.WALLET_ADD>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('addWallet', data)
+  logger.log('handleAddWallet', data)
   const wallets: WalletInfo[] = (await context.storage.get('WALLETS' as any)) || []
   if (!wallets.some((wallet: WalletInfo) => wallet.pubkey === data.data.wallet.pubkey)) {
     wallets.push(data.data.wallet)
@@ -225,7 +227,7 @@ const handleDeleteWallet: MessageHandlerFunction<Action.WALLET_DELETE> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.WALLET_DELETE>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('setActiveNetwork', data)
+  logger.log('handleDeleteWallet', data)
   const wallets: WalletInfo[] = (await context.storage.get('WALLETS' as any)) || []
   const filteredWallets: WalletInfo[] = wallets.filter(
     (wallet: WalletInfo) => wallet.pubkey !== data.data.wallet.pubkey
@@ -243,7 +245,7 @@ const handleGetWallets: MessageHandlerFunction<Action.WALLETS_GET> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => void,
   context: ActionContext
 ): Promise<void> => {
-  logger.log('setActiveNetwork', data)
+  logger.log('handleGetWallets', data)
   const wallets: WalletInfo[] = await context.storage.get('WALLETS' as any)
   sendResponse({ data: { wallets } })
 }
