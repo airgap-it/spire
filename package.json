@@ -87,5 +87,8 @@
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~3.8.3"
   },
-  "description": "Beacon connects Tezos decetralized applications with wallets."
+  "description": "Beacon connects Tezos decetralized applications with wallets.",
+  "browser": {
+    "fs": false
+  }
 }
