@@ -1,16 +1,22 @@
 import {
   BeaconBaseMessage,
-  BeaconErrorMessage,
   BeaconMessageType,
-  BroadcastRequest,
+  BroadcastRequestOutput,
   BroadcastResponse,
+  BroadcastResponseInput,
   ChromeStorage,
   Network,
-  OperationRequest,
+  OperationRequestOutput,
   OperationResponse,
+  OperationResponseInput,
+  PermissionRequestOutput,
+  PermissionResponse,
+  PermissionResponseInput,
+  PermissionScope,
   Serializer,
-  SignPayloadRequest,
-  SignPayloadResponse
+  SignPayloadRequestOutput,
+  SignPayloadResponse,
+  SignPayloadResponseInput
 } from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
@@ -58,33 +64,53 @@ const sign: (forgedTx: string) => Promise<string> = async (forgedTx: string): Pr
 }
 
 const beaconMessageHandlerNotSupported: (
-  data: BeaconBaseMessage,
+  data: { request: BeaconBaseMessage; extras: unknown },
   sendToPage: (message: string) => void,
   sendResponse: () => void
 ) => Promise<void> = (): Promise<void> => Promise.resolve()
 
 export type BeaconMessageHandlerFunction = (
-  data: BeaconBaseMessage,
+  data: { request: BeaconBaseMessage; extras: unknown },
   sendToPage: (message: string) => void,
   sendResponse: () => void
 ) => Promise<void>
 
 export const beaconMessageHandler: { [key in BeaconMessageType]: BeaconMessageHandlerFunction } = {
-  [BeaconMessageType.PermissionResponse]: async (
-    data: BeaconBaseMessage,
+  [BeaconMessageType.PermissionRequest]: async (
+    data: { request: BeaconBaseMessage; extras: unknown },
     sendToPage: (message: string) => void,
     sendResponse: Function
   ): Promise<void> => {
     logger.log('beaconMessageHandler permission-response', data)
-    sendToPage(await new Serializer().serialize(data))
+    const request: PermissionRequestOutput = (data.request as any) as PermissionRequestOutput
+    const extras: {
+      pubkey: string
+      accountIdentifier: string
+      scopes: PermissionScope[]
+    } = data.extras as any
+
+    const responseInput: PermissionResponseInput = {
+      id: request.id,
+      type: BeaconMessageType.PermissionResponse,
+      accountIdentifier: extras.accountIdentifier,
+      pubkey: extras.pubkey,
+      network: {
+        ...request.network
+      },
+      scopes: extras.scopes
+    }
+
+    const response: PermissionResponse = { beaconId: '0', version: '0', ...responseInput }
+
+    sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
   [BeaconMessageType.OperationRequest]: async (
-    data: BeaconBaseMessage,
+    data: { request: BeaconBaseMessage; extras: unknown },
     sendToPage: (message: string) => void,
     sendResponse: () => void
   ): Promise<void> => {
-    const operationRequest: OperationRequest = data as OperationRequest
+    const operationRequest: OperationRequestOutput = (data.request as any) as OperationRequestOutput
     logger.log('beaconMessageHandler operation-request', data)
     const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network)
 
@@ -100,70 +126,72 @@ export const beaconMessageHandler: { [key in BeaconMessageType]: BeaconMessageHa
     const forgedTx: RawTezosTransaction = await protocol.forgeAndWrapOperations(operation)
     logger.log(JSON.stringify(forgedTx))
 
-    let response: OperationResponse | BeaconErrorMessage
+    let responseInput: OperationResponseInput
     try {
       const hash: string = await sign(forgedTx.binaryTransaction).then((signedTx: string) => {
         return broadcast(operationRequest.network, signedTx)
       })
       logger.log('broadcast: ', hash)
-      response = {
-        id: data.id,
-        beaconId: 'Beacon Extension',
+      responseInput = {
+        id: operationRequest.id,
         type: BeaconMessageType.OperationResponse,
         transactionHash: hash
       }
     } catch (error) {
       logger.log('sending ERROR', error)
-      response = {
-        id: data.id,
-        beaconId: 'Beacon Extension',
+      responseInput = {
+        id: operationRequest.id,
         type: BeaconMessageType.OperationResponse,
         errorType: error
-      }
+      } as any
     }
+
+    const response: OperationResponse = { beaconId: '0', version: '0', ...responseInput }
 
     sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
   [BeaconMessageType.SignPayloadRequest]: async (
-    data: BeaconBaseMessage,
+    data: { request: BeaconBaseMessage; extras: unknown },
     sendToPage: (message: string) => void,
     sendResponse: () => void
   ): Promise<void> => {
-    const signRequest: SignPayloadRequest = data as SignPayloadRequest
+    const signRequest: SignPayloadRequestOutput = (data.request as any) as SignPayloadRequestOutput
     logger.log('beaconMessageHandler sign-request', data)
     const signature: string = await sign(signRequest.payload[0])
     logger.log('signed: ', signature)
-    const response: SignPayloadResponse = {
-      id: data.id,
-      beaconId: 'Beacon Extension',
+    const responseInput: SignPayloadResponseInput = {
+      id: signRequest.id,
       type: BeaconMessageType.SignPayloadResponse,
       signature
     }
+
+    const response: SignPayloadResponse = { beaconId: '0', version: '0', ...responseInput }
 
     sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
   [BeaconMessageType.BroadcastRequest]: async (
-    data: BeaconBaseMessage,
+    data: { request: BeaconBaseMessage; extras: unknown },
     sendToPage: (message: string) => void,
     sendResponse: () => void
   ): Promise<void> => {
-    const broadcastRequest: BroadcastRequest = data as BroadcastRequest
+    const broadcastRequest: BroadcastRequestOutput = (data.request as any) as BroadcastRequestOutput
     logger.log('beaconMessageHandler broadcast-request', broadcastRequest)
     const hash: string = await broadcast(broadcastRequest.network, broadcastRequest.signedTransaction)
     logger.log('broadcast: ', hash)
-    const response: BroadcastResponse = {
-      id: data.id,
-      beaconId: 'Beacon Extension',
+    const responseInput: BroadcastResponseInput = {
+      id: broadcastRequest.id,
       type: BeaconMessageType.BroadcastResponse,
       transactionHash: hash
     }
 
+    const response: BroadcastResponse = { beaconId: '0', version: '0', ...responseInput }
+
     sendToPage(await new Serializer().serialize(response))
     sendResponse()
   },
-  [BeaconMessageType.PermissionRequest]: beaconMessageHandlerNotSupported,
+  [BeaconMessageType.PermissionResponse]: beaconMessageHandlerNotSupported,
   [BeaconMessageType.OperationResponse]: beaconMessageHandlerNotSupported,
   [BeaconMessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
   [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported

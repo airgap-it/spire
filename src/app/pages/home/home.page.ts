@@ -7,8 +7,8 @@ import { SettingsService } from 'src/app/services/settings.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
 import { getTezblockLinkForNetwork } from 'src/extension/utils'
 
-import { WalletSelectPage } from '../wallet-select/wallet-select.page'
 import { PairPage } from '../pair/pair.page'
+import { WalletSelectPage } from '../wallet-select/wallet-select.page'
 
 enum SigningMethods {
   WALLET = 'WALLET',

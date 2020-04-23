@@ -1,4 +1,4 @@
-import { AccountInfo, ChromeStorage, Network, StorageKey, WalletCommunicationClient } from '@airgap/beacon-sdk'
+import { AccountInfo, ChromeStorage, Network, P2PCommunicationClient, StorageKey } from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 
@@ -16,7 +16,7 @@ const logError: (error: Error) => void = (error: Error): void => {
 }
 
 interface ActionContext {
-  p2pClient: WalletCommunicationClient
+  p2pClient: P2PCommunicationClient | undefined
   storage: ChromeStorage
   sendToPage(message: unknown): void
   setP2pPubkey(pubkey: string): void
@@ -63,6 +63,9 @@ const handleP2pInit: MessageHandlerFunction<Action.P2P_INIT> = async (
   sendResponse: (message: ExtensionMessageOutputPayload<Action.P2P_INIT>) => void,
   context: ActionContext
 ): Promise<void> => {
+  if (!context.p2pClient) {
+    return // TODO: Improve
+  }
   logger.log('handleP2pInit', 'handshake info', context.p2pClient.getHandshakeInfo())
 
   context.p2pClient
@@ -70,6 +73,9 @@ const handleP2pInit: MessageHandlerFunction<Action.P2P_INIT> = async (
       logger.log('handleP2PInit', 'channel opening', pubkey)
       context.setP2pPubkey(pubkey)
 
+      if (!context.p2pClient) {
+        return // TODO: Improve
+      }
       context.p2pClient
         .listenForEncryptedMessage(pubkey, (message: string) => {
           logger.log('handleP2PInit', 'got message!', message)
@@ -97,7 +103,7 @@ const handleResponse: MessageHandlerFunction<Action.RESPONSE> = async (
   logger.log('handleResponse', data)
   const handler: BeaconMessageHandlerFunction = beaconMessageHandler[(data.data.request as any).type]
   await handler(
-    data.data.request as any,
+    data.data as any,
     (message: string) => {
       context.sendToPage(message)
     },

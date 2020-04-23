@@ -1,14 +1,12 @@
 import {
-  BeaconBaseMessage,
   BeaconMessageType,
-  BroadcastRequest,
+  BroadcastRequestOutput,
   ChromeMessageTransport,
   Network,
-  OperationRequest,
-  PermissionRequest,
-  PermissionResponse,
+  OperationRequestOutput,
+  PermissionRequestOutput,
   PermissionScope,
-  SignPayloadRequest,
+  SignPayloadRequestOutput,
   Transport
 } from '@airgap/beacon-sdk'
 import { Component, OnInit } from '@angular/core'
@@ -21,10 +19,6 @@ import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
-export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
-  return x !== null && typeof x === 'object'
-}
-
 @Component({
   selector: 'beacon-request',
   templateUrl: './beacon-request.page.html',
@@ -35,7 +29,12 @@ export class BeaconRequestPage implements OnInit {
   public protocol: TezosProtocol = new TezosProtocol()
 
   public walletType: WalletType | undefined
-  public request: BeaconBaseMessage | undefined
+  public request:
+    | PermissionRequestOutput
+    | OperationRequestOutput
+    | SignPayloadRequestOutput
+    | BroadcastRequestOutput
+    | undefined
   public requesterName: string = ''
   public address: string = ''
   public requestedNetwork: Network | undefined
@@ -54,7 +53,7 @@ export class BeaconRequestPage implements OnInit {
     private readonly localWalletService: LocalWalletService,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
-    this.localWalletService.address.pipe(take(1)).subscribe(address => {
+    this.localWalletService.address.pipe(take(1)).subscribe((address: string) => {
       this.address = address
     })
     if (this.walletType === WalletType.LEDGER) {
@@ -62,45 +61,45 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  public ngOnInit(): void {
+  public async ngOnInit(): Promise<void> {
     console.log('new request', this.request)
-    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.PermissionRequest) {
+    if (this.request && this.request.type === BeaconMessageType.PermissionRequest) {
       this.title = 'Permission Request'
-      this.requesterName = ((this.request as any) as PermissionRequest).appMetadata.name
-      this.permissionRequest((this.request as any) as PermissionRequest)
+      this.requesterName = this.request.appMetadata.name
+      await this.permissionRequest(this.request)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.SignPayloadRequest) {
+    if (this.request && this.request.type === BeaconMessageType.SignPayloadRequest) {
       this.title = 'Sign Payload Request'
-      this.requesterName = 'dApp Name (placeholder)'
-      this.signRequest((this.request as any) as SignPayloadRequest)
+      this.requesterName = this.request.appMetadata.name
+      await this.signRequest(this.request)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.OperationRequest) {
+    if (this.request && this.request.type === BeaconMessageType.OperationRequest) {
       this.title = 'Operation Request'
-      this.requesterName = 'dApp Name (placeholder)'
-      this.operationRequest((this.request as any) as OperationRequest)
+      this.requesterName = this.request.appMetadata.name
+      await this.operationRequest(this.request)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === BeaconMessageType.BroadcastRequest) {
+    if (this.request && this.request.type === BeaconMessageType.BroadcastRequest) {
       this.title = 'Broadcast Request'
-      this.requesterName = 'dApp Name (placeholder)'
-      this.broadcastRequest((this.request as any) as BroadcastRequest)
+      this.requesterName = this.request.appMetadata.name
+      await this.broadcastRequest(this.request)
     }
   }
 
-  public async dismiss() {
+  public async dismiss(): Promise<void> {
     this.modalController.dismiss().catch(console.error)
   }
 
-  public async done() {
+  public async done(): Promise<void> {
     if (this.responseHandler) {
       await this.responseHandler()
     }
     await this.dismiss()
   }
 
-  private async permissionRequest(request: PermissionRequest): Promise<void> {
+  private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
     // console.error('Only mainnet and babylonnet is currently supported')
     // const response: NetworkNotSupportedError = {
     //   id: request.id,
@@ -117,7 +116,7 @@ export class BeaconRequestPage implements OnInit {
     // })
 
     this.requestedNetwork = request.network
-    this.localWalletService.publicKey.pipe(take(1)).subscribe(pubKey => {
+    this.localWalletService.publicKey.pipe(take(1)).subscribe((pubKey: string) => {
       this.inputs = [
         {
           name: 'read_address',
@@ -157,24 +156,16 @@ export class BeaconRequestPage implements OnInit {
       ]
 
       this.responseHandler = async (): Promise<void> => {
-        const response: PermissionResponse = {
-          id: request.id,
-          beaconId: 'Beacon Extension', // TODO: Use Beacon ID
-          type: BeaconMessageType.PermissionResponse,
-          accountIdentifier: `${pubKey}-${request.network.type}`,
+        await this.sendResponse(request, {
           pubkey: pubKey,
-          network: {
-            ...request.network
-          },
+          accountIdentifier: `${pubKey}-${request.network.type}`,
           scopes: this.inputs.filter(input => input.checked).map(input => input.value)
-        }
-
-        this.sendResponse(response)
+        })
       }
     })
   }
 
-  private async signRequest(request: SignPayloadRequest): Promise<void> {
+  private async signRequest(request: SignPayloadRequestOutput): Promise<void> {
     console.log('sign payload', request.payload[0])
     this.transactions = await this.protocol.getTransactionDetails({
       publicKey: '',
@@ -183,7 +174,7 @@ export class BeaconRequestPage implements OnInit {
     console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
-        this.sendResponse(request)
+        await this.sendResponse(request, {})
       } else {
         const modal = await this.modalController.create({
           component: AddLedgerConnectionPage,
@@ -209,7 +200,7 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  private async operationRequest(request: OperationRequest): Promise<void> {
+  private async operationRequest(request: OperationRequestOutput): Promise<void> {
     this.transactions = this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
@@ -218,7 +209,7 @@ export class BeaconRequestPage implements OnInit {
 
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
-        this.sendResponse(request)
+        this.sendResponse(request, {})
       } else {
         const modal = await this.modalController.create({
           component: AddLedgerConnectionPage,
@@ -244,7 +235,7 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  private async broadcastRequest(request: BroadcastRequest): Promise<void> {
+  private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
     console.log('signedTx', request.signedTransaction)
     this.transactions = await this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
@@ -252,15 +243,19 @@ export class BeaconRequestPage implements OnInit {
     })
     console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {
-      this.sendResponse(request)
+      await this.sendResponse(request, {})
     }
   }
 
-  private async sendResponse(request: any): Promise<void> {
+  private async sendResponse(
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput,
+    extras: unknown
+  ): Promise<void> {
     const response: ExtensionMessageOutputPayload<Action.RESPONSE> = await this.chromeMessagingService.sendChromeMessage(
       Action.RESPONSE,
       {
-        request
+        request,
+        extras
       }
     )
     console.log(response)

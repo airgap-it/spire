@@ -40,14 +40,12 @@ export class ToExtensionMessageHandler extends MessageHandler {
       this.sendToBeacon(data.payload as string)
     } else {
       logger.log('not beacon', 'sending to popup')
-      const deserialized: BeaconBaseMessage = (await new Serializer().deserialize(
-        data.payload as string
-      )) as BeaconBaseMessage
+      const deserialized: BeaconBaseMessage = await new Serializer().deserialize(data.payload as string)
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async (): Promise<void> => {
-          const operationRequest: OperationRequest = deserialized as OperationRequest
+          const operationRequest: OperationRequest = deserialized
           const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network)
           const mnemonic: string = await storage.get('mnemonic' as any)
           const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)

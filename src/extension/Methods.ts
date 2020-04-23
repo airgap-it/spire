@@ -52,7 +52,7 @@ export interface ActionInputTypesMap {
   [Action.MNEMONIC_GET]: undefined
   [Action.MNEMONIC_GENERATE]: undefined
   [Action.MNEMONIC_SAVE]: { mnemonic: string }
-  [Action.RESPONSE]: { request: unknown }
+  [Action.RESPONSE]: { request: unknown; extras: unknown }
 }
 
 export interface ActionOutputTypesMap {

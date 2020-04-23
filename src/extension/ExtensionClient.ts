@@ -7,12 +7,15 @@ import {
   ExtensionMessage,
   ExtensionMessageTarget,
   Origin,
+  P2PCommunicationClient,
   PermissionResponse,
   Serializer,
   Storage,
-  StorageKey,
-  WalletCommunicationClient
+  StorageKey
 } from '@airgap/beacon-sdk'
+import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
+import { getKeypairFromSeed } from '@airgap/beacon-sdk/dist/utils/crypto'
+import * as sodium from 'libsodium-wrappers'
 
 import { MessageHandlerFunction, messageTypeHandler, messageTypeHandlerNotSupported } from './action-message-handler'
 import { Logger } from './Logger'
@@ -33,7 +36,7 @@ const sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void> = (
 }
 
 export class ExtensionClient {
-  private readonly p2pClient: WalletCommunicationClient = new WalletCommunicationClient('test', 'asdf', 1, true)
+  private p2pClient: P2PCommunicationClient | undefined
   private p2pPubkey: string | undefined = ''
 
   private readonly storage: Storage
@@ -45,9 +48,15 @@ export class ExtensionClient {
     this.storage = new ChromeStorage()
     this.transport = new ChromeMessageTransport(name)
 
-    this.p2pClient.start().catch((p2pClientStartError: Error) => {
-      logger.error('p2pClientStartError', p2pClientStartError)
-    })
+    getKeypairFromSeed('asdf')
+      .then((keypair: sodium.Keypair) => {
+        this.p2pClient = new P2PCommunicationClient('test', keypair, 1, true)
+
+        this.p2pClient.start().catch((p2pClientStartError: Error) => {
+          logger.error('p2pClientStartError', p2pClientStartError)
+        })
+      })
+      .catch(console.error)
 
     const messageHandlerMap: Map<string, MessageHandler> = new Map<string, MessageHandler>()
     messageHandlerMap.set(
@@ -64,16 +73,22 @@ export class ExtensionClient {
     )
     messageHandlerMap.set(ExtensionMessageTarget.BACKGROUND, new ToBackgroundMessageHandler(this.handleMessage))
 
-    const transportListener: any = (message: ExtensionMessage<unknown>, connectionInfo): void => {
-      console.log('getting message!', message, connectionInfo)
+    const transportListener: any = (message: ExtensionMessage<unknown>, connectionContext: ConnectionContext): void => {
+      console.log('getting message!', message, connectionContext)
 
       const handler: MessageHandler = messageHandlerMap.get(message.target) || new MessageHandler()
-      handler.handle(message, connectionInfo.sendResponse, false).catch((handlerError: Error) => {
-        logger.error('messageHandlerError', handlerError)
-      })
+      handler
+        .handle(
+          message,
+          connectionContext.extras ? connectionContext.extras.sendResponse : (_response?: unknown): void => undefined,
+          false
+        )
+        .catch((handlerError: Error) => {
+          logger.error('messageHandlerError', handlerError)
+        })
 
       this.listeners.forEach(listener => {
-        listener(message, connectionInfo)
+        listener(message, connectionContext)
       })
     }
 
@@ -84,7 +99,7 @@ export class ExtensionClient {
 
   public sendToBeacon = async (message: string): Promise<void> => {
     logger.log('sending message', this.p2pPubkey, message)
-    if (this.p2pPubkey) {
+    if (this.p2pPubkey && this.p2pClient) {
       this.p2pClient.sendMessage(this.p2pPubkey, message).catch((beaconSendError: Error) => {
         logger.error('sendToBeacon', beaconSendError)
       })
@@ -158,9 +173,9 @@ export class ExtensionClient {
   }
 
   private async processMessage(data: string): Promise<void> {
-    const beaconMessage: BeaconBaseMessage = (await new Serializer().deserialize(data)) as BeaconBaseMessage
+    const beaconMessage: BeaconBaseMessage = await new Serializer().deserialize(data)
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
-      const permissionResponse: PermissionResponse = beaconMessage as PermissionResponse
+      const permissionResponse: PermissionResponse = beaconMessage
       const account: AccountInfo = {
         ...permissionResponse,
         origin: {

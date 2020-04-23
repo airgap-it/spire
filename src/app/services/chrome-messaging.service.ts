@@ -22,7 +22,7 @@ export class ChromeMessagingService {
       console.log('GOT DATA FROM BACKGROUND', message.data)
       const serializer: Serializer = new Serializer()
 
-      const deserialized: BeaconBaseMessage = (await serializer.deserialize(message.data)) as BeaconBaseMessage
+      const deserialized: BeaconBaseMessage = await serializer.deserialize(message.data)
 
       this.beaconRequest(deserialized, WalletType.LEDGER).catch((beaconRequestError: Error) => {
         console.log('beaconRequestError', beaconRequestError)

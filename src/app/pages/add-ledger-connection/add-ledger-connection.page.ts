@@ -32,7 +32,8 @@ export class AddLedgerConnectionPage implements OnInit {
     const response: ExtensionMessageOutputPayload<Action> = await this.chromeMessagingService.sendChromeMessage(
       this.targetMethod,
       {
-        request: this.request
+        request: this.request,
+        extras: undefined
       }
     )
     console.log('LEDGER RESPONSE', response)
