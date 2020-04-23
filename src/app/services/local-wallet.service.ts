@@ -2,7 +2,7 @@ import { Injectable, NgZone } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
-import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Methods'
 
 import { ChromeMessagingService } from './chrome-messaging.service'
 

@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload, WalletInfo } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletInfo } from 'src/extension/extension-client/Methods'
 
 @Component({
   selector: 'app-wallet-select',
@@ -21,24 +21,26 @@ export class WalletSelectPage {
   }
 
   public async refreshWallets(): Promise<void> {
-    this.chromeMessagingService
-      .sendChromeMessage(Action.WALLETS_GET, undefined)
-      .then((accounts: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => {
-        if (accounts.data) {
-          this.wallets = accounts.data.wallets
-          this.cdr.detectChanges()
-        }
-      })
-      .catch(console.error)
-    this.chromeMessagingService
-      .sendChromeMessage(Action.ACTIVE_WALLET_GET, undefined)
-      .then((accounts: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => {
-        if (accounts.data) {
-          this.activeWallet = accounts.data.wallet
-          this.cdr.detectChanges()
-        }
-      })
-      .catch(console.error)
+    await Promise.all([
+      this.chromeMessagingService
+        .sendChromeMessage(Action.WALLETS_GET, undefined)
+        .then((accounts: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => {
+          if (accounts.data) {
+            console.log('HAVE NEW WALLET DATA', accounts.data.wallets)
+            this.wallets = accounts.data.wallets
+          }
+        })
+        .catch(console.error),
+      this.chromeMessagingService
+        .sendChromeMessage(Action.ACTIVE_WALLET_GET, undefined)
+        .then((accounts: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => {
+          if (accounts.data) {
+            this.activeWallet = accounts.data.wallet
+          }
+        })
+        .catch(console.error)
+    ])
+    this.cdr.detectChanges()
   }
 
   public async activateWallet(wallet: WalletInfo): Promise<void> {

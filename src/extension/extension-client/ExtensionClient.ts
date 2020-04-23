@@ -1,6 +1,6 @@
 import {
   AccountInfo,
-  BeaconBaseMessage,
+  BeaconMessage,
   BeaconMessageType,
   ChromeMessageTransport,
   ChromeStorage,
@@ -25,6 +25,7 @@ import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageH
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { Action, ExtensionMessageInputPayload } from './Methods'
 import { PopupManager } from './PopupManager'
+import { ExtensionClientOptions } from './ExtensionClientOptions'
 
 const logger: Logger = new Logger('ExtensionClient')
 
@@ -44,9 +45,9 @@ export class ExtensionClient {
 
   private readonly listeners: any[] = []
 
-  constructor(name: string) {
+  constructor(config: ExtensionClientOptions) {
     this.storage = new ChromeStorage()
-    this.transport = new ChromeMessageTransport(name)
+    this.transport = new ChromeMessageTransport(config.name)
 
     getKeypairFromSeed('asdf')
       .then((keypair: sodium.Keypair) => {
@@ -173,7 +174,7 @@ export class ExtensionClient {
   }
 
   private async processMessage(data: string): Promise<void> {
-    const beaconMessage: BeaconBaseMessage = await new Serializer().deserialize(data)
+    const beaconMessage: BeaconMessage = (await new Serializer().deserialize(data)) as BeaconMessage
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
       const permissionResponse: PermissionResponse = beaconMessage
       const account: AccountInfo = {

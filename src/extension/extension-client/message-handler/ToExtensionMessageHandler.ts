@@ -1,5 +1,5 @@
 import {
-  BeaconBaseMessage,
+  BeaconMessage,
   BeaconMessageType,
   ChromeStorage,
   ExtensionMessage,
@@ -40,7 +40,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
       this.sendToBeacon(data.payload as string)
     } else {
       logger.log('not beacon', 'sending to popup')
-      const deserialized: BeaconBaseMessage = await new Serializer().deserialize(data.payload as string)
+      const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information

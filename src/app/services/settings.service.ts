@@ -2,7 +2,7 @@ import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { Observable, ReplaySubject } from 'rxjs'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Methods'
 
 import { ChromeMessagingService } from './chrome-messaging.service'
 import { StorageKey, StorageService } from './storage.service'

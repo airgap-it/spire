@@ -5,7 +5,7 @@ import { TezosProtocol } from 'airgap-coin-lib'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 import { SettingsService } from 'src/app/services/settings.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
-import { getTezblockLinkForNetwork } from 'src/extension/utils'
+import { getTezblockLinkForNetwork } from 'src/extension/extension-client/utils'
 
 import { PairPage } from '../pair/pair.page'
 import { WalletSelectPage } from '../wallet-select/wallet-select.page'

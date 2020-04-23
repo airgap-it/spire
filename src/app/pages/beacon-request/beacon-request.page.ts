@@ -15,7 +15,7 @@ import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
-import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/extension-client/Methods'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
