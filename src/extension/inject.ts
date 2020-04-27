@@ -16,7 +16,11 @@ window.addEventListener(
         console.log('BEACON EXTENSION (inject.ts): sending message from page to background', data.payload)
         // tslint:enable:no-console
 
-        chrome.runtime.sendMessage({ target: ExtensionMessageTarget.EXTENSION, payload: data.payload })
+        chrome.runtime.sendMessage({
+          target: ExtensionMessageTarget.EXTENSION,
+          sender: event.origin,
+          payload: data.payload
+        })
       }
     }
   },
@@ -24,14 +28,14 @@ window.addEventListener(
 )
 
 // Handle message from background.js and redirect to page
-chrome.runtime.onMessage.addListener((data: ExtensionMessage<string>) => {
-  if (data.target === ExtensionMessageTarget.EXTENSION) {
+chrome.runtime.onMessage.addListener((message: ExtensionMessage<string>, sender: chrome.runtime.MessageSender) => {
+  if (message.target === ExtensionMessageTarget.EXTENSION) {
     return
   }
 
   // tslint:disable:no-console
-  console.log('BEACON EXTENSION (inject.ts): sending message from background to page', data.payload)
+  console.log('BEACON EXTENSION (inject.ts): sending message from background to page', message.payload)
   // tslint:enable:no-console
 
-  window.postMessage(data, '*')
+  window.postMessage({ message, sender }, '*')
 })

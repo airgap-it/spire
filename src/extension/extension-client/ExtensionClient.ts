@@ -14,10 +14,13 @@ import {
   StorageKey
 } from '@airgap/beacon-sdk'
 import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
-import { getKeypairFromSeed } from '@airgap/beacon-sdk/dist/utils/crypto'
+import { getKeypairFromSeed, toHex } from '@airgap/beacon-sdk/dist/utils/crypto'
+import { ExposedPromise, exposedPromise } from '@airgap/beacon-sdk/dist/utils/exposed-promise'
+import { generateGUID } from '@airgap/beacon-sdk/dist/utils/generate-uuid'
 import * as sodium from 'libsodium-wrappers'
 
 import { MessageHandlerFunction, messageTypeHandler, messageTypeHandlerNotSupported } from './action-message-handler'
+import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
 import { ToBackgroundMessageHandler } from './message-handler/ToBackgroundMessageHandler'
@@ -25,7 +28,6 @@ import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageH
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { Action, ExtensionMessageInputPayload } from './Methods'
 import { PopupManager } from './PopupManager'
-import { ExtensionClientOptions } from './ExtensionClientOptions'
 
 const logger: Logger = new Logger('ExtensionClient')
 
@@ -37,6 +39,14 @@ const sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void> = (
 }
 
 export class ExtensionClient {
+  // private pendingRequests: BeaconMessage[] = []
+
+  protected beaconId: string | undefined
+  protected _keyPair: ExposedPromise<sodium.KeyPair> = exposedPromise()
+  protected get keyPair(): Promise<sodium.KeyPair> {
+    return this._keyPair.promise
+  }
+
   private p2pClient: P2PCommunicationClient | undefined
   private p2pPubkey: string | undefined = ''
 
@@ -49,9 +59,11 @@ export class ExtensionClient {
     this.storage = new ChromeStorage()
     this.transport = new ChromeMessageTransport(config.name)
 
-    getKeypairFromSeed('asdf')
-      .then((keypair: sodium.Keypair) => {
-        this.p2pClient = new P2PCommunicationClient('test', keypair, 1, true)
+    this.loadOrCreateBeaconSecret().catch(console.error)
+    this.keyPair
+      .then((keyPair: sodium.KeyPair) => {
+        this.beaconId = toHex(keyPair.publicKey)
+        this.p2pClient = new P2PCommunicationClient(config.name, keyPair, 1, true)
 
         this.p2pClient.start().catch((p2pClientStartError: Error) => {
           logger.error('p2pClientStartError', p2pClientStartError)
@@ -94,8 +106,6 @@ export class ExtensionClient {
     }
 
     this.transport.addListener(transportListener).catch(console.error)
-
-    // this.addDappListener((message: BaseMessage) => {})
   }
 
   public sendToBeacon = async (message: string): Promise<void> => {
@@ -173,6 +183,11 @@ export class ExtensionClient {
     return this.storage.delete(StorageKey.ACCOUNTS)
   }
 
+  /**
+   * Process the message before it gets sent to the page.
+   *
+   * @param data The serialized message that will be sent to the page
+   */
   private async processMessage(data: string): Promise<void> {
     const beaconMessage: BeaconMessage = (await new Serializer().deserialize(data)) as BeaconMessage
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
@@ -202,5 +217,16 @@ export class ExtensionClient {
         }
       }) // Send message to all tabs
     })
+  }
+
+  private async loadOrCreateBeaconSecret(): Promise<void> {
+    const storageValue: unknown = await this.storage.get(StorageKey.BEACON_SDK_SECRET_SEED)
+    if (storageValue && typeof storageValue === 'string') {
+      this._keyPair.resolve(getKeypairFromSeed(storageValue))
+    } else {
+      const key: string = generateGUID()
+      await this.storage.set(StorageKey.BEACON_SDK_SECRET_SEED, key)
+      this._keyPair.resolve(getKeypairFromSeed(key))
+    }
   }
 }
