@@ -19,6 +19,8 @@ import { ExposedPromise, exposedPromise } from '@airgap/beacon-sdk/dist/utils/ex
 import { generateGUID } from '@airgap/beacon-sdk/dist/utils/generate-uuid'
 import * as sodium from 'libsodium-wrappers'
 
+import { AirGapSigner } from '../AirGapSigner'
+
 import { MessageHandlerFunction, messageTypeHandler, messageTypeHandlerNotSupported } from './action-message-handler'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
@@ -28,6 +30,7 @@ import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageH
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { Action, ExtensionMessageInputPayload } from './Methods'
 import { PopupManager } from './PopupManager'
+import { Signer } from './Signer'
 
 const logger: Logger = new Logger('ExtensionClient')
 
@@ -46,6 +49,8 @@ export class ExtensionClient {
   protected get keyPair(): Promise<sodium.KeyPair> {
     return this._keyPair.promise
   }
+
+  public readonly signer: Signer = new AirGapSigner()
 
   private p2pClient: P2PCommunicationClient | undefined
   private p2pPubkey: string | undefined = ''
@@ -131,6 +136,7 @@ export class ExtensionClient {
       messageTypeHandler[data.payload.action] || messageTypeHandlerNotSupported
     logger.log('handler', handler)
     await handler(data.payload, sendResponse, {
+      client: this,
       p2pClient: this.p2pClient,
       storage: this.storage,
       sendToPage: (pageData: string): Promise<void> => {

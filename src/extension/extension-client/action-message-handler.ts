@@ -1,8 +1,9 @@
 import { AccountInfo, ChromeStorage, Network, P2PCommunicationClient, StorageKey } from '@airgap/beacon-sdk'
-import { TezosProtocol } from 'airgap-coin-lib'
+import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 import * as bip39 from 'bip39'
 
-import { beaconMessageHandler, BeaconMessageHandlerFunction } from './beacon-message-handler'
+import { BeaconMessageHandler, BeaconMessageHandlerFunction } from './beacon-message-handler'
+import { ExtensionClient } from './ExtensionClient'
 import { BeaconLedgerBridge } from './ledger-bridge'
 import { Logger } from './Logger'
 import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload, WalletInfo } from './Methods'
@@ -16,6 +17,7 @@ const logError: (error: Error) => void = (error: Error): void => {
 }
 
 interface ActionContext {
+  client: ExtensionClient
   p2pClient: P2PCommunicationClient | undefined
   storage: ChromeStorage
   sendToPage(message: unknown): void
@@ -53,8 +55,7 @@ const handleLedgerInit: MessageHandlerFunction<Action.LEDGER_INIT> = async (
     return
   }
 
-  const protocol: TezosProtocol = new TezosProtocol()
-  const address: string = await protocol.getAddressFromPublicKey(publicKey)
+  const address: string = await getAddressFromPublicKey(publicKey)
   sendResponse({ data: { pubkey: publicKey, address } })
 }
 
@@ -101,7 +102,8 @@ const handleResponse: MessageHandlerFunction<Action.RESPONSE> = async (
   context: ActionContext
 ): Promise<void> => {
   logger.log('handleResponse', data)
-  const handler: BeaconMessageHandlerFunction = beaconMessageHandler[(data.data.request as any).type]
+  const beaconMessageHandler: BeaconMessageHandler = new BeaconMessageHandler(context.client)
+  const handler: BeaconMessageHandlerFunction = await beaconMessageHandler.handle((data.data.request as any).type)
   await handler(
     data.data as any,
     (message: string) => {
