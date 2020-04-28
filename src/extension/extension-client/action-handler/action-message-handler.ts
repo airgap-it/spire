@@ -1,12 +1,20 @@
-import { AccountInfo, ChromeStorage, Network, P2PCommunicationClient, StorageKey } from '@airgap/beacon-sdk'
+import {
+  AccountInfo,
+  BeaconMessage,
+  ChromeStorage,
+  Network,
+  P2PCommunicationClient,
+  Serializer,
+  StorageKey
+} from '@airgap/beacon-sdk'
 import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 import * as bip39 from 'bip39'
 
-import { BeaconMessageHandler, BeaconMessageHandlerFunction } from './beacon-message-handler'
-import { ExtensionClient } from './ExtensionClient'
-import { BeaconLedgerBridge } from './ledger-bridge'
-import { Logger } from './Logger'
-import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload, WalletInfo } from './Methods'
+import { BeaconMessageHandler, BeaconMessageHandlerFunction } from '../beacon-message-handler/BeaconMessageHandler'
+import { ExtensionClient } from '../ExtensionClient'
+import { BeaconLedgerBridge } from '../ledger-bridge'
+import { Logger } from '../Logger'
+import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload, WalletInfo } from '../Methods'
 
 const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
 
@@ -103,10 +111,11 @@ const handleResponse: MessageHandlerFunction<Action.RESPONSE> = async (
 ): Promise<void> => {
   logger.log('handleResponse', data)
   const beaconMessageHandler: BeaconMessageHandler = new BeaconMessageHandler(context.client)
-  const handler: BeaconMessageHandlerFunction = await beaconMessageHandler.handle((data.data.request as any).type)
+  const handler: BeaconMessageHandlerFunction = await beaconMessageHandler.getHandler((data.data.request as any).type)
   await handler(
     data.data as any,
-    (message: string) => {
+    async (beaconMessage: BeaconMessage) => {
+      const message: string = await new Serializer().serialize(beaconMessage)
       context.sendToPage(message)
     },
     sendResponse as any
@@ -254,6 +263,16 @@ const handleGetWallets: MessageHandlerFunction<Action.WALLETS_GET> = async (
   sendResponse({ data: { wallets } })
 }
 
+const handleBeaconIdGet: MessageHandlerFunction<Action.BEACON_ID_GET> = async (
+  data: ExtensionMessageInputPayload<Action.BEACON_ID_GET>,
+  sendResponse: (message: ExtensionMessageOutputPayload<Action.BEACON_ID_GET>) => void,
+  _context: ActionContext
+): Promise<void> => {
+  logger.log('handleGetWallets', data)
+  // TODO: get actual beacon ID
+  sendResponse({ data: { id: 'BEACON_ID_PLACEHOLDER' } })
+}
+
 export const messageTypeHandler: { [key in Action]: MessageHandlerFunction<any> } = {
   [Action.HANDSHAKE]: messageTypeHandlerNotSupported,
   [Action.WALLET_ADD]: handleAddWallet,
@@ -272,5 +291,6 @@ export const messageTypeHandler: { [key in Action]: MessageHandlerFunction<any> 
   [Action.MNEMONIC_GET]: handleGetMnemonic,
   [Action.MNEMONIC_GENERATE]: handleGenerateMnemonic,
   [Action.MNEMONIC_SAVE]: handleSaveMnemonic,
+  [Action.BEACON_ID_GET]: handleBeaconIdGet,
   [Action.RESPONSE]: handleResponse
 }

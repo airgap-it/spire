@@ -3,6 +3,8 @@ import { Component } from '@angular/core'
 import { ToastController } from '@ionic/angular'
 
 import { SettingsService } from '../../services/settings.service'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Methods'
 
 @Component({
   selector: 'beacon-settings',
@@ -13,8 +15,13 @@ export class SettingsPage {
   public networkType: NetworkType = NetworkType.MAINNET
   public networkName: string | undefined
   public networkRpcUrl: string | undefined
+  public beaconId: string | undefined
 
-  constructor(public readonly settingsService: SettingsService, private readonly toastController: ToastController) {
+  constructor(
+    public readonly settingsService: SettingsService,
+    public readonly chromeMessagingService: ChromeMessagingService,
+    private readonly toastController: ToastController
+  ) {
     this.settingsService
       .getNetwork()
       .then((network: Network | undefined) => {
@@ -25,6 +32,17 @@ export class SettingsPage {
         }
       })
       .catch(console.error)
+
+    this.chromeMessagingService
+      .sendChromeMessage(Action.BEACON_ID_GET, undefined)
+      .then((data: ExtensionMessageOutputPayload<Action.BEACON_ID_GET>) => {
+        if (data.data) {
+          this.beaconId = data.data.id
+        }
+      })
+      .catch((chromeMessagingError: Error) => {
+        console.error(chromeMessagingError)
+      })
   }
 
   public async updateNetworkType() {

@@ -31,6 +31,7 @@ export enum Action {
   MNEMONIC_GET = 'MNEMONIC_GET',
   MNEMONIC_GENERATE = 'MNEMONIC_GENERATE',
   MNEMONIC_SAVE = 'MNEMONIC_SAVE',
+  BEACON_ID_GET = 'BEACON_ID_GET',
   RESPONSE = 'REQUEST'
 }
 
@@ -52,6 +53,7 @@ export interface ActionInputTypesMap {
   [Action.MNEMONIC_GET]: undefined
   [Action.MNEMONIC_GENERATE]: undefined
   [Action.MNEMONIC_SAVE]: { mnemonic: string }
+  [Action.BEACON_ID_GET]: undefined
   [Action.RESPONSE]: { request: unknown; extras: unknown }
 }
 
@@ -73,6 +75,7 @@ export interface ActionOutputTypesMap {
   [Action.MNEMONIC_GET]: { mnemonic: string }
   [Action.MNEMONIC_GENERATE]: { mnemonic: string }
   [Action.MNEMONIC_SAVE]: { result: boolean }
+  [Action.BEACON_ID_GET]: { id: string }
   [Action.RESPONSE]: undefined
 }
 

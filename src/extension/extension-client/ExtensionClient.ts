@@ -21,7 +21,11 @@ import * as sodium from 'libsodium-wrappers'
 
 import { AirGapSigner } from '../AirGapSigner'
 
-import { MessageHandlerFunction, messageTypeHandler, messageTypeHandlerNotSupported } from './action-message-handler'
+import {
+  MessageHandlerFunction,
+  messageTypeHandler,
+  messageTypeHandlerNotSupported
+} from './action-handler/action-message-handler'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
@@ -79,7 +83,7 @@ export class ExtensionClient {
     const messageHandlerMap: Map<string, MessageHandler> = new Map<string, MessageHandler>()
     messageHandlerMap.set(
       ExtensionMessageTarget.EXTENSION,
-      new ToExtensionMessageHandler(this.sendToBeacon, sendToPopup)
+      new ToExtensionMessageHandler(this.sendToBeacon, sendToPopup, this.signer)
     )
     messageHandlerMap.set(
       ExtensionMessageTarget.PAGE,
