@@ -7,7 +7,6 @@ import {
   Serializer
 } from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
-import * as bip39 from 'bip39'
 
 import { Logger } from '../Logger'
 import { getProtocolForNetwork } from '../utils'
@@ -48,12 +47,8 @@ export class ToExtensionMessageHandler extends MessageHandler {
           const operationRequest: OperationRequest = deserialized
           const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network)
           const mnemonic: string = await storage.get('mnemonic' as any)
-          const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
 
-          const publicKey: string = protocol.getPublicKeyFromHexSecret(
-            seed.toString('hex'),
-            protocol.standardDerivationPath
-          )
+          const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
           operationRequest.operationDetails = (
             await protocol.prepareOperations(publicKey, operationRequest.operationDetails)
           ).contents

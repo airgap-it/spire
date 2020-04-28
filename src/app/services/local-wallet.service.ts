@@ -54,13 +54,12 @@ export class LocalWalletService {
     publicKey: string
     address: string
   }> {
-    const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
-    const privateKey: string = this.protocol
-      .getPrivateKeyFromHexSecret(seed.toString('hex'), this.protocol.standardDerivationPath)
-      .toString('hex')
+    const privateKey: string = (
+      await this.protocol.getPrivateKeyFromMnemonic(mnemonic, this.protocol.standardDerivationPath)
+    ).toString('hex')
 
-    const publicKey: string = this.protocol.getPublicKeyFromHexSecret(
-      seed.toString('hex'),
+    const publicKey: string = await this.protocol.getPublicKeyFromMnemonic(
+      mnemonic,
       this.protocol.standardDerivationPath
     )
 

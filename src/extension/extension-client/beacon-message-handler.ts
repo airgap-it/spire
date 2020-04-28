@@ -5,7 +5,6 @@ import {
   BroadcastResponse,
   BroadcastResponseInput,
   ChromeStorage,
-  Network,
   OperationRequestOutput,
   OperationResponse,
   OperationResponseInput,
@@ -21,48 +20,13 @@ import {
 import { TezosProtocol } from 'airgap-coin-lib'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 import { RawTezosTransaction } from 'airgap-coin-lib/dist/serializer/types'
-import * as bip39 from 'bip39'
 
 import { ExtensionClient } from './ExtensionClient'
-import { BeaconLedgerBridge } from './ledger-bridge'
 import { Logger } from './Logger'
 import { getProtocolForNetwork } from './utils'
 
 const logger: Logger = new Logger('BeaconMessageHandler')
 const storage: ChromeStorage = new ChromeStorage()
-
-const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
-const useLedger: boolean = true
-
-const broadcast: (network: Network, signedTx: string) => Promise<string> = async (
-  network: Network,
-  signedTx: string
-): Promise<string> => {
-  const protocol: TezosProtocol = await getProtocolForNetwork(network)
-
-  return protocol.broadcastTransaction(signedTx)
-}
-
-const sign: (forgedTx: string) => Promise<string> = async (forgedTx: string): Promise<string> => {
-  if (!useLedger) {
-    const protocol: TezosProtocol = new TezosProtocol() // TODO: Remove this
-
-    const mnemonic: string = await storage.get('mnemonic' as any)
-    const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
-    const privatekey: Buffer = protocol.getPrivateKeyFromHexSecret(
-      seed.toString('hex'),
-      protocol.standardDerivationPath
-    )
-
-    return protocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
-  } else {
-    logger.log('WILL SIGN', forgedTx)
-    const signature: string = await bridge.signOperation(forgedTx)
-    logger.log('SIGNATURE', signature)
-
-    return signature
-  }
-}
 
 const beaconMessageHandlerNotSupported: (
   data: { request: BeaconBaseMessage; extras: unknown },
@@ -117,12 +81,8 @@ export class BeaconMessageHandler {
       const protocol: TezosProtocol = await getProtocolForNetwork(operationRequest.network)
 
       const mnemonic: string = await storage.get('mnemonic' as any)
-      const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
 
-      const publicKey: string = protocol.getPublicKeyFromHexSecret(
-        seed.toString('hex'),
-        protocol.standardDerivationPath
-      )
+      const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
       const operation: TezosWrappedOperation = await protocol.prepareOperations(
         publicKey,
         operationRequest.operationDetails
@@ -133,9 +93,11 @@ export class BeaconMessageHandler {
 
       let responseInput: OperationResponseInput
       try {
-        const hash: string = await this.client.signer.sign(forgedTx.binaryTransaction).then((signedTx: string) => {
-          return broadcast(operationRequest.network, signedTx)
-        })
+        const hash: string = await this.client.signer
+          .sign(forgedTx.binaryTransaction, mnemonic)
+          .then((signedTx: string) => {
+            return this.client.signer.broadcast(operationRequest.network, signedTx)
+          })
         logger.log('broadcast: ', hash)
         responseInput = {
           id: operationRequest.id,
@@ -163,7 +125,9 @@ export class BeaconMessageHandler {
     ): Promise<void> => {
       const signRequest: SignPayloadRequestOutput = (data.request as any) as SignPayloadRequestOutput
       logger.log('beaconMessageHandler sign-request', data)
-      const signature: string = await sign(signRequest.payload[0])
+      const mnemonic: string = await storage.get('mnemonic' as any)
+
+      const signature: string = await this.client.signer.sign(signRequest.payload[0], mnemonic)
       logger.log('signed: ', signature)
       const responseInput: SignPayloadResponseInput = {
         id: signRequest.id,
@@ -183,7 +147,10 @@ export class BeaconMessageHandler {
     ): Promise<void> => {
       const broadcastRequest: BroadcastRequestOutput = (data.request as any) as BroadcastRequestOutput
       logger.log('beaconMessageHandler broadcast-request', broadcastRequest)
-      const hash: string = await broadcast(broadcastRequest.network, broadcastRequest.signedTransaction)
+      const hash: string = await this.client.signer.broadcast(
+        broadcastRequest.network,
+        broadcastRequest.signedTransaction
+      )
       logger.log('broadcast: ', hash)
       const responseInput: BroadcastResponseInput = {
         id: broadcastRequest.id,

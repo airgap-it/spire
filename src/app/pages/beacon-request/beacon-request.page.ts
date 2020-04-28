@@ -281,13 +281,13 @@ export class BeaconRequestPage implements OnInit {
     await alert.present()
   }
 
-  public openBlockexplorer(address: string, hash: string): void {
+  public async openBlockexplorer(address: string, hash: string): Promise<void> {
     let blockexplorer: string = this.protocol.blockExplorer
 
     if (hash) {
-      blockexplorer = this.protocol.getBlockExplorerLinkForTxId(hash)
+      blockexplorer = await this.protocol.getBlockExplorerLinkForTxId(hash)
     } else if (address) {
-      blockexplorer = this.protocol.getBlockExplorerLinkForAddress(address)
+      blockexplorer = await this.protocol.getBlockExplorerLinkForAddress(address)
     }
 
     this.openUrl(blockexplorer)
