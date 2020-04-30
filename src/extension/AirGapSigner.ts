@@ -11,7 +11,7 @@ import { getProtocolForNetwork } from './extension-client/utils'
 const logger: Logger = new Logger('AirGap Signer')
 
 const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
-const useLedger: boolean = true
+const useLedger: boolean = false
 
 export class AirGapSigner implements Signer {
   public async prepareOperations(

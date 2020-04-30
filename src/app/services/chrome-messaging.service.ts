@@ -24,7 +24,7 @@ export class ChromeMessagingService {
 
       const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
 
-      this.beaconRequest(deserialized, WalletType.LEDGER).catch((beaconRequestError: Error) => {
+      this.beaconRequest(deserialized, WalletType.LOCAL_MNEMONIC).catch((beaconRequestError: Error) => {
         console.log('beaconRequestError', beaconRequestError)
       })
     })
