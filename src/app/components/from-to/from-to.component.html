@@ -46,7 +46,7 @@
 
   <address-row *ngFor="let address of transaction.to" [address]="address" label="To"></address-row>
 
-  <ion-row class="rawdata--container" *ngIf="transaction.transactionDetails">
+  <ion-row class="rawdata--container ion-padding-bottom ion-margin-bottom" *ngIf="transaction.transactionDetails">
     <ion-col class="ion-no-padding">
       <ion-item class="ion-no-padding" lines="none">
         <ion-label>Display extra transaction details</ion-label>
