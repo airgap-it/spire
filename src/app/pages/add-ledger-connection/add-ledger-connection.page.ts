@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 
 @Component({
   selector: 'app-add-ledger-connection',
@@ -47,11 +48,12 @@ export class AddLedgerConnectionPage implements OnInit {
           Action.LEDGER_INIT
         >
         if (data) {
-          const walletInfo: WalletInfo = {
+          const walletInfo: WalletInfo<WalletType.LEDGER> = {
+            address: await getAddressFromPublicKey(data.pubkey),
             pubkey: data.pubkey,
             type: WalletType.LEDGER,
             added: new Date(),
-            senderId: ''
+            info: undefined
           }
           await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
           await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })

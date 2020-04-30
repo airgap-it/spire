@@ -9,6 +9,6 @@ export const beaconIdGetAction: (logger: Logger) => MessageHandlerFunction<Actio
   context: ActionContext<Action.BEACON_ID_GET>
 ): Promise<void> => {
   logger.log('beaconIdGetAction', context.data)
-  // TODO: get actual beacon ID
-  context.sendResponse({ data: { id: 'BEACON_ID_PLACEHOLDER' } })
+  const beaconId: string = await context.client.beaconId
+  context.sendResponse({ data: { id: beaconId } })
 }

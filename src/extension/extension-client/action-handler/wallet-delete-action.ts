@@ -1,4 +1,4 @@
-import { Action, WalletInfo } from '../Actions'
+import { Action, WalletInfo, WalletType } from '../Actions'
 import { Logger } from '../Logger'
 
 import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
@@ -9,9 +9,9 @@ export const walletDeleteAction: (logger: Logger) => MessageHandlerFunction<Acti
   context: ActionContext<Action.WALLET_DELETE>
 ): Promise<void> => {
   logger.log('walletDeleteAction', context.data)
-  const wallets: WalletInfo[] = (await context.storage.get('WALLETS' as any)) || []
-  const filteredWallets: WalletInfo[] = wallets.filter(
-    (wallet: WalletInfo) => wallet.pubkey !== context.data.data.wallet.pubkey
+  const wallets: WalletInfo<WalletType>[] = (await context.storage.get('WALLETS' as any)) || []
+  const filteredWallets: WalletInfo<WalletType>[] = wallets.filter(
+    (wallet: WalletInfo<WalletType>) => wallet.pubkey !== context.data.data.wallet.pubkey
   )
   if (filteredWallets.length === wallets.length) {
     context.sendResponse({ data: { deleted: false } })

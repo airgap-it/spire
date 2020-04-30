@@ -1,16 +1,23 @@
-import { AccountInfo, Network } from '@airgap/beacon-sdk'
-
-export interface WalletInfo {
-  pubkey: string
-  type: WalletType
-  added: Date
-  senderId: string
-}
+import { AccountInfo, Network, P2PPairInfo } from '@airgap/beacon-sdk'
 
 export enum WalletType {
   P2P = 'P2P',
   LEDGER = 'LEDGER',
   LOCAL_MNEMONIC = 'LOCAL_MNEMONIC'
+}
+
+interface WalletInfoTypeMap {
+  [WalletType.P2P]: P2PPairInfo
+  [WalletType.LEDGER]: undefined
+  [WalletType.LOCAL_MNEMONIC]: { mnemonic: string }
+}
+
+export interface WalletInfo<T extends WalletType> {
+  address: string
+  pubkey: string
+  type: T
+  info: WalletInfoTypeMap[T]
+  added: Date
 }
 
 export enum Action {
@@ -37,11 +44,11 @@ export enum Action {
 
 export interface ActionInputTypesMap {
   [Action.HANDSHAKE]: undefined
-  [Action.WALLET_ADD]: { wallet: WalletInfo }
-  [Action.WALLET_DELETE]: { wallet: WalletInfo }
+  [Action.WALLET_ADD]: { wallet: WalletInfo<WalletType> }
+  [Action.WALLET_DELETE]: { wallet: WalletInfo<WalletType> }
   [Action.WALLETS_GET]: undefined
   [Action.ACTIVE_WALLET_GET]: undefined
-  [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo }
+  [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo<WalletType> }
   [Action.ACCOUNTS_GET]: undefined
   [Action.ACCOUNT_DELETE]: { account: AccountInfo }
   [Action.ACTIVE_NETWORK_GET]: undefined
@@ -61,8 +68,8 @@ export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
   [Action.WALLET_ADD]: { added: boolean }
   [Action.WALLET_DELETE]: { deleted: boolean }
-  [Action.WALLETS_GET]: { wallets: WalletInfo[] }
-  [Action.ACTIVE_WALLET_GET]: { wallet: WalletInfo }
+  [Action.WALLETS_GET]: { wallets: WalletInfo<WalletType>[] }
+  [Action.ACTIVE_WALLET_GET]: { wallet: WalletInfo<WalletType> }
   [Action.ACTIVE_WALLET_SET]: undefined
   [Action.ACCOUNTS_GET]: { accounts: AccountInfo[] }
   [Action.ACCOUNT_DELETE]: undefined

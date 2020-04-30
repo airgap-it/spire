@@ -111,18 +111,21 @@ export class LocalWalletService {
 
   public async addAndActiveWallet(mnemonic: string): Promise<void> {
     const {
-      publicKey
+      publicKey,
+      address
     }: {
       privateKey: string
       publicKey: string
       address: string
     } = await this.mnemonicToAddress(mnemonic)
-
-    const walletInfo: WalletInfo = {
+    const walletInfo: WalletInfo<WalletType.LOCAL_MNEMONIC> = {
+      address,
       pubkey: publicKey,
       type: WalletType.LOCAL_MNEMONIC,
       added: new Date(),
-      senderId: ''
+      info: {
+        mnemonic
+      }
     }
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })

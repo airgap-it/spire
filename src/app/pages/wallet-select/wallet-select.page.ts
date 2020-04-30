@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload, WalletInfo } from 'src/extension/extension-client/Actions'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-wallet-select',
@@ -9,8 +9,8 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo } from 'src/extension
   styleUrls: ['./wallet-select.page.scss']
 })
 export class WalletSelectPage {
-  public activeWallet: WalletInfo | undefined
-  public wallets: WalletInfo[] = []
+  public activeWallet: WalletInfo<WalletType> | undefined
+  public wallets: WalletInfo<WalletType>[] = []
 
   constructor(
     private readonly modalController: ModalController,
@@ -43,12 +43,12 @@ export class WalletSelectPage {
     this.cdr.detectChanges()
   }
 
-  public async activateWallet(wallet: WalletInfo): Promise<void> {
+  public async activateWallet(wallet: WalletInfo<WalletType>): Promise<void> {
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet })
     this.refreshWallets()
   }
 
-  public async deleteWallet(wallet: WalletInfo): Promise<void> {
+  public async deleteWallet(wallet: WalletInfo<WalletType>): Promise<void> {
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_DELETE, { wallet })
     this.refreshWallets()
   }
