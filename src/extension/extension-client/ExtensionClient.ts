@@ -15,24 +15,21 @@ import {
 } from '@airgap/beacon-sdk'
 import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
 import { getKeypairFromSeed, toHex } from '@airgap/beacon-sdk/dist/utils/crypto'
-import { ExposedPromise, exposedPromise } from '@airgap/beacon-sdk/dist/utils/exposed-promise'
+import { ExposedPromise } from '@airgap/beacon-sdk/dist/utils/exposed-promise'
 import { generateGUID } from '@airgap/beacon-sdk/dist/utils/generate-uuid'
+import { getAccountIdentifier } from '@airgap/beacon-sdk/dist/utils/get-account-identifier'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapSigner } from '../AirGapSigner'
 
-import {
-  MessageHandlerFunction,
-  messageTypeHandler,
-  messageTypeHandlerNotSupported
-} from './action-handler/action-message-handler'
+import { ActionMessageHandler, MessageHandlerFunction } from './action-handler/ActionMessageHandler'
+import { Action, ExtensionMessageInputPayload } from './Actions'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
 import { ToBackgroundMessageHandler } from './message-handler/ToBackgroundMessageHandler'
 import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageHandler'
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
-import { Action, ExtensionMessageInputPayload } from './Methods'
 import { PopupManager } from './PopupManager'
 import { Signer } from './Signer'
 
@@ -49,7 +46,7 @@ export class ExtensionClient {
   // private pendingRequests: BeaconMessage[] = []
 
   protected beaconId: string | undefined
-  protected _keyPair: ExposedPromise<sodium.KeyPair> = exposedPromise()
+  protected _keyPair: ExposedPromise<sodium.KeyPair> = new ExposedPromise()
   protected get keyPair(): Promise<sodium.KeyPair> {
     return this._keyPair.promise
   }
@@ -136,10 +133,12 @@ export class ExtensionClient {
     sendResponse: (message: unknown) => void
   ): Promise<void> => {
     logger.log('handleMessage', data, sendResponse)
-    const handler: MessageHandlerFunction<Action> =
-      messageTypeHandler[data.payload.action] || messageTypeHandlerNotSupported
+    const handler: MessageHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
+
     logger.log('handler', handler)
-    await handler(data.payload, sendResponse, {
+    await handler({
+      data: data.payload,
+      sendResponse,
       client: this,
       p2pClient: this.p2pClient,
       storage: this.storage,
@@ -203,9 +202,11 @@ export class ExtensionClient {
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
       const permissionResponse: PermissionResponse = beaconMessage
       const account: AccountInfo = {
+        // TODO: Replace
+        accountIdentifier: await getAccountIdentifier(permissionResponse.pubkey, permissionResponse.network),
         ...permissionResponse,
         origin: {
-          type: Origin.EXTENSION, // TODO: Fix
+          type: Origin.WEBSITE,
           id: permissionResponse.beaconId
         },
         beaconId: '',

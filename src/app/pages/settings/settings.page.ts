@@ -1,10 +1,10 @@
 import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { ToastController } from '@ionic/angular'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
 import { SettingsService } from '../../services/settings.service'
-import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Methods'
 
 @Component({
   selector: 'beacon-settings',

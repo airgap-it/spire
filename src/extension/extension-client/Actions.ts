@@ -25,8 +25,8 @@ export enum Action {
   ACTIVE_NETWORK_GET = 'ACTIVE_NETWORK_GET',
   ACTIVE_NETWORK_SET = 'ACTIVE_NETWORK_SET',
   P2P_INIT = 'P2P_INIT',
-  P2P_GET_PEERS = 'P2P_GET_PEERS',
-  P2P_REMOVE_PEERS = 'P2P_REMOVE_PEERS',
+  P2P_PEERS_GET = 'P2P_GET_PEERS',
+  P2P_PEER_REMOVE = 'P2P_REMOVE_PEERS',
   LEDGER_INIT = 'LEDGER_INIT',
   MNEMONIC_GET = 'MNEMONIC_GET',
   MNEMONIC_GENERATE = 'MNEMONIC_GENERATE',
@@ -47,8 +47,8 @@ export interface ActionInputTypesMap {
   [Action.ACTIVE_NETWORK_GET]: undefined
   [Action.ACTIVE_NETWORK_SET]: { network: Network }
   [Action.P2P_INIT]: undefined
-  [Action.P2P_GET_PEERS]: undefined
-  [Action.P2P_REMOVE_PEERS]: undefined
+  [Action.P2P_PEERS_GET]: undefined
+  [Action.P2P_PEER_REMOVE]: undefined
   [Action.LEDGER_INIT]: undefined
   [Action.MNEMONIC_GET]: undefined
   [Action.MNEMONIC_GENERATE]: undefined
@@ -69,8 +69,8 @@ export interface ActionOutputTypesMap {
   [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }
   [Action.ACTIVE_NETWORK_SET]: undefined
   [Action.P2P_INIT]: { qr: { name: string; pubKey: string; relayServer: string } }
-  [Action.P2P_GET_PEERS]: undefined
-  [Action.P2P_REMOVE_PEERS]: undefined
+  [Action.P2P_PEERS_GET]: undefined
+  [Action.P2P_PEER_REMOVE]: undefined
   [Action.LEDGER_INIT]: { pubkey: string; address: string }
   [Action.MNEMONIC_GET]: { mnemonic: string }
   [Action.MNEMONIC_GENERATE]: { mnemonic: string }

@@ -15,7 +15,7 @@ import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
-import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/extension-client/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/extension-client/Actions'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
@@ -119,15 +119,6 @@ export class BeaconRequestPage implements OnInit {
     this.localWalletService.publicKey.pipe(take(1)).subscribe((pubKey: string) => {
       this.inputs = [
         {
-          name: 'read_address',
-          type: 'checkbox',
-          label: 'Read Address',
-          value: 'read_address',
-          icon: 'eye',
-          checked: request.scopes.indexOf(PermissionScope.READ_ADDRESS) >= 0
-        },
-
-        {
           name: 'sign',
           type: 'checkbox',
           label: 'Sign transactions',
@@ -158,7 +149,6 @@ export class BeaconRequestPage implements OnInit {
       this.responseHandler = async (): Promise<void> => {
         await this.sendResponse(request, {
           pubkey: pubKey,
-          accountIdentifier: `${pubKey}-${request.network.type}`,
           scopes: this.inputs.filter(input => input.checked).map(input => input.value)
         })
       }

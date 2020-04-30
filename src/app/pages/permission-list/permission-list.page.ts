@@ -1,7 +1,7 @@
 import { AccountInfo } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Methods'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-permission-list',

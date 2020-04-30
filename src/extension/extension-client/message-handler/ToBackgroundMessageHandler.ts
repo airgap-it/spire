@@ -1,7 +1,7 @@
 import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
 
+import { Action, ExtensionMessageInputPayload } from '../Actions'
 import { Logger } from '../Logger'
-import { Action, ExtensionMessageInputPayload } from '../Methods'
 
 import { MessageHandler } from './MessageHandler'
 

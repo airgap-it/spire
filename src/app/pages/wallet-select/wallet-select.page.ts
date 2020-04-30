@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload, WalletInfo } from 'src/extension/extension-client/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletInfo } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-wallet-select',

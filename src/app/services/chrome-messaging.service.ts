@@ -7,7 +7,7 @@ import {
   ExtensionMessageInputPayload,
   ExtensionMessageOutputPayload,
   WalletType
-} from 'src/extension/extension-client/Methods'
+} from 'src/extension/extension-client/Actions'
 
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 

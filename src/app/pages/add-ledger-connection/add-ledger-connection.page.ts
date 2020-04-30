@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-add-ledger-connection',

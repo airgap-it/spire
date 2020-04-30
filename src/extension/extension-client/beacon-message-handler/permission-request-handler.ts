@@ -27,14 +27,12 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
     const request: PermissionRequestOutput = (data.request as any) as PermissionRequestOutput
     const extras: {
       pubkey: string
-      accountIdentifier: string
       scopes: PermissionScope[]
     } = data.extras as any
 
     const responseInput: PermissionResponseInput = {
       id: request.id,
       type: BeaconMessageType.PermissionResponse,
-      accountIdentifier: extras.accountIdentifier,
       pubkey: extras.pubkey,
       network: {
         ...request.network

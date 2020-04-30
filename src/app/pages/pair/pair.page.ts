@@ -3,7 +3,7 @@ import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { SettingsService } from 'src/app/services/settings.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Methods'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
