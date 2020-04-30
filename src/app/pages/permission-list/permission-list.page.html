@@ -1,0 +1,29 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Permissions
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list lines="none">
+    <ion-list-header>
+      Connected dApps
+    </ion-list-header>
+    <ion-item-sliding *ngFor="let account of accounts">
+      <ion-item>
+        {{ account.pubkey }}
+        <br />
+        {{ account.scopes }}
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option (click)="deleteAccount(account)" color="danger">Delete</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+  {{ accounts | json }}
+</ion-content>

@@ -26,6 +26,11 @@ const routes: Routes = [
   {
     path: 'home',
     loadChildren: () => import('./pages/home/home.module').then(m => m.HomePageModule)
+  },
+  {
+    path: 'permission-list',
+    loadChildren: () =>
+      import('./pages/permission-list/permission-list-routing.module').then(m => m.PermissionListPageRoutingModule)
   }
 ]
 

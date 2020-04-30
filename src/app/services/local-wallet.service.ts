@@ -2,7 +2,9 @@ import { Injectable, NgZone } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
-import { Methods } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+
+import { ChromeMessagingService } from './chrome-messaging.service'
 
 @Injectable({
   providedIn: 'root'
@@ -20,22 +22,20 @@ export class LocalWalletService {
   public publicKey: Observable<string> = this._publicKey.asObservable()
   public address: Observable<string> = this._address.asObservable()
 
-  constructor(private readonly ngZone: NgZone) {
+  constructor(private readonly ngZone: NgZone, private readonly chromeMessagingService: ChromeMessagingService) {
     this.protocol = new TezosProtocol() // This protocol is only used to calculate addresses, so it is not different on testnets
 
     this.mnemonic.subscribe(async (mnemonic: string) => {
       console.log('SUBSCRIBE TRIGGERED')
-      const seed = await bip39.mnemonicToSeed(mnemonic)
-      const privateKey = this.protocol
-        .getPrivateKeyFromHexSecret(seed.toString('hex'), this.protocol.standardDerivationPath)
-        .toString('hex')
-
-      const publicKey = this.protocol.getPublicKeyFromHexSecret(
-        seed.toString('hex'),
-        this.protocol.standardDerivationPath
-      )
-
-      const address = await this.protocol.getAddressFromPublicKey(publicKey)
+      const {
+        privateKey,
+        publicKey,
+        address
+      }: {
+        privateKey: string
+        publicKey: string
+        address: string
+      } = await this.mnemonicToAddress(mnemonic)
 
       this.ngZone.run(() => {
         this._privateKey.next(privateKey)
@@ -47,29 +47,84 @@ export class LocalWalletService {
     this.getMnemonic()
   }
 
+  public async mnemonicToAddress(
+    mnemonic: string
+  ): Promise<{
+    privateKey: string
+    publicKey: string
+    address: string
+  }> {
+    const privateKey: string = (
+      await this.protocol.getPrivateKeyFromMnemonic(mnemonic, this.protocol.standardDerivationPath)
+    ).toString('hex')
+
+    const publicKey: string = await this.protocol.getPublicKeyFromMnemonic(
+      mnemonic,
+      this.protocol.standardDerivationPath
+    )
+
+    const address: string = await this.protocol.getAddressFromPublicKey(publicKey)
+
+    return {
+      privateKey,
+      publicKey,
+      address
+    }
+  }
+
   public async getMnemonic(): Promise<void> {
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GET_MNEMONIC }, response => {
-      console.log('generateMnemonic response', response)
-      this._mnemonic.next(response.mnemonic)
-    })
+    const response: ExtensionMessageOutputPayload<Action.MNEMONIC_GET> = await this.chromeMessagingService.sendChromeMessage(
+      Action.MNEMONIC_GET,
+      undefined
+    )
+    console.log('generateMnemonic response', response)
+    if (response.data) {
+      this._mnemonic.next(response.data.mnemonic)
+    }
   }
 
   public async generateMnemonic(): Promise<void> {
-    chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.LOCAL_GENERATE_MNEMONIC }, response => {
-      console.log('generateMnemonic response', response)
-      this._mnemonic.next(response.mnemonic)
-    })
+    const response: ExtensionMessageOutputPayload<Action.MNEMONIC_GENERATE> = await this.chromeMessagingService.sendChromeMessage(
+      Action.MNEMONIC_GENERATE,
+      undefined
+    )
+    console.log('generateMnemonic response', response)
+    if (response.data) {
+      this._mnemonic.next(response.data.mnemonic)
+      await this.addAndActiveWallet(response.data.mnemonic)
+    }
   }
 
   public async saveMnemonic(mnemonic: string): Promise<void> {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      chrome.runtime.sendMessage(
-        { method: 'toBackground', type: Methods.LOCAL_SAVE_MNEMONIC, payload: { params: { mnemonic } } },
-        response => {
-          console.log('saveMnemonic response', response)
-        }
+      const response: ExtensionMessageOutputPayload<Action.MNEMONIC_SAVE> = await this.chromeMessagingService.sendChromeMessage(
+        Action.MNEMONIC_SAVE,
+        { mnemonic }
       )
+
+      console.log('saveMnemonic response', response)
+
       this._mnemonic.next(mnemonic)
+      await this.addAndActiveWallet(mnemonic)
     }
+  }
+
+  public async addAndActiveWallet(mnemonic: string): Promise<void> {
+    const {
+      publicKey
+    }: {
+      privateKey: string
+      publicKey: string
+      address: string
+    } = await this.mnemonicToAddress(mnemonic)
+
+    const walletInfo: WalletInfo = {
+      pubkey: publicKey,
+      type: WalletType.LOCAL_MNEMONIC,
+      added: new Date(),
+      senderId: ''
+    }
+    await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
+    await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
   }
 }

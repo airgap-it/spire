@@ -1,0 +1,36 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Wallets</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list *ngIf="activeWallet">
+    <ion-list-header>
+      Active Wallet
+    </ion-list-header>
+    <ion-item>
+      {{ activeWallet.type }} - {{ activeWallet.pubkey }}
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-list-header>
+      Other wallets
+    </ion-list-header>
+    <ion-item-sliding *ngFor="let wallet of wallets">
+      <ion-item (click)="activateWallet(wallet)">
+        {{ wallet.type }} - {{ wallet.pubkey }}
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option (click)="deleteWallet(wallet)" color="danger">Delete</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+  {{ wallets | json }}
+</ion-content>

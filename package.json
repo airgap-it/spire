@@ -12,11 +12,13 @@
     "test": "ng test",
     "test-ci": "ng test --code-coverage --watch=false",
     "lint": "ng lint",
+    "lint-fix": "ng lint --fix",
     "lint-ci": "ng lint app --format json > ./lintReport.json || true",
     "e2e": "ng e2e",
     "prettier": "npx prettier --write 'src/**/*'",
     "sonar-scanner": "sonar-scanner",
     "extension:build": "ionic build && node ./scripts/copy-extension-files.js",
+    "extension:build:dev": "ionic build --prod --optimization=false && node ./scripts/copy-extension-files.js",
     "extension:build:prod": "ionic build --prod && node ./scripts/copy-extension-files.js",
     "prepare-prod-build": "npm run disable-pure-getters && npm run configure-mangle",
     "disable-pure-getters": "replace 'pure_getters: buildOptions.buildOptimizer' 'pure_getters: false' ./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs/common.js ",
@@ -24,7 +26,7 @@
   },
   "private": true,
   "dependencies": {
-    "@airgap/beacon-sdk": "0.0.2",
+    "@airgap/beacon-sdk": "0.2.0",
     "@angular/common": "^9.1.0",
     "@angular/core": "^9.1.0",
     "@angular/forms": "^9.1.0",
@@ -32,20 +34,16 @@
     "@angular/platform-browser-dynamic": "^9.1.0",
     "@angular/router": "^9.1.0",
     "@download/blockies": "^1.0.3",
-    "@ionic-native/core": "^5.0.0",
-    "@ionic-native/splash-screen": "^5.0.0",
-    "@ionic-native/status-bar": "^5.0.0",
-    "@ionic/angular": "5.0.0",
-    "airgap-coin-lib": "0.8.0-beta.8",
+    "@ionic/angular": "^5.0.7",
+    "@sentry/browser": "^5.15.5",
+    "airgap-coin-lib": "0.8.0",
     "angular2-qrcode": "^2.0.3",
     "bignumber.js": "^9.0.0",
     "bip39": "^3.0.2",
     "core-js": "^2.5.4",
-    "matrix-js-sdk": "^2.4.6",
     "moment": "^2.24.0",
     "myetherwallet-blockies": "^0.1.1",
     "ngx-moment": "^3.5.0",
-    "qrcode-generator": "^1.4.4",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
     "zone.js": "~0.9.1"
@@ -85,5 +83,8 @@
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~3.8.3"
   },
-  "description": "Beacon connects Tezos decetralized applications with wallets."
+  "description": "Beacon connects Tezos decetralized applications with wallets.",
+  "browser": {
+    "fs": false
+  }
 }

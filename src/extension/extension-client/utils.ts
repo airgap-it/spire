@@ -1,17 +1,17 @@
-import { Network, NetworkType } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 
-export const getProtocolForNetwork = async (network: Network): Promise<TezosProtocol> => {
+export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol> = async (
+  network: Network
+): Promise<TezosProtocol> => {
   const rpcUrls: { [key in NetworkType]: string } = {
     [NetworkType.MAINNET]: 'https://tezos-node.prod.gke.papers.tech',
-    [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-node-1.kubernetes.papers.tech',
     [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-node-1.kubernetes.papers.tech',
     [NetworkType.CUSTOM]: ''
   }
 
   const apiUrls: { [key in NetworkType]: string } = {
     [NetworkType.MAINNET]: 'https://tezos-mainnet-conseil-1.kubernetes.papers.tech',
-    [NetworkType.BABYLONNET]: 'https://tezos-babylonnet-conseil-1.kubernetes.papers.tech',
     [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-conseil-1.kubernetes.papers.tech',
     [NetworkType.CUSTOM]: ''
   }
@@ -19,4 +19,19 @@ export const getProtocolForNetwork = async (network: Network): Promise<TezosProt
   const apiUrl: string = apiUrls[network.type]
 
   return new TezosProtocol(rpcUrl, apiUrl)
+}
+
+export const getTezblockLinkForNetwork: (network: Network | undefined) => Promise<string> = async (
+  network: Network | undefined
+): Promise<string> => {
+  console.log('network', network)
+
+  const urls: { [key in NetworkType]: string } = {
+    [NetworkType.MAINNET]: 'https://tezblock.io/account/',
+    [NetworkType.CARTHAGENET]: 'https://carthagenet.tezblock.io/account/',
+    [NetworkType.CUSTOM]: 'http://localhost:8100/account/'
+  }
+  const url: string = urls[network ? network.type : NetworkType.MAINNET]
+
+  return url
 }

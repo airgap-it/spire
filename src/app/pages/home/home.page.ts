@@ -1,13 +1,14 @@
-import { Network } from '@airgap/beacon-sdk/dist/messages/Messages'
+import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
 import { SettingsService } from 'src/app/services/settings.service'
-import { SigningMethodService } from 'src/app/services/signing-method.service'
 import { StorageKey, StorageService } from 'src/app/services/storage.service'
+import { getTezblockLinkForNetwork } from 'src/extension/extension-client/utils'
 
 import { PairPage } from '../pair/pair.page'
+import { WalletSelectPage } from '../wallet-select/wallet-select.page'
 
 enum SigningMethods {
   WALLET = 'WALLET',
@@ -24,33 +25,27 @@ export class HomePage {
   public signingMethods: typeof SigningMethods = SigningMethods
   public currentSigningMethod: string = 'Unpaired'
   public balance: string = ''
+  public tezblockLink: string = ''
   public network: Network | undefined
 
   constructor(
     public readonly localWalletService: LocalWalletService,
-    private readonly signingMethodService: SigningMethodService,
     private readonly modalController: ModalController,
     private readonly storageService: StorageService,
     private readonly settingsService: SettingsService,
     private readonly ref: ChangeDetectorRef
   ) {
     this.settingsService.getNetwork().then(network => (this.network = network))
-    this.signingMethodService.signingMethod.asObservable().subscribe(method => {
-      if (method === SigningMethods.WALLET) {
-        this.currentSigningMethod = 'Wallet'
-      } else if (method === SigningMethods.LOCAL_MNEMONIC) {
-        this.currentSigningMethod = 'Local Secret'
-      } else if (method === SigningMethods.LEDGER) {
-        this.currentSigningMethod = 'Ledger'
-      } else {
-        this.currentSigningMethod = method
-      }
-    })
 
     this.checkOnboarding().catch(console.error)
 
-    this.localWalletService.address.subscribe(async address => {
-      this.balance = await this.getBalance(address)
+    this.localWalletService.address.subscribe(async (address: string | null) => {
+      const [balance, tezblockLink]: [string, string] = await Promise.all([
+        this.getBalance(address),
+        this.getBlockexplorer(address)
+      ])
+      this.balance = balance
+      this.tezblockLink = tezblockLink
       this.ref.detectChanges()
     })
   }
@@ -72,6 +67,14 @@ export class HomePage {
     }
   }
 
+  public async openWalletSelection(): Promise<void> {
+    const modal: HTMLIonModalElement = await this.modalController.create({
+      component: WalletSelectPage
+    })
+
+    return modal.present()
+  }
+
   public async getBalance(address: string | null): Promise<string> {
     console.log('getBalance', address)
     if (!address) {
@@ -82,12 +85,22 @@ export class HomePage {
     if (network) {
       const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
 
-      const amount = await protocol.getBalanceOfAddresses([address])
+      const amount: string = await protocol.getBalanceOfAddresses([address])
       console.log('getBalance', amount)
 
       return amount
     } else {
       return ''
     }
+  }
+
+  public async getBlockexplorer(address: string | null): Promise<string> {
+    const link: string = await getTezblockLinkForNetwork(this.network)
+
+    return `${link}${address}`
+  }
+
+  public async openBlockexplorer(): Promise<void> {
+    window.open(this.tezblockLink)
   }
 }
