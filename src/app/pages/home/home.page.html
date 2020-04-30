@@ -4,12 +4,18 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Beacon</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openWalletSelection()">
+        Wallets
+        <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <!--TODO: set current paired method image -->
-  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_wallets.png" /></ion-row>
+  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_wallets.svg" /></ion-row>
 
   <ion-row class="ion-padding-vertical">
     <ion-col>
@@ -17,20 +23,17 @@
       <h3 class="ion-text-center ion-no-margin">{{ currentSigningMethod }}</h3>
     </ion-col>
   </ion-row>
-  <ion-row *ngIf="network" class="ion-padding-vertical">
-    <ion-col>
-      <p class="ion-text-center ion-no-margin"><small>Network</small></p>
-      <h3 class="ion-text-center ion-no-margin">{{ (network).type }}</h3>
-    </ion-col>
-  </ion-row>
 
   <ng-container *ngIf="currentSigningMethod !== 'Wallet'">
     <ion-row>
       <ion-col>
         <p class="ion-text-center ion-no-margin"><small>Address</small></p>
-        <div class="ion-justify-content-center ion-align-items-center address--container">
+        <div (click)="openBlockexplorer()" class="ion-justify-content-center ion-align-items-center address--container">
           <identicon [address]="localWalletService.address | async"></identicon>
-          <h6>{{ localWalletService.address | async }}</h6>
+          <h6>
+            {{ localWalletService.address | async }}
+            <ion-icon name="open-outline"></ion-icon>
+          </h6>
         </div>
       </ion-col>
     </ion-row>
@@ -43,26 +46,17 @@
         </h3>
       </ion-col>
     </ion-row>
+
+    <ion-row *ngIf="network">
+      <ion-col>
+        <p class="ion-text-center ion-no-margin"><small>Network</small></p>
+        <h3 class="ion-text-center ion-no-margin">{{ (network).type }}</h3>
+      </ion-col>
+    </ion-row>
   </ng-container>
 
-  <!-- TODO: list current connected dApps
-  <ion-list lines="none">
-    <ion-list-header>
-      Connected dApps
-    </ion-list-header>
-    <ion-item-sliding>
-      <ion-item>
-        Beacon dApp
-      </ion-item>
-      <ion-item-options side="end">
-        <ion-item-option color="danger">Delete</ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
-  -->
-
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-button (click)="showPairPage()" color="primary">
+    <ion-button (click)="showPairPage()" color="primary" fill="outline">
       Pair Wallet
     </ion-button>
   </ion-fab>

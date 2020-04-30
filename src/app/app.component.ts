@@ -1,15 +1,15 @@
-import { Serializer } from '@airgap/beacon-sdk/dist/Serializer'
-import { BaseMessage } from '@airgap/beacon-sdk/dist/messages/Messages'
 import { Component } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
-import { ModalController } from '@ionic/angular'
-import { map } from 'rxjs/operators'
 
-import { BeaconRequestPage } from './pages/beacon-request/beacon-request.page'
 import { SettingsService } from './services/settings.service'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
   return x !== null && typeof x === 'object'
+}
+
+interface MenuItem {
+  title: string
+  url: string
+  icon: string
 }
 
 @Component({
@@ -18,22 +18,23 @@ export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknow
   styleUrls: ['app.component.scss']
 })
 export class AppComponent {
-  public appPages: { title: string; url: string; icon: string }[] = []
+  public appPages: MenuItem[] = []
 
-  constructor(
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly modalController: ModalController,
-    private readonly settingsService: SettingsService
-  ) {
+  constructor(private readonly settingsService: SettingsService) {
     this.initializeApp()
   }
 
-  public initializeApp() {
-    const menu = [
+  public initializeApp(): void {
+    const menu: MenuItem[] = [
       {
         title: 'Overview',
         url: '/home',
         icon: 'layers-outline'
+      },
+      {
+        title: 'Permissions',
+        url: '/permission-list',
+        icon: 'options-outline'
       },
       {
         title: 'Settings',
@@ -42,7 +43,7 @@ export class AppComponent {
       }
     ]
 
-    this.settingsService.getDevSettingsEnabled().subscribe(enabled => {
+    this.settingsService.getDevSettingsEnabled().subscribe((enabled: boolean) => {
       this.appPages = [...menu]
 
       if (enabled) {
@@ -53,38 +54,5 @@ export class AppComponent {
         })
       }
     })
-
-    const data = this.activatedRoute.queryParamMap.pipe(map(params => params.get('d')))
-    data.subscribe(res => {
-      if (res) {
-        console.log('d', res)
-        const serializer = new Serializer()
-
-        const deserialized = serializer.deserialize(res) as BaseMessage
-
-        this.beaconRequest(deserialized)
-      }
-    })
-
-    chrome.runtime.sendMessage({ data: 'Handshake' })
-    chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-      console.log('GOT DATA FROM BACKGROUND', message.data)
-      const serializer = new Serializer()
-
-      const deserialized = serializer.deserialize(message.data) as BaseMessage
-
-      this.beaconRequest(deserialized)
-    })
-  }
-
-  public async beaconRequest(request: BaseMessage): Promise<void> {
-    const modal = await this.modalController.create({
-      component: BeaconRequestPage,
-      componentProps: {
-        request
-      }
-    })
-
-    return modal.present()
   }
 }

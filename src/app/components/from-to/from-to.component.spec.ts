@@ -1,24 +1,24 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { IonicModule } from '@ionic/angular'
 
-import { FromToComponent } from './from-to.component';
+import { FromToComponent } from './from-to.component'
 
 describe('FromToComponent', () => {
-  let component: FromToComponent;
-  let fixture: ComponentFixture<FromToComponent>;
+  let component: FromToComponent
+  let fixture: ComponentFixture<FromToComponent>
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FromToComponent ],
+      declarations: [FromToComponent],
       imports: [IonicModule.forRoot()]
-    }).compileComponents();
+    }).compileComponents()
 
-    fixture = TestBed.createComponent(FromToComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+    fixture = TestBed.createComponent(FromToComponent)
+    component = fixture.componentInstance
+    fixture.detectChanges()
+  }))
 
   it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    expect(component).toBeTruthy()
+  })
+})

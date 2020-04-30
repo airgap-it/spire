@@ -18,10 +18,10 @@
             </ion-avatar>
             <ion-label class="ion-margin-start">
               <p>Requested by dApp</p>
-              <h3>{{requesterName}}</h3>
+              <h3>{{ requesterName }}</h3>
             </ion-label>
             <ion-badge color="primary">
-              {{$any(request).network.type}}
+              {{ $any(request).network.type }}
             </ion-badge>
           </ion-item>
         </ion-card-content>
@@ -106,7 +106,7 @@
         Close
       </ion-button>
       <ion-button color="primary" (click)="done()">
-        Confirm
+        {{ confirmButtonText }}
       </ion-button>
     </ion-fab>
   </ng-container>

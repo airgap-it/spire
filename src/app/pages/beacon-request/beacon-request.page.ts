@@ -1,26 +1,23 @@
 import {
-  BaseMessage,
-  BroadcastRequest,
-  MessageType,
-  OperationRequest,
-  PermissionRequest,
-  PermissionResponse,
+  BeaconMessageType,
+  BroadcastRequestOutput,
+  ChromeMessageTransport,
+  Network,
+  OperationRequestOutput,
+  PermissionRequestOutput,
   PermissionScope,
-  SignPayloadRequest,
-  Network
-} from '@airgap/beacon-sdk/dist/messages/Messages'
-import { ChromeMessageTransport } from '@airgap/beacon-sdk/dist/transports/ChromeMessageTransport'
-import { Transport } from '@airgap/beacon-sdk/dist/transports/Transport'
+  SignPayloadRequestOutput,
+  Transport
+} from '@airgap/beacon-sdk'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { LocalWalletService } from 'src/app/services/local-wallet.service'
-import { Methods } from 'src/extension/Methods'
+import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/extension-client/Actions'
 
-export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
-  return x !== null && typeof x === 'object'
-}
+import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
 @Component({
   selector: 'beacon-request',
@@ -31,7 +28,13 @@ export class BeaconRequestPage implements OnInit {
   public title: string = ''
   public protocol: TezosProtocol = new TezosProtocol()
 
-  public request: BaseMessage | undefined
+  public walletType: WalletType | undefined
+  public request:
+    | PermissionRequestOutput
+    | OperationRequestOutput
+    | SignPayloadRequestOutput
+    | BroadcastRequestOutput
+    | undefined
   public requesterName: string = ''
   public address: string = ''
   public requestedNetwork: Network | undefined
@@ -42,60 +45,66 @@ export class BeaconRequestPage implements OnInit {
 
   public transport: Transport = new ChromeMessageTransport('Beacon Extension')
 
+  public confirmButtonText: string = 'Confirm'
+
   constructor(
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
-    private readonly localWalletService: LocalWalletService
+    private readonly localWalletService: LocalWalletService,
+    private readonly chromeMessagingService: ChromeMessagingService
   ) {
-    this.localWalletService.address.pipe(take(1)).subscribe(address => {
+    this.localWalletService.address.pipe(take(1)).subscribe((address: string) => {
       this.address = address
     })
+    if (this.walletType === WalletType.LEDGER) {
+      this.confirmButtonText = 'Sign with Ledger'
+    }
   }
 
-  public ngOnInit() {
+  public async ngOnInit(): Promise<void> {
     console.log('new request', this.request)
-    if (isUnknownObject(this.request) && this.request.type === MessageType.PermissionRequest) {
+    if (this.request && this.request.type === BeaconMessageType.PermissionRequest) {
       this.title = 'Permission Request'
-      this.requesterName = ((this.request as any) as PermissionRequest).senderName
-      this.permissionRequest((this.request as any) as PermissionRequest)
+      this.requesterName = this.request.appMetadata.name
+      await this.permissionRequest(this.request)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageType.SignPayloadRequest) {
+    if (this.request && this.request.type === BeaconMessageType.SignPayloadRequest) {
       this.title = 'Sign Payload Request'
-      this.requesterName = 'dApp Name (placeholder)'
-      this.signRequest((this.request as any) as SignPayloadRequest)
+      this.requesterName = 'placeholder' // this.request.appMetadata.name
+      await this.signRequest(this.request)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageType.OperationRequest) {
+    if (this.request && this.request.type === BeaconMessageType.OperationRequest) {
       this.title = 'Operation Request'
-      this.requesterName = 'dApp Name (placeholder)'
-      this.operationRequest((this.request as any) as OperationRequest)
+      this.requesterName = 'placeholder' // this.request.appMetadata.name
+      await this.operationRequest(this.request)
     }
 
-    if (isUnknownObject(this.request) && this.request.type === MessageType.BroadcastRequest) {
+    if (this.request && this.request.type === BeaconMessageType.BroadcastRequest) {
       this.title = 'Broadcast Request'
-      this.requesterName = 'dApp Name (placeholder)'
-      this.broadcastRequest((this.request as any) as BroadcastRequest)
+      this.requesterName = 'placeholder' // this.request.appMetadata.name
+      await this.broadcastRequest(this.request)
     }
   }
 
-  public async dismiss() {
+  public async dismiss(): Promise<void> {
     this.modalController.dismiss().catch(console.error)
   }
 
-  public async done() {
+  public async done(): Promise<void> {
     if (this.responseHandler) {
       await this.responseHandler()
     }
-    this.dismiss()
+    await this.dismiss()
   }
 
-  private async permissionRequest(request: PermissionRequest): Promise<void> {
+  private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
     // console.error('Only mainnet and babylonnet is currently supported')
     // const response: NetworkNotSupportedError = {
     //   id: request.id,
     //   senderId: 'Beacon Extension',
-    //   type: MessageType.PermissionResponse,
+    //   type: BeaconMessageType.PermissionResponse,
     //   errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
     // }
 
@@ -107,17 +116,8 @@ export class BeaconRequestPage implements OnInit {
     // })
 
     this.requestedNetwork = request.network
-    this.localWalletService.publicKey.pipe(take(1)).subscribe(pubKey => {
+    this.localWalletService.publicKey.pipe(take(1)).subscribe((pubKey: string) => {
       this.inputs = [
-        {
-          name: 'read_address',
-          type: 'checkbox',
-          label: 'Read Address',
-          value: 'read_address',
-          icon: 'eye',
-          checked: request.scopes.indexOf(PermissionScope.READ_ADDRESS) >= 0
-        },
-
         {
           name: 'sign',
           type: 'checkbox',
@@ -146,89 +146,114 @@ export class BeaconRequestPage implements OnInit {
         }
       ]
 
-      this.responseHandler = async () => {
-        const response: PermissionResponse = {
-          id: request.id,
-          senderId: 'Beacon Extension',
-          type: MessageType.PermissionResponse,
-          permissions: {
-            accountIdentifier: `${pubKey}-${request.network.type}`,
-            pubkey: pubKey,
-            network: {
-              ...request.network
-            },
-            scopes: this.inputs.filter(input => input.checked).map(input => input.value)
-          }
-        }
-
-        chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
-          console.log(res)
-          setTimeout(() => {
-            window.close()
-          }, 1000)
+      this.responseHandler = async (): Promise<void> => {
+        await this.sendResponse(request, {
+          pubkey: pubKey,
+          scopes: this.inputs.filter(input => input.checked).map(input => input.value)
         })
-
-        await this.showSuccessAlert()
       }
     })
   }
 
-  private async signRequest(request: SignPayloadRequest): Promise<void> {
+  private async signRequest(request: SignPayloadRequestOutput): Promise<void> {
     console.log('sign payload', request.payload[0])
     this.transactions = await this.protocol.getTransactionDetails({
       publicKey: '',
       transaction: { binaryTransaction: request.payload[0] }
     })
     console.log(this.transactions)
-    this.responseHandler = async () => {
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-        console.log(response)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
+    this.responseHandler = async (): Promise<void> => {
+      if (this.walletType === WalletType.LOCAL_MNEMONIC) {
+        await this.sendResponse(request, {})
+      } else {
+        const modal = await this.modalController.create({
+          component: AddLedgerConnectionPage,
+          componentProps: {
+            request,
+            targetMethod: Action.RESPONSE
+          }
+        })
 
-      await this.showSuccessAlert()
+        modal
+          .onWillDismiss()
+          .then(({ data: closeParent }) => {
+            if (closeParent) {
+              setTimeout(() => {
+                this.dismiss()
+              }, 500)
+            }
+          })
+          .catch(error => console.error(error))
+
+        return modal.present()
+      }
     }
   }
 
-  private async operationRequest(request: OperationRequest): Promise<void> {
+  private async operationRequest(request: OperationRequestOutput): Promise<void> {
     this.transactions = this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
     })
     console.log('transactions', this.transactions)
 
-    this.responseHandler = async () => {
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-        console.log(response)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
+    this.responseHandler = async (): Promise<void> => {
+      if (this.walletType === WalletType.LOCAL_MNEMONIC) {
+        this.sendResponse(request, {})
+      } else {
+        const modal = await this.modalController.create({
+          component: AddLedgerConnectionPage,
+          componentProps: {
+            request,
+            targetMethod: Action.RESPONSE
+          }
+        })
 
-      await this.showSuccessAlert()
+        modal
+          .onWillDismiss()
+          .then(({ data: closeParent }) => {
+            if (closeParent) {
+              setTimeout(() => {
+                this.dismiss()
+              }, 500)
+            }
+          })
+          .catch(error => console.error(error))
+
+        return modal.present()
+      }
     }
   }
 
-  private async broadcastRequest(request: BroadcastRequest): Promise<void> {
-    const signedTransaction = request.signedTransactions[0]
-    console.log('signedTx', signedTransaction)
+  private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
+    console.log('signedTx', request.signedTransaction)
     this.transactions = await this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
-      transaction: signedTransaction
+      transaction: request.signedTransaction
     })
     console.log(this.transactions)
-    this.responseHandler = async () => {
-      chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request }, response => {
-        console.log(response)
-        setTimeout(() => {
-          window.close()
-        }, 1000)
-      })
-
-      await this.showSuccessAlert()
+    this.responseHandler = async (): Promise<void> => {
+      await this.sendResponse(request, {})
     }
+  }
+
+  private async sendResponse(
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput,
+    extras: unknown
+  ): Promise<void> {
+    const response: ExtensionMessageOutputPayload<Action.RESPONSE> = await this.chromeMessagingService.sendChromeMessage(
+      Action.RESPONSE,
+      {
+        request,
+        extras
+      }
+    )
+    console.log(response)
+    setTimeout(() => {
+      window.close()
+    }, 1000)
+
+    await this.showSuccessAlert()
   }
 
   private async showSuccessAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {
@@ -246,13 +271,13 @@ export class BeaconRequestPage implements OnInit {
     await alert.present()
   }
 
-  public openBlockexplorer(address: string, hash: string): void {
+  public async openBlockexplorer(address: string, hash: string): Promise<void> {
     let blockexplorer: string = this.protocol.blockExplorer
 
     if (hash) {
-      blockexplorer = this.protocol.getBlockExplorerLinkForTxId(hash)
+      blockexplorer = await this.protocol.getBlockExplorerLinkForTxId(hash)
     } else if (address) {
-      blockexplorer = this.protocol.getBlockExplorerLinkForAddress(address)
+      blockexplorer = await this.protocol.getBlockExplorerLinkForAddress(address)
     }
 
     this.openUrl(blockexplorer)

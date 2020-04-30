@@ -20,17 +20,17 @@ const routes: Routes = [
     loadChildren: () => import('./pages/settings/settings.module').then(m => m.SettingsPageModule)
   },
   {
-    path: 'add-wallet-connection',
-    loadChildren: () =>
-      import('./pages/add-wallet-connection/add-wallet-connection.module').then(m => m.AddWalletConnectionPageModule)
-  },
-  {
     path: 'beacon-request',
     loadChildren: () => import('./pages/beacon-request/beacon-request.module').then(m => m.BeaconRequestPageModule)
   },
   {
     path: 'home',
     loadChildren: () => import('./pages/home/home.module').then(m => m.HomePageModule)
+  },
+  {
+    path: 'permission-list',
+    loadChildren: () =>
+      import('./pages/permission-list/permission-list-routing.module').then(m => m.PermissionListPageRoutingModule)
   }
 ]
 

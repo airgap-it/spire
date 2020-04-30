@@ -1,0 +1,83 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Pair Ledger</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card class="ion-margin">
+    <ion-card-content>
+      <ion-item lines="none" class="ion-no-padding">
+        <ng-container *ngIf="isLoading">
+          <ion-spinner slot="start"></ion-spinner>
+          <ion-label>
+            <h3>Connecting to Ledger..</h3>
+          </ion-label>
+        </ng-container>
+        <ng-container *ngIf="!isLoading && !success">
+          <ion-icon name="alert-circle-outline" slot="start" size="large" color="warning"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h3>
+              Could not connect to Ledger.
+            </h3>
+            <p>Please make sure your Ledger is plugged into the computer, unlocked and the Tezos app is open.</p>
+          </ion-label>
+        </ng-container>
+        <ng-container *ngIf="success">
+          <ion-icon name="checkmark-circle-outline" slot="start" size="large" color="success"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h3>
+              Successfully connected to Ledger. Redirecting...
+            </h3>
+          </ion-label>
+        </ng-container>
+      </ion-item>
+      <ng-container *ngIf="!isLoading && !success">
+        <ion-button (click)="connect()">Retry</ion-button>
+      </ng-container>
+    </ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf="isLoading || !success">
+    <div class="ion-padding-horizontal">
+      <ion-row class="ion-justify-content-center ion-padding-top">
+        <img src="./assets/img/beacon_ledger_connect.svg" />
+      </ion-row>
+      <ion-row class="ion-padding-vertical">
+        <ion-col>
+          <p class="ion-text-center ion-no-margin"><small>Step 1</small></p>
+          <h6 class="ion-text-center ion-no-margin">
+            Connect your Ledger to your computer and unlock it by entering the pin code.
+          </h6>
+        </ion-col>
+      </ion-row>
+      <ion-row class="ion-justify-content-center ion-padding-top">
+        <img src="./assets/img/beacon_ledger_app.svg" />
+      </ion-row>
+      <ion-row class="ion-padding-vertical">
+        <ion-col>
+          <p class="ion-text-center ion-no-margin"><small>Step 2</small></p>
+          <h6 class="ion-text-center ion-no-margin">
+            Open the Tezos app on your Ledger.
+          </h6>
+        </ion-col>
+      </ion-row>
+      <ion-row class="ion-justify-content-center ion-padding-top">
+        <img src="./assets/img/beacon_ledger_confirm.svg" />
+      </ion-row>
+      <ion-row class="ion-padding-vertical">
+        <ion-col>
+          <p class="ion-text-center ion-no-margin"><small>Step 3</small></p>
+          <h6 class="ion-text-center ion-no-margin">
+            Confirm Public Key Hash to share your Tezos address with Beacon.
+          </h6>
+        </ion-col>
+      </ion-row>
+    </div>
+  </ng-container>
+</ion-content>

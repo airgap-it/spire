@@ -12,7 +12,7 @@
 <ion-content class="ion-padding">
   <h3 class="ion-padding-bottom">Choose a way to pair your wallet with Beacon</h3>
 
-  <ion-row class="ion-justify-content-center"><img src="./assets/img/beacon_wallets.png" /></ion-row>
+  <ion-row class="ion-justify-content-center"><img src="./assets/img/beacon_wallets.svg" /></ion-row>
 
   <ion-row>
     <ion-col>
@@ -23,11 +23,11 @@
     </ion-col>
   </ion-row>
 
-  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_ledger.png" /></ion-row>
+  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_ledger.svg" /></ion-row>
 
   <ion-row>
     <ion-col>
-      <ion-button color="primary" expand="block" (click)="pairHardwareWallet()" disabled>
+      <ion-button color="primary" expand="block" (click)="pairHardwareWallet()">
         Pair with Ledger
       </ion-button>
       <p>Pair your Ledger Nano hardware wallet with Beacon.</p>
@@ -45,7 +45,7 @@
 
   <ng-container *ngIf="developerModeEnabled">
     <ion-row class="ion-justify-content-center ion-padding-top">
-      <img src="./assets/img/beacon_extension.png" />
+      <img src="./assets/img/beacon_extension.svg" />
     </ion-row>
 
     <ion-row>
