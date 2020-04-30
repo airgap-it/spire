@@ -32,7 +32,7 @@ export const broadcastRequestHandler: (client: ExtensionClient, logger: Logger) 
       transactionHash: hash
     }
 
-    const response: BroadcastResponse = { beaconId: '0', version: SDK_VERSION, ...responseInput }
+    const response: BroadcastResponse = { beaconId: await client.beaconId, version: SDK_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponse()

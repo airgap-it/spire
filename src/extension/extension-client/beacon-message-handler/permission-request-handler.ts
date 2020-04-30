@@ -15,7 +15,7 @@ import { Logger } from '../Logger'
 import { BeaconMessageHandlerFunction } from './BeaconMessageHandler'
 
 export const permissionRequestHandler: (client: ExtensionClient, logger: Logger) => BeaconMessageHandlerFunction = (
-  _client: ExtensionClient,
+  client: ExtensionClient,
   logger: Logger
 ): BeaconMessageHandlerFunction => {
   return async (
@@ -40,7 +40,7 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
       scopes: extras.scopes
     }
 
-    const response: PermissionResponse = { beaconId: '0', version: SDK_VERSION, ...responseInput }
+    const response: PermissionResponse = { beaconId: await client.beaconId, version: SDK_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponse()

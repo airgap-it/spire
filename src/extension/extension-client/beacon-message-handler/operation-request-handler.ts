@@ -58,7 +58,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       } as any
     }
 
-    const response: OperationResponse = { beaconId: '0', version: SDK_VERSION, ...responseInput }
+    const response: OperationResponse = { beaconId: await client.beaconId, version: SDK_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponse()
