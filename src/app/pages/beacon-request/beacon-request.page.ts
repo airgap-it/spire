@@ -71,19 +71,19 @@ export class BeaconRequestPage implements OnInit {
 
     if (this.request && this.request.type === BeaconMessageType.SignPayloadRequest) {
       this.title = 'Sign Payload Request'
-      this.requesterName = 'placeholder' // this.request.appMetadata.name
+      this.requesterName = this.request.appMetadata.name
       await this.signRequest(this.request)
     }
 
     if (this.request && this.request.type === BeaconMessageType.OperationRequest) {
       this.title = 'Operation Request'
-      this.requesterName = 'placeholder' // this.request.appMetadata.name
+      this.requesterName = this.request.appMetadata.name
       await this.operationRequest(this.request)
     }
 
     if (this.request && this.request.type === BeaconMessageType.BroadcastRequest) {
       this.title = 'Broadcast Request'
-      this.requesterName = 'placeholder' // this.request.appMetadata.name
+      this.requesterName = this.request.appMetadata.name
       await this.broadcastRequest(this.request)
     }
   }

@@ -16,9 +16,8 @@
     </ion-list-header>
     <ion-item lines="none" *ngFor="let permission of permissions">
       <ion-label>
-        <!--TODO: human readable name from id -->
         <h3>
-          <strong>Human Readable Name</strong>
+          <strong>{{ permission.appMetadata.name }}</strong>
           <small>{{ permission.website }}</small>
         </h3>
         <div class="d-flex ion-align-items-center">

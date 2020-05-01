@@ -1,4 +1,4 @@
-import { Network, P2PPairInfo, PermissionScope } from '@airgap/beacon-sdk'
+import { Network, P2PPairInfo, PermissionScope, AppMetadata } from '@airgap/beacon-sdk'
 
 export enum WalletType {
   P2P = 'P2P',
@@ -23,6 +23,7 @@ export interface WalletInfo<T extends WalletType> {
 export interface PermissionInfo {
   accountIdentifier: string
   beaconId: string
+  appMetadata: AppMetadata
   website: string
   address: string
   pubkey: string

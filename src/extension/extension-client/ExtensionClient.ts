@@ -1,4 +1,5 @@
 import {
+  AppMetadata,
   BeaconMessage,
   BeaconMessageType,
   ChromeMessageTransport,
@@ -7,7 +8,8 @@ import {
   ExtensionMessageTarget,
   P2PCommunicationClient,
   PermissionResponse,
-  Serializer
+  Serializer,
+  PermissionRequest
 } from '@airgap/beacon-sdk'
 import { BeaconClient } from '@airgap/beacon-sdk/dist/clients/beacon-client/BeaconClient'
 import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
@@ -38,7 +40,7 @@ const sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void> = (
 }
 
 export class ExtensionClient extends BeaconClient {
-  // private pendingRequests: BeaconMessage[] = []
+  public pendingRequests: BeaconMessage[] = []
 
   public readonly signer: Signer = new AirGapSigner()
 
@@ -235,6 +237,45 @@ export class ExtensionClient extends BeaconClient {
     return this.storage.delete('wallets' as any)
   }
 
+  public async getAppMetadataList(): Promise<AppMetadata[]> {
+    logger.log('getAppMetadataList')
+
+    return (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when appMetadataList type is in sdk
+  }
+
+  public async getAppMetadata(beaconId: string): Promise<AppMetadata | undefined> {
+    const appMetadataList: AppMetadata[] = (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when wallets type is in sdk
+
+    return appMetadataList.find((appMetadata: AppMetadata) => appMetadata.beaconId === beaconId)
+  }
+
+  public async addAppMetadata(appMetadata: AppMetadata): Promise<void> {
+    logger.log('addAppMetadata', appMetadata)
+    const appMetadataList: AppMetadata[] = (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when appMetadataList type is in sdk
+
+    if (
+      !appMetadataList.some((appMetadataElement: AppMetadata) => appMetadataElement.beaconId === appMetadata.beaconId)
+    ) {
+      appMetadataList.push(appMetadata)
+    }
+
+    return this.storage.set('appMetadataList' as any, appMetadataList)
+  }
+
+  public async removeAppMetadata(beaconId: string): Promise<void> {
+    const appMetadataList: AppMetadata[] = (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when appMetadataList type is in sdk
+
+    const filteredAppMetadataList: AppMetadata[] = appMetadataList.filter(
+      (appMetadata: AppMetadata) => appMetadata.beaconId !== beaconId
+    )
+
+    return this.storage.set('appMetadataList' as any, filteredAppMetadataList)
+  }
+
+  public async removeAllAppMetadata(): Promise<void> {
+    return this.storage.delete('appMetadataList' as any)
+  }
+
   /**
    * Process the message before it gets sent to the page.
    *
@@ -244,10 +285,19 @@ export class ExtensionClient extends BeaconClient {
     const beaconMessage: BeaconMessage = (await new Serializer().deserialize(data)) as BeaconMessage
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
       const permissionResponse: PermissionResponse = beaconMessage
+      const request: BeaconMessage | undefined = this.pendingRequests.find(
+        (requestElement: BeaconMessage) => requestElement.id === permissionResponse.id
+      )
+      if (!request) {
+        throw new Error('Matching request not found')
+      }
+
+      const permissionRequest: PermissionRequest = request as PermissionRequest
       const permission: PermissionInfo = {
         accountIdentifier: await getAccountIdentifier(permissionResponse.pubkey, permissionResponse.network),
         beaconId: permissionResponse.beaconId,
-        website: 'website', // TODO: Use actual website
+        appMetadata: permissionRequest.appMetadata,
+        website: 'https://placeholder.com', // TODO: Use actual website
         address: await getAddressFromPublicKey(permissionResponse.pubkey),
         pubkey: permissionResponse.pubkey,
         network: permissionResponse.network,

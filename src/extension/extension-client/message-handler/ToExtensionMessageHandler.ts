@@ -1,4 +1,15 @@
-import { BeaconMessage, BeaconMessageType, ExtensionMessage, OperationRequest, Serializer } from '@airgap/beacon-sdk'
+import {
+  AppMetadata,
+  BeaconMessage,
+  BeaconMessageType,
+  BeaconRequestOutputMessage,
+  BroadcastRequestOutput,
+  ExtensionMessage,
+  OperationRequestOutput,
+  PermissionRequestOutput,
+  Serializer,
+  SignPayloadRequestOutput
+} from '@airgap/beacon-sdk'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
 import { WalletInfo, WalletType } from '../Actions'
@@ -33,11 +44,14 @@ export class ToExtensionMessageHandler extends MessageHandler {
     } else {
       logger.log('not beacon', 'sending to popup')
       const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
+      this.client.pendingRequests.push(deserialized)
+
+      const enriched: BeaconRequestOutputMessage = await this.enrichRequest(deserialized)
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async (): Promise<void> => {
-          const operationRequest: OperationRequest = deserialized
+          const operationRequest: OperationRequestOutput = enriched as OperationRequestOutput
 
           const wallet: WalletInfo<WalletType> | undefined = await this.client.getWalletByAddress(
             operationRequest.sourceAddress
@@ -53,7 +67,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
           )
 
           operationRequest.operationDetails = operations.contents
-          const serialized: string = await new Serializer().serialize(deserialized)
+          const serialized: string = await new Serializer().serialize(operationRequest)
 
           return this.sendToPopup({ ...data, payload: serialized })
         })().catch((operationPrepareError: Error) => {
@@ -64,5 +78,55 @@ export class ToExtensionMessageHandler extends MessageHandler {
       }
     }
     sendResponse()
+  }
+
+  public async enrichRequest(message: BeaconMessage): Promise<BeaconRequestOutputMessage> {
+    switch (message.type) {
+      case BeaconMessageType.PermissionRequest: {
+        await this.client.addAppMetadata(message.appMetadata)
+        const request: PermissionRequestOutput = message
+
+        return request
+      }
+      case BeaconMessageType.OperationRequest: {
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        if (!result) {
+          throw new Error('AppMetadata not available')
+        }
+        const request: OperationRequestOutput = {
+          appMetadata: result,
+          ...message
+        }
+
+        return request
+      }
+      case BeaconMessageType.SignPayloadRequest: {
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        if (!result) {
+          throw new Error('AppMetadata not available')
+        }
+        const request: SignPayloadRequestOutput = {
+          appMetadata: result,
+          ...message
+        }
+
+        return request
+      }
+      case BeaconMessageType.BroadcastRequest: {
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        if (!result) {
+          throw new Error('AppMetadata not available')
+        }
+        const request: BroadcastRequestOutput = {
+          appMetadata: result,
+          ...message
+        }
+
+        return request
+      }
+
+      default:
+        throw new Error('Message not handled')
+    }
   }
 }
