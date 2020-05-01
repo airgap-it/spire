@@ -7,6 +7,6 @@ export const walletsGetAction: (logger: Logger) => MessageHandlerFunction<Action
   logger: Logger
 ): MessageHandlerFunction<Action.WALLETS_GET> => async (context: ActionContext<Action.WALLETS_GET>): Promise<void> => {
   logger.log('walletsGetAction', context.data)
-  const wallets: WalletInfo<WalletType>[] = await context.storage.get('WALLETS' as any)
+  const wallets: WalletInfo<WalletType>[] = await context.client.getWallets()
   context.sendResponse({ data: { wallets } })
 }

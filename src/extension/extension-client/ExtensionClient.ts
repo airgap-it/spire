@@ -18,7 +18,7 @@ import * as sodium from 'libsodium-wrappers'
 import { AirGapSigner } from '../AirGapSigner'
 
 import { ActionMessageHandler, MessageHandlerFunction } from './action-handler/ActionMessageHandler'
-import { Action, ExtensionMessageInputPayload, PermissionInfo } from './Actions'
+import { Action, ExtensionMessageInputPayload, PermissionInfo, WalletInfo, WalletType } from './Actions'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
@@ -151,15 +151,19 @@ export class ExtensionClient extends BeaconClient {
   public async getPermission(accountIdentifier: string): Promise<PermissionInfo | undefined> {
     const permissions: PermissionInfo[] = await this.storage.get('permissions' as any)
 
-    return permissions.find((account: PermissionInfo) => account.accountIdentifier === accountIdentifier)
+    return permissions.find((permission: PermissionInfo) => permission.accountIdentifier === accountIdentifier)
   }
 
-  public async addPermission(accountInfo: PermissionInfo): Promise<void> {
-    logger.log('addPermission', accountInfo)
+  public async addPermission(permissionInfo: PermissionInfo): Promise<void> {
+    logger.log('addPermission', permissionInfo)
     const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
 
-    if (!permissions.some((account: PermissionInfo) => account.accountIdentifier === accountInfo.accountIdentifier)) {
-      permissions.push(accountInfo)
+    if (
+      !permissions.some(
+        (permission: PermissionInfo) => permission.accountIdentifier === permissionInfo.accountIdentifier
+      )
+    ) {
+      permissions.push(permissionInfo)
     }
 
     return this.storage.set('permissions' as any, permissions)
@@ -169,7 +173,7 @@ export class ExtensionClient extends BeaconClient {
     const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
 
     const filteredPermissions: PermissionInfo[] = permissions.filter(
-      (accountInfo: PermissionInfo) => accountInfo.accountIdentifier !== accountIdentifier
+      (permissionInfo: PermissionInfo) => permissionInfo.accountIdentifier !== accountIdentifier
     )
 
     return this.storage.set('permissions' as any, filteredPermissions)
@@ -177,6 +181,43 @@ export class ExtensionClient extends BeaconClient {
 
   public async removeAllPermissions(): Promise<void> {
     return this.storage.delete('permissions' as any)
+  }
+
+  public async getWallets(): Promise<WalletInfo<WalletType>[]> {
+    logger.log('getWallets')
+
+    return this.storage.get('wallets' as any) || [] // TODO: Fix when wallets type is in sdk
+  }
+
+  public async getWallet(pubkey: string): Promise<WalletInfo<WalletType> | undefined> {
+    const wallets: WalletInfo<WalletType>[] = await this.storage.get('wallets' as any)
+
+    return wallets.find((wallet: WalletInfo<WalletType>) => wallet.pubkey === pubkey)
+  }
+
+  public async addWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+    logger.log('addWallet', walletInfo)
+    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+
+    if (!wallets.some((wallet: WalletInfo<WalletType>) => wallet.pubkey === walletInfo.pubkey)) {
+      wallets.push(walletInfo)
+    }
+
+    return this.storage.set('wallets' as any, wallets)
+  }
+
+  public async removeWallet(pubkey: string): Promise<void> {
+    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+
+    const filteredWallets: WalletInfo<WalletType>[] = wallets.filter(
+      (walletInfo: WalletInfo<WalletType>) => walletInfo.pubkey !== pubkey
+    )
+
+    return this.storage.set('wallets' as any, filteredWallets)
+  }
+
+  public async removeAllWallets(): Promise<void> {
+    return this.storage.delete('wallets' as any)
   }
 
   /**

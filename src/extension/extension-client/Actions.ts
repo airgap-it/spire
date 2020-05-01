@@ -77,8 +77,8 @@ export interface ActionInputTypesMap {
 
 export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
-  [Action.WALLET_ADD]: { added: boolean }
-  [Action.WALLET_DELETE]: { deleted: boolean }
+  [Action.WALLET_ADD]: undefined
+  [Action.WALLET_DELETE]: undefined
   [Action.WALLETS_GET]: { wallets: WalletInfo<WalletType>[] }
   [Action.ACTIVE_WALLET_GET]: { wallet: WalletInfo<WalletType> }
   [Action.ACTIVE_WALLET_SET]: undefined

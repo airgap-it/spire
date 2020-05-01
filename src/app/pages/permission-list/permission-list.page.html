@@ -10,20 +10,29 @@
 </ion-header>
 
 <ion-content>
-  <ion-list lines="none">
-    <ion-list-header>
-      Connected dApps
-    </ion-list-header>
-    <ion-item-sliding *ngFor="let permission of permissions">
-      <ion-item>
-        {{ permission.pubkey }}
-        <br />
-        {{ permission.scopes }}
-      </ion-item>
-      <ion-item-options side="end">
-        <ion-item-option (click)="deletePermission(permission)" color="danger">Delete</ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
+  <ion-card class="ion-no-margin">
+    <ion-card-content>
+      <ion-card-subtitle>
+        Connected dApps
+      </ion-card-subtitle>
+      <div *ngFor="let permission of permissions">
+        <ion-item lines="none" class="ion-no-padding">
+          <ion-label slot="start">
+            <h3>{{ permission.address }}</h3>
+            <ion-badge color="dark">
+              {{ permission.scopes }}
+            </ion-badge>
+            <ion-badge color="dark">
+              {{ permission.website }}
+            </ion-badge>
+          </ion-label>
+        </ion-item>
+        <ion-button size="small" fill="outline" (click)="deletePermission(permission)">
+          Remove
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
   {{ permissions | json }}
 </ion-content>
