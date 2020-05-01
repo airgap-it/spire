@@ -7,7 +7,7 @@ import {
   OperationResponse,
   OperationResponseInput
 } from '@airgap/beacon-sdk'
-import { SDK_VERSION } from '@airgap/beacon-sdk/dist/constants'
+import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
@@ -58,7 +58,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       } as any
     }
 
-    const response: OperationResponse = { beaconId: await client.beaconId, version: SDK_VERSION, ...responseInput }
+    const response: OperationResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponse()

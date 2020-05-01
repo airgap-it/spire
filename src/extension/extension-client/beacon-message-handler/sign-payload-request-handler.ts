@@ -7,7 +7,7 @@ import {
   SignPayloadResponse,
   SignPayloadResponseInput
 } from '@airgap/beacon-sdk'
-import { SDK_VERSION } from '@airgap/beacon-sdk/dist/constants'
+import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
@@ -37,7 +37,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
       signature
     }
 
-    const response: SignPayloadResponse = { beaconId: await client.beaconId, version: SDK_VERSION, ...responseInput }
+    const response: SignPayloadResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponse()
