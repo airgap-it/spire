@@ -59,11 +59,12 @@ export class WalletService {
       })
       .catch(console.error)
   }
+
   public async getActiveWallet(): Promise<void> {
     this.chromeMessagingService
       .sendChromeMessage(Action.ACTIVE_WALLET_GET, undefined)
       .then((response: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => {
-        if (response.data) {
+        if (response.data && response.data.wallet) {
           this._activeWallet.next(response.data.wallet)
         }
       })
@@ -72,28 +73,29 @@ export class WalletService {
 
   public async saveMnemonic(mnemonic: string): Promise<void> {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      await this.addAndActiveWallet(mnemonic)
+      const {
+        publicKey,
+        address
+      }: {
+        privateKey: string
+        publicKey: string
+        address: string
+      } = await this.mnemonicToAddress(mnemonic)
+      const walletInfo: WalletInfo<WalletType.LOCAL_MNEMONIC> = {
+        address,
+        pubkey: publicKey,
+        type: WalletType.LOCAL_MNEMONIC,
+        added: new Date(),
+        info: {
+          mnemonic
+        }
+      }
+
+      await this.addAndActiveWallet(walletInfo)
     }
   }
 
-  public async addAndActiveWallet(mnemonic: string): Promise<void> {
-    const {
-      publicKey,
-      address
-    }: {
-      privateKey: string
-      publicKey: string
-      address: string
-    } = await this.mnemonicToAddress(mnemonic)
-    const walletInfo: WalletInfo<WalletType.LOCAL_MNEMONIC> = {
-      address,
-      pubkey: publicKey,
-      type: WalletType.LOCAL_MNEMONIC,
-      added: new Date(),
-      info: {
-        mnemonic
-      }
-    }
+  public async addAndActiveWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
 

@@ -74,7 +74,7 @@ export interface ActionOutputTypesMap {
   [Action.WALLET_ADD]: undefined
   [Action.WALLET_DELETE]: undefined
   [Action.WALLETS_GET]: { wallets: WalletInfo<WalletType>[] }
-  [Action.ACTIVE_WALLET_GET]: { wallet: WalletInfo<WalletType> }
+  [Action.ACTIVE_WALLET_GET]: { wallet?: WalletInfo<WalletType> }
   [Action.ACTIVE_WALLET_SET]: undefined
   [Action.PERMISSIONS_GET]: { permissions: PermissionInfo[] }
   [Action.PERMISSION_DELETE]: undefined

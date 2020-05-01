@@ -144,7 +144,7 @@ export class ExtensionClient extends BeaconClient {
   public async getPermissions(): Promise<PermissionInfo[]> {
     logger.log('getPermissions')
 
-    return this.storage.get('permissions' as any) || [] // TODO: Fix when permissions type is in sdk
+    return (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
   }
 
   public async getPermission(accountIdentifier: string): Promise<PermissionInfo | undefined> {
@@ -185,7 +185,7 @@ export class ExtensionClient extends BeaconClient {
   public async getWallets(): Promise<WalletInfo<WalletType>[]> {
     logger.log('getWallets')
 
-    return this.storage.get('wallets' as any) || [] // TODO: Fix when wallets type is in sdk
+    return (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
   }
 
   public async getWallet(pubkey: string): Promise<WalletInfo<WalletType> | undefined> {

@@ -5,7 +5,7 @@ import {
   OperationRequest,
   Serializer
 } from '@airgap/beacon-sdk'
-import { Injectable } from '@angular/core'
+import { Injectable, NgZone } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import {
   Action,
@@ -22,36 +22,39 @@ import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
   providedIn: 'root'
 })
 export class ChromeMessagingService {
-  constructor(private readonly modalController: ModalController) {
+  constructor(private readonly ngZone: NgZone, private readonly modalController: ModalController) {
     chrome.runtime.sendMessage({ data: 'Handshake' })
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
       console.log('GOT DATA FROM BACKGROUND', message.data)
       const serializer: Serializer = new Serializer()
+      try {
+        const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
 
-      const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
+        let walletType: WalletType = WalletType.LOCAL_MNEMONIC
 
-      let walletType: WalletType = WalletType.LOCAL_MNEMONIC
-
-      if ((deserialized as OperationRequest).sourceAddress) {
-        const result: ExtensionMessageOutputPayload<Action.WALLETS_GET> = await this.sendChromeMessage(
-          Action.WALLETS_GET,
-          undefined
-        )
-        if (result.data) {
-          const wallet: WalletInfo<WalletType> | undefined = result.data.wallets.find(
-            (walletInfo: WalletInfo<WalletType>) =>
-              walletInfo.address === (deserialized as OperationRequest).sourceAddress
+        if ((deserialized as OperationRequest).sourceAddress) {
+          const result: ExtensionMessageOutputPayload<Action.WALLETS_GET> = await this.sendChromeMessage(
+            Action.WALLETS_GET,
+            undefined
           )
-          if (wallet) {
-            walletType = wallet.type
+          if (result.data) {
+            const wallet: WalletInfo<WalletType> | undefined = result.data.wallets.find(
+              (walletInfo: WalletInfo<WalletType>) =>
+                walletInfo.address === (deserialized as OperationRequest).sourceAddress
+            )
+            if (wallet) {
+              walletType = wallet.type
+            }
           }
         }
-      }
 
-      this.beaconRequest(deserialized, walletType).catch((beaconRequestError: Error) => {
-        console.log('beaconRequestError', beaconRequestError)
-      })
+        this.beaconRequest(deserialized, walletType).catch((beaconRequestError: Error) => {
+          console.log('beaconRequestError', beaconRequestError)
+        })
+      } catch (e) {
+        console.error(e)
+      }
     })
   }
 
@@ -71,7 +74,9 @@ export class ChromeMessagingService {
       }
       chrome.runtime.sendMessage(message, (response: ExtensionMessageOutputPayload<K>) => {
         console.log(`GETTING RESPONSE[${action}]`, response)
-        resolve(response)
+        this.ngZone.run(() => {
+          resolve(response)
+        })
       })
     })
   }

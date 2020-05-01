@@ -38,6 +38,8 @@ export class LocalMnemonicPage {
         this.address = localWallet.address
         this.balance = await this.getBalance(localWallet.address)
         this.ref.detectChanges()
+      } else {
+        await this.generateAndSaveMnemonic()
       }
     })
   }
@@ -61,8 +63,7 @@ export class LocalMnemonicPage {
           text: 'Yes',
           handler: async (): Promise<void> => {
             this.saveButtonDisabled = true
-            const mnemonic: string = bip39.generateMnemonic()
-            await this.walletService.saveMnemonic(mnemonic)
+            this.generateAndSaveMnemonic()
           }
         }
       ]
@@ -112,5 +113,10 @@ export class LocalMnemonicPage {
     } else {
       return ''
     }
+  }
+
+  private async generateAndSaveMnemonic(): Promise<void> {
+    const mnemonic: string = bip39.generateMnemonic()
+    await this.walletService.saveMnemonic(mnemonic)
   }
 }

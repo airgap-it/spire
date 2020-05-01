@@ -45,11 +45,12 @@ export class HomePage {
     this.checkOnboarding().catch(console.error)
 
     this.walletService.activeWallet$.subscribe(async (wallet: WalletInfo<WalletType>) => {
+      this.address = wallet.address
+      this.currentSigningMethod = wallet.type === WalletType.LEDGER ? 'Ledger' : 'Local Mnemonic'
       const [balance, tezblockLink]: [string, string] = await Promise.all([
         this.getBalance(wallet.address),
         this.getBlockexplorer(wallet.address)
       ])
-      this.address = wallet.address
       this.balance = balance
       this.tezblockLink = tezblockLink
       this.ref.detectChanges()
