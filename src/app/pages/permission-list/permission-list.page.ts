@@ -1,7 +1,6 @@
-import { AccountInfo } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
+import { Action, ExtensionMessageOutputPayload, PermissionInfo } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-permission-list',
@@ -9,20 +8,20 @@ import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-c
   styleUrls: ['./permission-list.page.scss']
 })
 export class PermissionListPage {
-  public accounts: AccountInfo[] = []
+  public permissions: PermissionInfo[] = []
 
   constructor(private readonly chromeMessagingService: ChromeMessagingService) {
     this.chromeMessagingService
-      .sendChromeMessage(Action.ACCOUNTS_GET, undefined)
-      .then((accounts: ExtensionMessageOutputPayload<Action.ACCOUNTS_GET>) => {
-        if (accounts.data) {
-          this.accounts = accounts.data.accounts
+      .sendChromeMessage(Action.PERMISSIONS_GET, undefined)
+      .then((response: ExtensionMessageOutputPayload<Action.PERMISSIONS_GET>) => {
+        if (response.data) {
+          this.permissions = response.data.permissions
         }
       })
       .catch(console.error)
   }
 
-  public async deleteAccount(account: AccountInfo): Promise<void> {
-    await this.chromeMessagingService.sendChromeMessage(Action.ACCOUNT_DELETE, { account })
+  public async deletePermission(permission: PermissionInfo): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.PERMISSION_DELETE, { permission })
   }
 }

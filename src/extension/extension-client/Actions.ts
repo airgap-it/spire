@@ -1,4 +1,4 @@
-import { AccountInfo, Network, P2PPairInfo } from '@airgap/beacon-sdk'
+import { Network, P2PPairInfo, PermissionScope } from '@airgap/beacon-sdk'
 
 export enum WalletType {
   P2P = 'P2P',
@@ -20,6 +20,17 @@ export interface WalletInfo<T extends WalletType> {
   added: Date
 }
 
+export interface PermissionInfo {
+  accountIdentifier: string
+  beaconId: string
+  website: string
+  address: string
+  pubkey: string
+  network: Network
+  scopes: PermissionScope[]
+  connectedAt: Date
+}
+
 export enum Action {
   HANDSHAKE = 'HANDSHAKE',
   WALLET_ADD = 'WALLET_ADD',
@@ -27,8 +38,8 @@ export enum Action {
   WALLETS_GET = 'WALLETS_GET',
   ACTIVE_WALLET_GET = 'ACTIVE_WALLET_GET',
   ACTIVE_WALLET_SET = 'ACTIVE_WALLET_SET',
-  ACCOUNTS_GET = 'ACCOUNTS_GET',
-  ACCOUNT_DELETE = 'ACCOUNT_DELETE',
+  PERMISSIONS_GET = 'PERMISSIONS_GET',
+  PERMISSION_DELETE = 'PERMISSION_DELETE',
   ACTIVE_NETWORK_GET = 'ACTIVE_NETWORK_GET',
   ACTIVE_NETWORK_SET = 'ACTIVE_NETWORK_SET',
   P2P_INIT = 'P2P_INIT',
@@ -49,8 +60,8 @@ export interface ActionInputTypesMap {
   [Action.WALLETS_GET]: undefined
   [Action.ACTIVE_WALLET_GET]: undefined
   [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo<WalletType> }
-  [Action.ACCOUNTS_GET]: undefined
-  [Action.ACCOUNT_DELETE]: { account: AccountInfo }
+  [Action.PERMISSIONS_GET]: undefined
+  [Action.PERMISSION_DELETE]: { permission: PermissionInfo }
   [Action.ACTIVE_NETWORK_GET]: undefined
   [Action.ACTIVE_NETWORK_SET]: { network: Network }
   [Action.P2P_INIT]: undefined
@@ -71,8 +82,8 @@ export interface ActionOutputTypesMap {
   [Action.WALLETS_GET]: { wallets: WalletInfo<WalletType>[] }
   [Action.ACTIVE_WALLET_GET]: { wallet: WalletInfo<WalletType> }
   [Action.ACTIVE_WALLET_SET]: undefined
-  [Action.ACCOUNTS_GET]: { accounts: AccountInfo[] }
-  [Action.ACCOUNT_DELETE]: undefined
+  [Action.PERMISSIONS_GET]: { permissions: PermissionInfo[] }
+  [Action.PERMISSION_DELETE]: undefined
   [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }
   [Action.ACTIVE_NETWORK_SET]: undefined
   [Action.P2P_INIT]: { qr: { name: string; pubKey: string; relayServer: string } }

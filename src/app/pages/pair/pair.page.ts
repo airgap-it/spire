@@ -24,9 +24,9 @@ export class PairPage {
     private readonly router: Router
   ) {
     this.dismissEnabled = this.chromeMessagingService
-      .sendChromeMessage(Action.ACCOUNTS_GET, undefined)
-      .then((accounts: ExtensionMessageOutputPayload<Action.ACCOUNTS_GET>) => {
-        return accounts.data ? accounts.data.accounts.length > 0 : false
+      .sendChromeMessage(Action.WALLETS_GET, undefined)
+      .then((response: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => {
+        return response.data ? response.data.wallets.length > 0 : false
       })
     this.settingsService.getDevSettingsEnabled().subscribe((enabled: boolean) => {
       this.developerModeEnabled = enabled

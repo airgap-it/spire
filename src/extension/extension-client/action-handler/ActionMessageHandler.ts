@@ -4,8 +4,6 @@ import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } f
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 
-import { accountDeleteAction } from './account-delete-action'
-import { accountsGetAction } from './accounts-get-action'
 import { activeNetworkGetAction } from './active-network-get-action'
 import { activeNetworkSetAction } from './active-network-set-action'
 import { activeWalletGetAction } from './active-wallet-get-action'
@@ -18,6 +16,8 @@ import { mnemonicSaveAction } from './mnemonic-save-action'
 import { p2pInitAction } from './p2p-init-action'
 import { p2pPeerRemoveAction } from './p2p-peer-remove-action'
 import { p2pPeersGetAction } from './p2p-peers-get-action'
+import { permissionDeleteAction } from './permission-delete-action'
+import { permissionsGetAction } from './permissions-get-action'
 import { responseAction } from './response-action'
 import { walletAddAction } from './wallet-add-action'
 import { walletDeleteAction } from './wallet-delete-action'
@@ -50,8 +50,8 @@ export class ActionMessageHandler {
     [Action.WALLETS_GET]: walletsGetAction(logger),
     [Action.ACTIVE_WALLET_GET]: activeWalletGetAction(logger),
     [Action.ACTIVE_WALLET_SET]: activeWalletSetAction(logger),
-    [Action.ACCOUNT_DELETE]: accountDeleteAction(logger),
-    [Action.ACCOUNTS_GET]: accountsGetAction(logger),
+    [Action.PERMISSION_DELETE]: permissionDeleteAction(logger),
+    [Action.PERMISSIONS_GET]: permissionsGetAction(logger),
     [Action.ACTIVE_NETWORK_GET]: activeNetworkGetAction(logger),
     [Action.ACTIVE_NETWORK_SET]: activeNetworkSetAction(logger),
     [Action.P2P_INIT]: p2pInitAction(logger),

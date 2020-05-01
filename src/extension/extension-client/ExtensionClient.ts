@@ -1,26 +1,24 @@
 import {
-  AccountInfo,
   BeaconMessage,
   BeaconMessageType,
   ChromeMessageTransport,
   ChromeStorage,
   ExtensionMessage,
   ExtensionMessageTarget,
-  Origin,
   P2PCommunicationClient,
   PermissionResponse,
-  Serializer,
-  StorageKey
+  Serializer
 } from '@airgap/beacon-sdk'
 import { BeaconClient } from '@airgap/beacon-sdk/dist/clients/beacon-client/BeaconClient'
 import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
+import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 import { getAccountIdentifier } from '@airgap/beacon-sdk/dist/utils/get-account-identifier'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapSigner } from '../AirGapSigner'
 
 import { ActionMessageHandler, MessageHandlerFunction } from './action-handler/ActionMessageHandler'
-import { Action, ExtensionMessageInputPayload } from './Actions'
+import { Action, ExtensionMessageInputPayload, PermissionInfo } from './Actions'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
@@ -144,41 +142,41 @@ export class ExtensionClient extends BeaconClient {
     this.listeners.push(listener)
   }
 
-  public async getAccounts(): Promise<AccountInfo[]> {
-    logger.log('getAccounts')
+  public async getPermissions(): Promise<PermissionInfo[]> {
+    logger.log('getPermissions')
 
-    return this.storage.get(StorageKey.ACCOUNTS)
+    return this.storage.get('permissions' as any) || [] // TODO: Fix when permissions type is in sdk
   }
 
-  public async getAccount(accountIdentifier: string): Promise<AccountInfo | undefined> {
-    const accounts: AccountInfo[] = await this.storage.get(StorageKey.ACCOUNTS)
+  public async getPermission(accountIdentifier: string): Promise<PermissionInfo | undefined> {
+    const permissions: PermissionInfo[] = await this.storage.get('permissions' as any)
 
-    return accounts.find((account: AccountInfo) => account.accountIdentifier === accountIdentifier)
+    return permissions.find((account: PermissionInfo) => account.accountIdentifier === accountIdentifier)
   }
 
-  public async addAccount(accountInfo: AccountInfo): Promise<void> {
-    logger.log('addAccount', accountInfo)
-    const accounts: AccountInfo[] = await this.storage.get(StorageKey.ACCOUNTS)
+  public async addPermission(accountInfo: PermissionInfo): Promise<void> {
+    logger.log('addPermission', accountInfo)
+    const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
 
-    if (!accounts.some((account: AccountInfo) => account.accountIdentifier === accountInfo.accountIdentifier)) {
-      accounts.push(accountInfo)
+    if (!permissions.some((account: PermissionInfo) => account.accountIdentifier === accountInfo.accountIdentifier)) {
+      permissions.push(accountInfo)
     }
 
-    return this.storage.set(StorageKey.ACCOUNTS, accounts)
+    return this.storage.set('permissions' as any, permissions)
   }
 
-  public async removeAccount(accountIdentifier: string): Promise<void> {
-    const accounts: AccountInfo[] = await this.storage.get(StorageKey.ACCOUNTS)
+  public async removePermission(accountIdentifier: string): Promise<void> {
+    const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
 
-    const filteredAccounts: AccountInfo[] = accounts.filter(
-      (accountInfo: AccountInfo) => accountInfo.accountIdentifier !== accountIdentifier
+    const filteredPermissions: PermissionInfo[] = permissions.filter(
+      (accountInfo: PermissionInfo) => accountInfo.accountIdentifier !== accountIdentifier
     )
 
-    return this.storage.set(StorageKey.ACCOUNTS, filteredAccounts)
+    return this.storage.set('permissions' as any, filteredPermissions)
   }
 
-  public async removeAllAccounts(): Promise<void> {
-    return this.storage.delete(StorageKey.ACCOUNTS)
+  public async removeAllPermissions(): Promise<void> {
+    return this.storage.delete('permissions' as any)
   }
 
   /**
@@ -190,18 +188,17 @@ export class ExtensionClient extends BeaconClient {
     const beaconMessage: BeaconMessage = (await new Serializer().deserialize(data)) as BeaconMessage
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
       const permissionResponse: PermissionResponse = beaconMessage
-      const account: AccountInfo = {
-        // TODO: Replace
+      const permission: PermissionInfo = {
         accountIdentifier: await getAccountIdentifier(permissionResponse.pubkey, permissionResponse.network),
-        ...permissionResponse,
-        origin: {
-          type: Origin.WEBSITE,
-          id: permissionResponse.beaconId
-        },
-        beaconId: '',
+        beaconId: permissionResponse.beaconId,
+        website: 'website', // TODO: Use actual website
+        address: await getAddressFromPublicKey(permissionResponse.pubkey),
+        pubkey: permissionResponse.pubkey,
+        network: permissionResponse.network,
+        scopes: permissionResponse.scopes,
         connectedAt: new Date()
       }
-      await this.addAccount(account)
+      await this.addPermission(permission)
     }
   }
 

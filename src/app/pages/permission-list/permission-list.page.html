@@ -14,16 +14,16 @@
     <ion-list-header>
       Connected dApps
     </ion-list-header>
-    <ion-item-sliding *ngFor="let account of accounts">
+    <ion-item-sliding *ngFor="let permission of permissions">
       <ion-item>
-        {{ account.pubkey }}
+        {{ permission.pubkey }}
         <br />
-        {{ account.scopes }}
+        {{ permission.scopes }}
       </ion-item>
       <ion-item-options side="end">
-        <ion-item-option (click)="deleteAccount(account)" color="danger">Delete</ion-item-option>
+        <ion-item-option (click)="deletePermission(permission)" color="danger">Delete</ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
   </ion-list>
-  {{ accounts | json }}
+  {{ permissions | json }}
 </ion-content>
