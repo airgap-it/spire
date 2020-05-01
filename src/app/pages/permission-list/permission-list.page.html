@@ -10,29 +10,29 @@
 </ion-header>
 
 <ion-content>
-  <ion-card class="ion-no-margin">
-    <ion-card-content>
-      <ion-card-subtitle>
-        Connected dApps
-      </ion-card-subtitle>
-      <div *ngFor="let permission of permissions">
-        <ion-item lines="none" class="ion-no-padding">
-          <ion-label slot="start">
-            <h3>{{ permission.address }}</h3>
-            <ion-badge color="dark">
-              {{ permission.scopes }}
-            </ion-badge>
-            <ion-badge color="dark">
-              {{ permission.website }}
-            </ion-badge>
-          </ion-label>
-        </ion-item>
-        <ion-button size="small" fill="outline" (click)="deletePermission(permission)">
-          Remove
-        </ion-button>
-      </div>
-    </ion-card-content>
-  </ion-card>
-
-  {{ permissions | json }}
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Connected dApps</ion-label>
+    </ion-list-header>
+    <ion-item lines="none" *ngFor="let permission of permissions">
+      <ion-label>
+        <!--TODO: human readable name from id -->
+        <h3>
+          <strong>Human Readable Name</strong>
+          <small>{{ permission.website }}</small>
+        </h3>
+        <div class="d-flex ion-align-items-center">
+          <identicon [address]="permission.address"></identicon>
+          <p class="ion-no-margin">{{ permission.address }}</p>
+        </div>
+        <ion-badge color="light">
+          {{ permission.scopes }}
+        </ion-badge>
+      </ion-label>
+      <!--TODO: prompt alert and ask if user really want to remove this permission-->
+      <ion-button slot="end" size="small" fill="outline" (click)="deletePermission(permission)">
+        Remove
+      </ion-button>
+    </ion-item>
+  </ion-list>
 </ion-content>

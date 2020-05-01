@@ -28,7 +28,10 @@
     <ion-row>
       <ion-col>
         <p class="ion-text-center ion-no-margin"><small>Address</small></p>
-        <div (click)="openBlockexplorer()" class="ion-justify-content-center ion-align-items-center address--container">
+        <div
+          (click)="openBlockexplorer()"
+          class="ion-justify-content-center ion-align-items-center d-flex address--container"
+        >
           <identicon [address]="localWalletService.address | async"></identicon>
           <h6>
             {{ localWalletService.address | async }}
