@@ -45,6 +45,9 @@ ion-list-header ion-label {
   font-size: 22px;
 }
 
+.d-flex {
+  display: flex;
+}
 beacon-request {
   .permission-request--container {
     identicon {
@@ -60,6 +63,17 @@ beacon-from-to {
     img {
       width: 48px;
       height: 48px;
+    }
+  }
+}
+app-permission-list {
+  identicon {
+    img,
+    div {
+      min-height: 20px !important;
+      height: 20px;
+      min-width: 20px !important;
+      width: 20px;
     }
   }
 }
