@@ -1,4 +1,10 @@
-import { BeaconMessage, ExtensionMessage, ExtensionMessageTarget, Serializer } from '@airgap/beacon-sdk'
+import {
+  BeaconMessage,
+  ExtensionMessage,
+  ExtensionMessageTarget,
+  OperationRequest,
+  Serializer
+} from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import {
@@ -6,6 +12,7 @@ import {
   ActionInputTypesMap,
   ExtensionMessageInputPayload,
   ExtensionMessageOutputPayload,
+  WalletInfo,
   WalletType
 } from 'src/extension/extension-client/Actions'
 
@@ -24,7 +31,25 @@ export class ChromeMessagingService {
 
       const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
 
-      this.beaconRequest(deserialized, WalletType.LOCAL_MNEMONIC).catch((beaconRequestError: Error) => {
+      let walletType: WalletType = WalletType.LOCAL_MNEMONIC
+
+      if ((deserialized as OperationRequest).sourceAddress) {
+        const result: ExtensionMessageOutputPayload<Action.WALLETS_GET> = await this.sendChromeMessage(
+          Action.WALLETS_GET,
+          undefined
+        )
+        if (result.data) {
+          const wallet: WalletInfo<WalletType> | undefined = result.data.wallets.find(
+            (walletInfo: WalletInfo<WalletType>) =>
+              walletInfo.address === (deserialized as OperationRequest).sourceAddress
+          )
+          if (wallet) {
+            walletType = wallet.type
+          }
+        }
+      }
+
+      this.beaconRequest(deserialized, walletType).catch((beaconRequestError: Error) => {
         console.log('beaconRequestError', beaconRequestError)
       })
     })

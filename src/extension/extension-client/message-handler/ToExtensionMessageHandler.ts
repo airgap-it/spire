@@ -1,27 +1,19 @@
-import {
-  BeaconMessage,
-  BeaconMessageType,
-  ChromeStorage,
-  ExtensionMessage,
-  OperationRequest,
-  Serializer
-} from '@airgap/beacon-sdk'
+import { BeaconMessage, BeaconMessageType, ExtensionMessage, OperationRequest, Serializer } from '@airgap/beacon-sdk'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
+import { WalletInfo, WalletType } from '../Actions'
+import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
-import { Signer } from '../Signer'
 
 import { MessageHandler } from './MessageHandler'
 
 const logger: Logger = new Logger('ToExtensionMessageHandler')
 
-const storage: ChromeStorage = new ChromeStorage()
-
 export class ToExtensionMessageHandler extends MessageHandler {
   constructor(
     private readonly sendToBeacon: (message: string) => void,
     private readonly sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void>,
-    private readonly signer: Signer
+    private readonly client: ExtensionClient
   ) {
     super()
   }
@@ -47,11 +39,17 @@ export class ToExtensionMessageHandler extends MessageHandler {
         ;(async (): Promise<void> => {
           const operationRequest: OperationRequest = deserialized
 
-          const mnemonic: string = await storage.get('mnemonic' as any)
-          const operations: TezosWrappedOperation = await this.signer.prepareOperations(
+          const wallet: WalletInfo<WalletType> | undefined = await this.client.getWalletByAddress(
+            operationRequest.sourceAddress
+          )
+          if (!wallet) {
+            throw new Error('NO WALLET FOUND') // TODO: Send error to DApp
+          }
+
+          const operations: TezosWrappedOperation = await this.client.signer.prepareOperations(
             operationRequest.operationDetails,
             operationRequest.network,
-            mnemonic
+            wallet.pubkey
           )
 
           operationRequest.operationDetails = operations.contents

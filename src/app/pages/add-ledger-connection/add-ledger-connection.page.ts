@@ -1,8 +1,8 @@
+import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
-import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 
 @Component({
   selector: 'app-add-ledger-connection',

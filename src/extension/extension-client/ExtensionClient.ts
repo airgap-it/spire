@@ -67,7 +67,7 @@ export class ExtensionClient extends BeaconClient {
     const messageHandlerMap: Map<string, MessageHandler> = new Map<string, MessageHandler>()
     messageHandlerMap.set(
       ExtensionMessageTarget.EXTENSION,
-      new ToExtensionMessageHandler(this.sendToBeacon, sendToPopup, this.signer)
+      new ToExtensionMessageHandler(this.sendToBeacon, sendToPopup, this)
     )
     messageHandlerMap.set(
       ExtensionMessageTarget.PAGE,
@@ -122,7 +122,6 @@ export class ExtensionClient extends BeaconClient {
     logger.log('handleMessage', data, sendResponse)
     const handler: MessageHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
 
-    logger.log('handler', handler)
     await handler({
       data: data.payload,
       sendResponse,
@@ -149,7 +148,7 @@ export class ExtensionClient extends BeaconClient {
   }
 
   public async getPermission(accountIdentifier: string): Promise<PermissionInfo | undefined> {
-    const permissions: PermissionInfo[] = await this.storage.get('permissions' as any)
+    const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when wallets type is in sdk
 
     return permissions.find((permission: PermissionInfo) => permission.accountIdentifier === accountIdentifier)
   }
@@ -190,9 +189,15 @@ export class ExtensionClient extends BeaconClient {
   }
 
   public async getWallet(pubkey: string): Promise<WalletInfo<WalletType> | undefined> {
-    const wallets: WalletInfo<WalletType>[] = await this.storage.get('wallets' as any)
+    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
     return wallets.find((wallet: WalletInfo<WalletType>) => wallet.pubkey === pubkey)
+  }
+
+  public async getWalletByAddress(address: string): Promise<WalletInfo<WalletType> | undefined> {
+    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+
+    return wallets.find((wallet: WalletInfo<WalletType>) => wallet.address === address)
   }
 
   public async addWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {

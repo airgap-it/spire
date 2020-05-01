@@ -5,9 +5,9 @@ export interface Signer {
   prepareOperations(
     operations: TezosBaseOperation[],
     network: Network,
-    mnemonic: string
+    publicKey: string
   ): Promise<TezosWrappedOperation>
-  prepareAndWrapOperations(operations: TezosBaseOperation[], network: Network, mnemonic: string): Promise<string>
-  sign(forgedTx: string, mnemonic: string): Promise<string>
+  prepareAndWrapOperations(operations: TezosBaseOperation[], network: Network, publicKey: string): Promise<string>
+  sign(forgedTx: string): Promise<string>
   broadcast(network: Network, signedTx: string): Promise<string>
 }

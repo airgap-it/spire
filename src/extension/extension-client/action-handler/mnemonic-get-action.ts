@@ -15,6 +15,6 @@ export const mnemonicGetAction: (logger: Logger) => MessageHandlerFunction<Actio
     logger.log('mnemonic read', mnemonic)
     context.sendResponse({ data: { mnemonic } })
   } else {
-    mnemonicGenerateAction(context as any)
+    await mnemonicGenerateAction(logger)(context as any)
   }
 }

@@ -2,19 +2,18 @@ import {
   BeaconBaseMessage,
   BeaconMessage,
   BeaconMessageType,
-  ChromeStorage,
   OperationRequestOutput,
   OperationResponse,
   OperationResponseInput
 } from '@airgap/beacon-sdk'
 import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 
+import { WalletInfo, WalletType } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 
 import { BeaconMessageHandlerFunction } from './BeaconMessageHandler'
-
-const storage: ChromeStorage = new ChromeStorage()
+import { AirGapSigner, LocalSigner, LedgerSigner } from 'src/extension/AirGapSigner'
 
 export const operationRequestHandler: (client: ExtensionClient, logger: Logger) => BeaconMessageHandlerFunction = (
   client: ExtensionClient,
@@ -28,20 +27,31 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
     const operationRequest: OperationRequestOutput = (data.request as any) as OperationRequestOutput
     logger.log('beaconMessageHandler operation-request', data)
 
-    const mnemonic: string = await storage.get('mnemonic' as any)
+    const wallet: WalletInfo<WalletType> | undefined = await client.getWalletByAddress(operationRequest.sourceAddress)
+    if (!wallet) {
+      throw new Error('NO WALLET FOUND') // TODO: Send error to DApp
+    }
 
     const forgedTx: string = await client.signer.prepareAndWrapOperations(
       operationRequest.operationDetails,
       operationRequest.network,
-      mnemonic
+      wallet.pubkey
     )
+
+    let signer: AirGapSigner
+    if (wallet.type === WalletType.LOCAL_MNEMONIC) {
+      const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> = wallet as WalletInfo<WalletType.LOCAL_MNEMONIC>
+      signer = new LocalSigner(localWallet.info.mnemonic)
+    } else {
+      signer = new LedgerSigner()
+    }
 
     logger.log(JSON.stringify(forgedTx))
 
     let responseInput: OperationResponseInput
     try {
-      const hash: string = await client.signer.sign(forgedTx, mnemonic).then((signedTx: string) => {
-        return client.signer.broadcast(operationRequest.network, signedTx)
+      const hash: string = await signer.sign(forgedTx).then((signedTx: string) => {
+        return signer.broadcast(operationRequest.network, signedTx)
       })
       logger.log('broadcast: ', hash)
       responseInput = {
