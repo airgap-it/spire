@@ -2,9 +2,10 @@ import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
-import { LocalWalletService } from 'src/app/services/local-wallet.service'
+import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
+import { WalletService } from 'src/app/services/local-wallet.service'
 import { SettingsService } from 'src/app/services/settings.service'
-import { StorageKey, StorageService } from 'src/app/services/storage.service'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 import { getTezblockLinkForNetwork } from 'src/extension/extension-client/utils'
 
 import { PairPage } from '../pair/pair.page'
@@ -27,23 +28,28 @@ export class HomePage {
   public balance: string = ''
   public tezblockLink: string = ''
   public network: Network | undefined
+  public address: string = ''
 
   constructor(
-    public readonly localWalletService: LocalWalletService,
+    public readonly walletService: WalletService,
     private readonly modalController: ModalController,
-    private readonly storageService: StorageService,
     private readonly settingsService: SettingsService,
+    private readonly chromeMessagingService: ChromeMessagingService,
     private readonly ref: ChangeDetectorRef
   ) {
-    this.settingsService.getNetwork().then(network => (this.network = network))
+    this.settingsService
+      .getNetwork()
+      .then((network: Network | undefined) => (this.network = network))
+      .catch(console.error)
 
     this.checkOnboarding().catch(console.error)
 
-    this.localWalletService.address.subscribe(async (address: string | null) => {
+    this.walletService.activeWallet$.subscribe(async (wallet: WalletInfo<WalletType>) => {
       const [balance, tezblockLink]: [string, string] = await Promise.all([
-        this.getBalance(address),
-        this.getBlockexplorer(address)
+        this.getBalance(wallet.address),
+        this.getBlockexplorer(wallet.address)
       ])
+      this.address = wallet.address
       this.balance = balance
       this.tezblockLink = tezblockLink
       this.ref.detectChanges()
@@ -59,11 +65,14 @@ export class HomePage {
   }
 
   public async checkOnboarding(): Promise<void> {
-    const hasOnboarded: boolean = await this.storageService.get(StorageKey.HAS_ONBOARDED)
+    const hasWallet: boolean = await this.chromeMessagingService
+      .sendChromeMessage(Action.WALLETS_GET, undefined)
+      .then((response: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => {
+        return response.data ? response.data.wallets.length > 0 : false
+      })
 
-    if (!hasOnboarded) {
+    if (!hasWallet) {
       await this.showPairPage()
-      await this.storageService.set(StorageKey.HAS_ONBOARDED, true)
     }
   }
 

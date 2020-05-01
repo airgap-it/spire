@@ -32,9 +32,9 @@
           (click)="openBlockexplorer()"
           class="ion-justify-content-center ion-align-items-center d-flex address--container"
         >
-          <identicon [address]="localWalletService.address | async"></identicon>
+          <identicon [address]="address"></identicon>
           <h6>
-            {{ localWalletService.address | async }}
+            {{ address }}
             <ion-icon name="open-outline"></ion-icon>
           </h6>
         </div>

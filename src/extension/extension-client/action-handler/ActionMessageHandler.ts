@@ -10,9 +10,6 @@ import { activeWalletGetAction } from './active-wallet-get-action'
 import { activeWalletSetAction } from './active-wallet-set-action'
 import { beaconIdGetAction } from './beacon-id-get-action'
 import { ledgerInitAction } from './ledger-init-action'
-import { mnemonicGenerateAction } from './mnemonic-generate-action'
-import { mnemonicGetAction } from './mnemonic-get-action'
-import { mnemonicSaveAction } from './mnemonic-save-action'
 import { p2pInitAction } from './p2p-init-action'
 import { p2pPeerRemoveAction } from './p2p-peer-remove-action'
 import { p2pPeersGetAction } from './p2p-peers-get-action'
@@ -58,9 +55,6 @@ export class ActionMessageHandler {
     [Action.P2P_PEERS_GET]: p2pPeersGetAction(logger),
     [Action.P2P_PEER_REMOVE]: p2pPeerRemoveAction(logger),
     [Action.LEDGER_INIT]: ledgerInitAction(logger),
-    [Action.MNEMONIC_GET]: mnemonicGetAction(logger),
-    [Action.MNEMONIC_GENERATE]: mnemonicGenerateAction(logger),
-    [Action.MNEMONIC_SAVE]: mnemonicSaveAction(logger),
     [Action.BEACON_ID_GET]: beaconIdGetAction(logger),
     [Action.RESPONSE]: responseAction(logger)
   }

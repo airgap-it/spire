@@ -1,20 +1,17 @@
 import { Injectable } from '@angular/core'
 
 export enum StorageKey {
-  DEV_SETTINGS_ENABLED = 'DEV_SETTINGS_ENABLED',
-  HAS_ONBOARDED = 'HAS_ONBOARDED'
+  DEV_SETTINGS_ENABLED = 'DEV_SETTINGS_ENABLED'
 }
 
 interface StorageKeyReturnType {
   [StorageKey.DEV_SETTINGS_ENABLED]: boolean
-  [StorageKey.HAS_ONBOARDED]: boolean
 }
 
 type StorageKeyReturnDefaults = { [key in StorageKey]: StorageKeyReturnType[key] }
 
 const defaultValues: StorageKeyReturnDefaults = {
-  [StorageKey.DEV_SETTINGS_ENABLED]: false,
-  [StorageKey.HAS_ONBOARDED]: false
+  [StorageKey.DEV_SETTINGS_ENABLED]: false
 }
 
 @Injectable({

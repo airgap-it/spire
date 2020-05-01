@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core'
+import { Injectable } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
@@ -9,42 +9,19 @@ import { ChromeMessagingService } from './chrome-messaging.service'
 @Injectable({
   providedIn: 'root'
 })
-export class LocalWalletService {
+export class WalletService {
+  private readonly _wallets: ReplaySubject<WalletInfo<WalletType>[]> = new ReplaySubject(1)
+  private readonly _activeWallet: ReplaySubject<WalletInfo<WalletType>> = new ReplaySubject(1)
+
   private readonly protocol: TezosProtocol
 
-  private readonly _mnemonic: ReplaySubject<string> = new ReplaySubject(1)
-  private readonly _privateKey: ReplaySubject<string> = new ReplaySubject(1)
-  private readonly _publicKey: ReplaySubject<string> = new ReplaySubject(1)
-  private readonly _address: ReplaySubject<string> = new ReplaySubject(1)
+  public readonly wallets$: Observable<WalletInfo<WalletType>[]> = this._wallets.asObservable()
+  public readonly activeWallet$: Observable<WalletInfo<WalletType>> = this._activeWallet.asObservable()
 
-  public mnemonic: Observable<string> = this._mnemonic.asObservable()
-  public privateKey: Observable<string> = this._privateKey.asObservable()
-  public publicKey: Observable<string> = this._publicKey.asObservable()
-  public address: Observable<string> = this._address.asObservable()
-
-  constructor(private readonly ngZone: NgZone, private readonly chromeMessagingService: ChromeMessagingService) {
+  constructor(private readonly chromeMessagingService: ChromeMessagingService) {
     this.protocol = new TezosProtocol() // This protocol is only used to calculate addresses, so it is not different on testnets
-
-    this.mnemonic.subscribe(async (mnemonic: string) => {
-      console.log('SUBSCRIBE TRIGGERED')
-      const {
-        privateKey,
-        publicKey,
-        address
-      }: {
-        privateKey: string
-        publicKey: string
-        address: string
-      } = await this.mnemonicToAddress(mnemonic)
-
-      this.ngZone.run(() => {
-        this._privateKey.next(privateKey)
-        this._publicKey.next(publicKey)
-        this._address.next(address)
-      })
-    })
-
-    this.getMnemonic()
+    this.getWallets().catch(console.error)
+    this.getActiveWallet().catch(console.error)
   }
 
   public async mnemonicToAddress(
@@ -72,39 +49,29 @@ export class LocalWalletService {
     }
   }
 
-  public async getMnemonic(): Promise<void> {
-    const response: ExtensionMessageOutputPayload<Action.MNEMONIC_GET> = await this.chromeMessagingService.sendChromeMessage(
-      Action.MNEMONIC_GET,
-      undefined
-    )
-    console.log('generateMnemonic response', response)
-    if (response.data) {
-      this._mnemonic.next(response.data.mnemonic)
-    }
+  public async getWallets(): Promise<void> {
+    this.chromeMessagingService
+      .sendChromeMessage(Action.WALLETS_GET, undefined)
+      .then((response: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => {
+        if (response.data) {
+          this._wallets.next(response.data.wallets)
+        }
+      })
+      .catch(console.error)
   }
-
-  public async generateMnemonic(): Promise<void> {
-    const response: ExtensionMessageOutputPayload<Action.MNEMONIC_GENERATE> = await this.chromeMessagingService.sendChromeMessage(
-      Action.MNEMONIC_GENERATE,
-      undefined
-    )
-    console.log('generateMnemonic response', response)
-    if (response.data) {
-      this._mnemonic.next(response.data.mnemonic)
-      await this.addAndActiveWallet(response.data.mnemonic)
-    }
+  public async getActiveWallet(): Promise<void> {
+    this.chromeMessagingService
+      .sendChromeMessage(Action.ACTIVE_WALLET_GET, undefined)
+      .then((response: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => {
+        if (response.data) {
+          this._activeWallet.next(response.data.wallet)
+        }
+      })
+      .catch(console.error)
   }
 
   public async saveMnemonic(mnemonic: string): Promise<void> {
     if (mnemonic && bip39.validateMnemonic(mnemonic)) {
-      const response: ExtensionMessageOutputPayload<Action.MNEMONIC_SAVE> = await this.chromeMessagingService.sendChromeMessage(
-        Action.MNEMONIC_SAVE,
-        { mnemonic }
-      )
-
-      console.log('saveMnemonic response', response)
-
-      this._mnemonic.next(mnemonic)
       await this.addAndActiveWallet(mnemonic)
     }
   }
@@ -129,5 +96,7 @@ export class LocalWalletService {
     }
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
+
+    await this.getWallets()
   }
 }

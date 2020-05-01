@@ -15,7 +15,7 @@ export const ledgerInitAction: (logger: Logger) => MessageHandlerFunction<Action
 
   let publicKey: string | undefined
   try {
-    publicKey = await bridge.getAddress()
+    publicKey = (await bridge.getAddress()).substr(2)
   } catch (error) {
     context.sendResponse({ error })
 

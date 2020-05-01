@@ -33,7 +33,7 @@
   </ion-list>
   <ion-row>
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ localWalletService.address | async }}</p>
+      <p class="ion-no-margin">{{ address }}</p>
     </ion-col>
   </ion-row>
 
@@ -44,7 +44,7 @@
   </ion-list>
   <ion-row>
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ localWalletService.privateKey | async }}</p>
+      <p class="ion-no-margin">{{ privateKey }}</p>
     </ion-col>
   </ion-row>
 
@@ -55,7 +55,7 @@
   </ion-list>
   <ion-row class="ion-padding-bottom">
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ localWalletService.publicKey | async }}</p>
+      <p class="ion-no-margin">{{ publicKey }}</p>
     </ion-col>
   </ion-row>
 

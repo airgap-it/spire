@@ -3,8 +3,10 @@ import { ChangeDetectorRef, Component } from '@angular/core'
 import { AlertController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { SettingsService } from 'src/app/services/settings.service'
+import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+import * as bip39 from 'bip39'
 
-import { LocalWalletService } from '../../services/local-wallet.service'
+import { WalletService } from '../../services/local-wallet.service'
 
 @Component({
   selector: 'beacon-local-mnemonic',
@@ -14,20 +16,29 @@ import { LocalWalletService } from '../../services/local-wallet.service'
 export class LocalMnemonicPage {
   public saveButtonDisabled: boolean = true
   public mnemonic: string = ''
+  public privateKey: string = ''
+  public publicKey: string = ''
+  public address: string = ''
+
   public balance: string = ''
 
   constructor(
     public readonly alertController: AlertController,
-    public readonly localWalletService: LocalWalletService,
+    public readonly walletService: WalletService,
     private readonly settingsService: SettingsService,
     private readonly ref: ChangeDetectorRef
   ) {
-    this.localWalletService.mnemonic.subscribe(mnemonic => {
-      this.mnemonic = mnemonic
-    })
-    this.localWalletService.address.subscribe(async address => {
-      this.balance = await this.getBalance(address)
-      this.ref.detectChanges()
+    this.walletService.wallets$.subscribe(async (wallets: WalletInfo<WalletType>[]) => {
+      const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> | undefined = wallets.find(
+        (wallet: WalletInfo<WalletType>) => wallet.type === WalletType.LOCAL_MNEMONIC
+      ) as WalletInfo<WalletType.LOCAL_MNEMONIC>
+      if (localWallet) {
+        this.mnemonic = localWallet.info.mnemonic
+        this.publicKey = localWallet.pubkey
+        this.address = localWallet.address
+        this.balance = await this.getBalance(localWallet.address)
+        this.ref.detectChanges()
+      }
     })
   }
 
@@ -48,9 +59,10 @@ export class LocalMnemonicPage {
         },
         {
           text: 'Yes',
-          handler: async () => {
+          handler: async (): Promise<void> => {
             this.saveButtonDisabled = true
-            await this.localWalletService.generateMnemonic()
+            const mnemonic: string = bip39.generateMnemonic()
+            await this.walletService.saveMnemonic(mnemonic)
           }
         }
       ]
@@ -72,9 +84,9 @@ export class LocalMnemonicPage {
         },
         {
           text: 'Yes',
-          handler: async () => {
+          handler: async (): Promise<void> => {
             this.saveButtonDisabled = true
-            await this.localWalletService.saveMnemonic(mnemonic)
+            await this.walletService.saveMnemonic(mnemonic)
           }
         }
       ]
@@ -93,7 +105,7 @@ export class LocalMnemonicPage {
     if (network) {
       const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
 
-      const amount = await protocol.getBalanceOfAddresses([address])
+      const amount: string = await protocol.getBalanceOfAddresses([address])
       console.log('getBalance', amount)
 
       return amount

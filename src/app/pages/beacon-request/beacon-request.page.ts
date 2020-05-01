@@ -14,8 +14,8 @@ import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { LocalWalletService } from 'src/app/services/local-wallet.service'
-import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/extension-client/Actions'
+import { WalletService } from 'src/app/services/local-wallet.service'
+import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
@@ -50,11 +50,11 @@ export class BeaconRequestPage implements OnInit {
   constructor(
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
-    private readonly localWalletService: LocalWalletService,
+    private readonly walletService: WalletService,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
-    this.localWalletService.address.pipe(take(1)).subscribe((address: string) => {
-      this.address = address
+    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo<WalletType>) => {
+      this.address = wallet.address
     })
     if (this.walletType === WalletType.LEDGER) {
       this.confirmButtonText = 'Sign with Ledger'
@@ -95,8 +95,9 @@ export class BeaconRequestPage implements OnInit {
   public async done(): Promise<void> {
     if (this.responseHandler) {
       await this.responseHandler()
+    } else {
+      await this.dismiss()
     }
-    await this.dismiss()
   }
 
   private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
@@ -116,7 +117,7 @@ export class BeaconRequestPage implements OnInit {
     // })
 
     this.requestedNetwork = request.network
-    this.localWalletService.publicKey.pipe(take(1)).subscribe((pubKey: string) => {
+    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo<WalletType>) => {
       this.inputs = [
         {
           name: 'sign',
@@ -148,9 +149,10 @@ export class BeaconRequestPage implements OnInit {
 
       this.responseHandler = async (): Promise<void> => {
         await this.sendResponse(request, {
-          pubkey: pubKey,
+          pubkey: wallet.pubkey,
           scopes: this.inputs.filter(input => input.checked).map(input => input.value)
         })
+        await this.dismiss()
       }
     })
   }
@@ -165,27 +167,9 @@ export class BeaconRequestPage implements OnInit {
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
+        await this.dismiss()
       } else {
-        const modal = await this.modalController.create({
-          component: AddLedgerConnectionPage,
-          componentProps: {
-            request,
-            targetMethod: Action.RESPONSE
-          }
-        })
-
-        modal
-          .onWillDismiss()
-          .then(({ data: closeParent }) => {
-            if (closeParent) {
-              setTimeout(() => {
-                this.dismiss()
-              }, 500)
-            }
-          })
-          .catch(error => console.error(error))
-
-        return modal.present()
+        await this.openLedgerModal(request)
       }
     }
   }
@@ -199,30 +183,37 @@ export class BeaconRequestPage implements OnInit {
 
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
-        this.sendResponse(request, {})
+        await this.sendResponse(request, {})
+        await this.dismiss()
       } else {
-        const modal = await this.modalController.create({
-          component: AddLedgerConnectionPage,
-          componentProps: {
-            request,
-            targetMethod: Action.RESPONSE
-          }
-        })
-
-        modal
-          .onWillDismiss()
-          .then(({ data: closeParent }) => {
-            if (closeParent) {
-              setTimeout(() => {
-                this.dismiss()
-              }, 500)
-            }
-          })
-          .catch(error => console.error(error))
-
-        return modal.present()
+        await this.openLedgerModal(request)
       }
     }
+  }
+
+  private async openLedgerModal(
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
+  ): Promise<void> {
+    const modal = await this.modalController.create({
+      component: AddLedgerConnectionPage,
+      componentProps: {
+        request,
+        targetMethod: Action.RESPONSE
+      }
+    })
+
+    modal
+      .onDidDismiss()
+      .then(({ data: closeParent }) => {
+        if (closeParent) {
+          setTimeout(() => {
+            this.dismiss()
+          }, 500)
+        }
+      })
+      .catch(error => console.error(error))
+
+    return modal.present()
   }
 
   private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
@@ -234,6 +225,7 @@ export class BeaconRequestPage implements OnInit {
     console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {
       await this.sendResponse(request, {})
+      await this.dismiss()
     }
   }
 

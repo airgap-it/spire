@@ -20,7 +20,7 @@ interface BeaconLedgerBridgeVersionResponse {
 }
 
 export class BeaconLedgerBridge {
-  private static readonly TARGET = 'BEACON-SDK-LEDGER-BRIDGE'
+  private static readonly TARGET: string = 'BEACON-SDK-LEDGER-BRIDGE'
 
   private readonly iframe: HTMLIFrameElement
 
@@ -97,7 +97,7 @@ export class BeaconLedgerBridge {
   }
 
   private randomID(): string {
-    const uint32 = window.crypto.getRandomValues(new Uint32Array(1))[0]
+    const uint32: number = window.crypto.getRandomValues(new Uint32Array(1))[0]
 
     return uint32.toString(16)
   }

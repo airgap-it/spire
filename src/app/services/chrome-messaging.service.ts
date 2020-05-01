@@ -59,7 +59,7 @@ export class ChromeMessagingService {
     action: K,
     payload: ActionInputTypesMap[K]
   ): Promise<ExtensionMessageOutputPayload<K>> {
-    console.log('SENDING MESSAGE', action, payload)
+    console.log(`SENDING REQUEST[${action}]`, payload)
 
     return new Promise(resolve => {
       const message: ExtensionMessage<ExtensionMessageInputPayload<K>> = {
@@ -70,7 +70,7 @@ export class ChromeMessagingService {
         }
       }
       chrome.runtime.sendMessage(message, (response: ExtensionMessageOutputPayload<K>) => {
-        console.log('GETTING RESPONSE', response)
+        console.log(`GETTING RESPONSE[${action}]`, response)
         resolve(response)
       })
     })

@@ -204,11 +204,21 @@ export class ExtensionClient extends BeaconClient {
     logger.log('addWallet', walletInfo)
     const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
+    let newWallets: WalletInfo<WalletType>[] = wallets
     if (!wallets.some((wallet: WalletInfo<WalletType>) => wallet.pubkey === walletInfo.pubkey)) {
-      wallets.push(walletInfo)
+      if (walletInfo.type === WalletType.LOCAL_MNEMONIC) {
+        // There can only be one local mnemonic. So we have to delete the old one if we add a new one
+        const filteredWallets: WalletInfo<WalletType>[] = wallets.filter(
+          (walletInfoElement: WalletInfo<WalletType>) => walletInfoElement.type !== WalletType.LOCAL_MNEMONIC
+        )
+        filteredWallets.push(walletInfo)
+        newWallets = filteredWallets
+      } else {
+        newWallets.push(walletInfo)
+      }
     }
 
-    return this.storage.set('wallets' as any, wallets)
+    return this.storage.set('wallets' as any, newWallets)
   }
 
   public async removeWallet(pubkey: string): Promise<void> {

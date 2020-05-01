@@ -40,7 +40,7 @@ export class AddLedgerConnectionPage implements OnInit {
     console.log('LEDGER RESPONSE', response)
 
     this.isLoading = false
-    if (response.error) {
+    if (response && response.error) {
     } else {
       this.success = true
       if (this.targetMethod === Action.LEDGER_INIT) {
