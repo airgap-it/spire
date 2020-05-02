@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core'
-import { ModalController } from '@ionic/angular'
+import { AlertController, ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
@@ -15,6 +15,7 @@ export class WalletSelectPage {
   constructor(
     private readonly modalController: ModalController,
     private readonly chromeMessagingService: ChromeMessagingService,
+    private readonly alertController: AlertController,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.refreshWallets()
@@ -49,8 +50,27 @@ export class WalletSelectPage {
   }
 
   public async deleteWallet(wallet: WalletInfo<WalletType>): Promise<void> {
-    await this.chromeMessagingService.sendChromeMessage(Action.WALLET_DELETE, { wallet })
-    this.refreshWallets()
+    const alert: HTMLIonAlertElement = await this.alertController.create({
+      header: 'Delete Wallet?',
+      message:
+        'Are you sure you want to delete this wallet? You will have to pair it again if you want to use it again.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Yes',
+          handler: async (): Promise<void> => {
+            await this.chromeMessagingService.sendChromeMessage(Action.WALLET_DELETE, { wallet })
+            await this.refreshWallets()
+          }
+        }
+      ]
+    })
+
+    await alert.present()
   }
 
   public async dismiss(closeParent: boolean = false): Promise<void> {
