@@ -9,39 +9,50 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content>
   <ion-list *ngIf="activeWallet">
     <ion-list-header>
-      Active Wallet
+      <ion-label>Active Wallet</ion-label>
     </ion-list-header>
-    <ion-item>
-      {{ activeWallet.type }} - {{ activeWallet.pubkey }}
+    <ion-item lines="none">
+      <ion-label>
+        <h3>
+          <strong>{{ activeWallet.type }}</strong>
+        </h3>
+        <div class="d-flex ion-align-items-center">
+          <identicon [address]="'address'"></identicon>
+          <!--TODO: active wallet address-->
+          <p class="ion-no-margin">address</p>
+        </div>
+        <p class="ion-text-wrap">{{ activeWallet.pubkey }}</p>
+      </ion-label>
     </ion-item>
   </ion-list>
 
-  <ion-card class="ion-no-margin">
-    <ion-card-content>
-      <ion-card-subtitle>
-        Other wallets
-      </ion-card-subtitle>
-      <div *ngFor="let wallet of wallets">
-        <ion-item lines="none" class="ion-no-padding">
-          <ion-label slot="start">
-            <h3>{{ wallet.address }}</h3>
-            <ion-badge color="dark">
-              {{ wallet.type }}
-            </ion-badge>
-          </ion-label>
-        </ion-item>
-        <ion-button size="small" (click)="activateWallet(wallet)">
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Other Wallets</ion-label>
+    </ion-list-header>
+    <ion-item lines="none" *ngFor="let wallet of wallets">
+      <ion-label>
+        <h3>
+          <strong>{{ wallet.type }}</strong>
+        </h3>
+        <div class="d-flex ion-align-items-center">
+          <identicon [address]="wallet.address"></identicon>
+          <p class="ion-no-margin">{{wallet.address}}</p>
+        </div>
+        <p class="ion-text-wrap">{{ wallet.pubkey }}</p>
+      </ion-label>
+      <div slot="end">
+        <ion-button size="small" fill="outline" color="primary" (click)="activateWallet(wallet)">
           Activate
         </ion-button>
-        <ion-button size="small" fill="outline" (click)="deleteWallet(wallet)">
-          Remove
+        <!--TODO: prompt alert and ask if user really want to remove this permission-->
+        <ion-button size="small" fill="outline" color="dark" (click)="deleteWallet(wallet)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
         </ion-button>
       </div>
-    </ion-card-content>
-  </ion-card>
-
-  {{ wallets | json }}
+    </ion-item>
+  </ion-list>
 </ion-content>
