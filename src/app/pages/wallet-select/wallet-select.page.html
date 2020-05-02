@@ -20,9 +20,8 @@
           <strong>{{ activeWallet.type }}</strong>
         </h3>
         <div class="d-flex ion-align-items-center">
-          <identicon [address]="'address'"></identicon>
-          <!--TODO: active wallet address-->
-          <p class="ion-no-margin">address</p>
+          <identicon [address]="activeWallet.address"></identicon>
+          <p class="ion-no-margin">{{ activeWallet.address }}</p>
         </div>
         <p class="ion-text-wrap">{{ activeWallet.pubkey }}</p>
       </ion-label>
@@ -48,7 +47,6 @@
         <ion-button size="small" fill="outline" color="primary" (click)="activateWallet(wallet)">
           Activate
         </ion-button>
-        <!--TODO: prompt alert and ask if user really want to remove this permission-->
         <ion-button size="small" fill="outline" color="dark" (click)="deleteWallet(wallet)">
           <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
         </ion-button>
