@@ -13,10 +13,10 @@ import { LedgerSigner, LocalSigner } from 'src/extension/AirGapSigner'
 import { WalletInfo, WalletType } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
+import { Signer } from '../Signer'
 import { to, To } from '../utils'
 
 import { BeaconMessageHandlerFunction } from './BeaconMessageHandler'
-import { Signer } from '../Signer'
 
 export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger) => BeaconMessageHandlerFunction = (
   client: ExtensionClient,

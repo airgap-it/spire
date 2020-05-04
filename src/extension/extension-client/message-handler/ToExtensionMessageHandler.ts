@@ -1,15 +1,18 @@
 import {
   AppMetadata,
+  BeaconErrorType,
   BeaconMessage,
   BeaconMessageType,
   BeaconRequestOutputMessage,
   BroadcastRequestOutput,
   ExtensionMessage,
   OperationRequestOutput,
+  OperationResponse,
   PermissionRequestOutput,
   Serializer,
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
+import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
 import { WalletInfo, WalletType } from '../Actions'
@@ -53,11 +56,35 @@ export class ToExtensionMessageHandler extends MessageHandler {
         ;(async (): Promise<void> => {
           const operationRequest: OperationRequestOutput = enriched as OperationRequestOutput
 
+          const sendError: (error: Error, errorType: BeaconErrorType) => Promise<void> = async (
+            error: Error,
+            errorType: BeaconErrorType
+          ): Promise<void> => {
+            logger.log('error', error)
+            const responseInput = {
+              id: operationRequest.id,
+              type: BeaconMessageType.OperationResponse,
+              errorType
+            } as any
+
+            const response: OperationResponse = {
+              beaconId: await this.client.beaconId,
+              version: BEACON_VERSION,
+              ...responseInput
+            }
+            sendResponse(response)
+          }
+
           const wallet: WalletInfo<WalletType> | undefined = await this.client.getWalletByAddress(
             operationRequest.sourceAddress
           )
           if (!wallet) {
-            throw new Error('NO WALLET FOUND') // TODO: Send error to DApp
+            await sendError(
+              { name: 'Wallet Error', message: `No wallet found for address ${operationRequest.sourceAddress}` },
+              BeaconErrorType.NO_PRIVATE_KEY_FOUND_ERROR
+            )
+
+            throw new Error('NO WALLET FOUND')
           }
 
           const operations: TezosWrappedOperation = await this.client.operationProvider.prepareOperations(
