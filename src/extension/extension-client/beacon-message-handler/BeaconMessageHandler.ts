@@ -19,7 +19,7 @@ const beaconMessageHandlerNotSupported: (
 export type BeaconMessageHandlerFunction = (
   data: { request: BeaconBaseMessage; extras: unknown },
   sendToPage: (message: BeaconMessage) => void,
-  sendResponse: () => void
+  sendResponseToPopup: (error?: unknown) => void
 ) => Promise<void>
 
 export class BeaconMessageHandler {

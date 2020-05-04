@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Error</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ng-container *ngIf="error">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ error.name }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        {{ error.message }}
+        <br />
+        <br />
+        {{ error.stack | json }}
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-button fill="outline" color="primary" (click)="dismiss()">
+      Close
+    </ion-button>
+  </ion-fab>
+</ion-content>

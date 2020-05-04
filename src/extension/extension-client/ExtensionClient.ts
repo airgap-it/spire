@@ -7,9 +7,9 @@ import {
   ExtensionMessage,
   ExtensionMessageTarget,
   P2PCommunicationClient,
+  PermissionRequest,
   PermissionResponse,
-  Serializer,
-  PermissionRequest
+  Serializer
 } from '@airgap/beacon-sdk'
 import { BeaconClient } from '@airgap/beacon-sdk/dist/clients/beacon-client/BeaconClient'
 import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
@@ -17,7 +17,7 @@ import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 import { getAccountIdentifier } from '@airgap/beacon-sdk/dist/utils/get-account-identifier'
 import * as sodium from 'libsodium-wrappers'
 
-import { AirGapSigner } from '../AirGapSigner'
+import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
 
 import { ActionMessageHandler, MessageHandlerFunction } from './action-handler/ActionMessageHandler'
 import { Action, ExtensionMessageInputPayload, PermissionInfo, WalletInfo, WalletType } from './Actions'
@@ -42,7 +42,8 @@ const sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void> = (
 export class ExtensionClient extends BeaconClient {
   public pendingRequests: BeaconMessage[] = []
 
-  public readonly signer: Signer = new AirGapSigner()
+  public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
+  public readonly signer: Signer = new LocalSigner()
 
   private p2pClient: P2PCommunicationClient | undefined
   private p2pPubkey: string | undefined = ''

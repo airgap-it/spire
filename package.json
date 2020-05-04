@@ -38,6 +38,7 @@
     "@sentry/browser": "^5.15.5",
     "airgap-coin-lib": "0.8.0",
     "angular2-qrcode": "^2.0.3",
+    "axios": "^0.19.2",
     "bignumber.js": "^9.0.0",
     "bip39": "^3.0.2",
     "core-js": "^2.5.4",

@@ -60,7 +60,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
             throw new Error('NO WALLET FOUND') // TODO: Send error to DApp
           }
 
-          const operations: TezosWrappedOperation = await this.client.signer.prepareOperations(
+          const operations: TezosWrappedOperation = await this.client.operationProvider.prepareOperations(
             operationRequest.operationDetails,
             operationRequest.network,
             wallet.pubkey

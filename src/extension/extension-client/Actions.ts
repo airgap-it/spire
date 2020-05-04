@@ -86,7 +86,7 @@ export interface ActionOutputTypesMap {
   [Action.P2P_PEER_REMOVE]: undefined
   [Action.LEDGER_INIT]: { pubkey: string; address: string }
   [Action.BEACON_ID_GET]: { id: string }
-  [Action.RESPONSE]: undefined
+  [Action.RESPONSE]: { error?: unknown }
 }
 
 export interface ExtensionMessageInputPayload<T extends Action> {

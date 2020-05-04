@@ -18,6 +18,7 @@ import { WalletService } from 'src/app/services/local-wallet.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
+import { ErrorPage } from '../error/error.page'
 
 @Component({
   selector: 'beacon-request',
@@ -167,7 +168,6 @@ export class BeaconRequestPage implements OnInit {
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
-        await this.dismiss()
       } else {
         await this.openLedgerModal(request)
       }
@@ -184,7 +184,6 @@ export class BeaconRequestPage implements OnInit {
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
-        await this.dismiss()
       } else {
         await this.openLedgerModal(request)
       }
@@ -225,7 +224,6 @@ export class BeaconRequestPage implements OnInit {
     console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {
       await this.sendResponse(request, {})
-      await this.dismiss()
     }
   }
 
@@ -241,11 +239,34 @@ export class BeaconRequestPage implements OnInit {
       }
     )
     console.log(response)
-    setTimeout(() => {
-      window.close()
-    }, 1000)
+    if (response.error) {
+      const modal = await this.modalController.create({
+        component: ErrorPage,
+        componentProps: {
+          error: response.error
+        }
+      })
 
-    await this.showSuccessAlert()
+      modal
+        .onDidDismiss()
+        .then(({ data: closeParent }) => {
+          if (closeParent) {
+            setTimeout(() => {
+              this.dismiss()
+            }, 500)
+          }
+        })
+        .catch(error => console.error(error))
+
+      return modal.present()
+    } else {
+      setTimeout(() => {
+        // TODO: window.close()
+      }, 1500)
+
+      await this.showSuccessAlert()
+      await this.dismiss()
+    }
   }
 
   private async showSuccessAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {

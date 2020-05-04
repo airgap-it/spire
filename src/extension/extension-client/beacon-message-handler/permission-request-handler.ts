@@ -21,7 +21,7 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
   return async (
     data: { request: BeaconBaseMessage; extras: unknown },
     sendToPage: (message: BeaconMessage) => void,
-    sendResponse: Function
+    sendResponseToPopup: (error?: unknown) => void
   ): Promise<void> => {
     logger.log('permission-response', data)
     const request: PermissionRequestOutput = (data.request as any) as PermissionRequestOutput
@@ -43,6 +43,6 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
     const response: PermissionResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
 
     sendToPage(response)
-    sendResponse()
+    sendResponseToPopup()
   }
 }
