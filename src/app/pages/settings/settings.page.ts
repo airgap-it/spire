@@ -4,7 +4,7 @@ import { ToastController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
-import { SettingsService } from '../../services/settings.service'
+import { WalletService } from 'src/app/services/local-wallet.service'
 
 @Component({
   selector: 'beacon-settings',
@@ -18,20 +18,17 @@ export class SettingsPage {
   public beaconId: string | undefined
 
   constructor(
-    public readonly settingsService: SettingsService,
+    public readonly walletService: WalletService,
     public readonly chromeMessagingService: ChromeMessagingService,
     private readonly toastController: ToastController
   ) {
-    this.settingsService
-      .getNetwork()
-      .then((network: Network | undefined) => {
-        if (network) {
-          this.networkType = network.type
-          this.networkName = network.name
-          this.networkRpcUrl = network.rpcUrl
-        }
-      })
-      .catch(console.error)
+    this.walletService.activeNetwork$.subscribe((network: Network | undefined) => {
+      if (network) {
+        this.networkType = network.type
+        this.networkName = network.name
+        this.networkRpcUrl = network.rpcUrl
+      }
+    })
 
     this.chromeMessagingService
       .sendChromeMessage(Action.BEACON_ID_GET, undefined)
@@ -54,7 +51,7 @@ export class SettingsPage {
   }
 
   public async updateNetwork(): Promise<void> {
-    return this.settingsService
+    return this.walletService
       .setNetwork({
         type: this.networkType,
         name: this.networkName,

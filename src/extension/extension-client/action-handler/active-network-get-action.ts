@@ -1,4 +1,4 @@
-import { Network } from '@airgap/beacon-sdk'
+import { Network, NetworkType } from '@airgap/beacon-sdk'
 
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
@@ -11,7 +11,7 @@ export const activeNetworkGetAction: (logger: Logger) => MessageHandlerFunction<
   context: ActionContext<Action.ACTIVE_NETWORK_GET>
 ): Promise<void> => {
   logger.log('activeNetworkGetAction')
-  const activeNetwork: Network = await context.storage.get('ACTIVE_NETWORK' as any)
+  const activeNetwork: Network = (await context.storage.get('ACTIVE_NETWORK' as any)) || { type: NetworkType.MAINNET }
 
   context.sendResponse({ data: { network: activeNetwork } })
 }

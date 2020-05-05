@@ -2,9 +2,7 @@ import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { Observable, ReplaySubject } from 'rxjs'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
-import { ChromeMessagingService } from './chrome-messaging.service'
 import { StorageKey, StorageService } from './storage.service'
 
 @Injectable({
@@ -13,27 +11,13 @@ import { StorageKey, StorageService } from './storage.service'
 export class SettingsService {
   public readonly _devSettingsEnabled: ReplaySubject<boolean> = new ReplaySubject(1)
 
-  constructor(
-    private readonly storageService: StorageService,
-    private readonly chromeMessagingService: ChromeMessagingService
-  ) {
+  constructor(private readonly storageService: StorageService) {
     this.storageService
       .get(StorageKey.DEV_SETTINGS_ENABLED)
-      .then((enabled: boolean) => this._devSettingsEnabled.next(enabled))
+      .then((enabled: boolean) => {
+        this._devSettingsEnabled.next(enabled)
+      })
       .catch(console.error)
-  }
-
-  public async getNetwork(): Promise<Network | undefined> {
-    const data: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_GET> = await this.chromeMessagingService.sendChromeMessage(
-      Action.ACTIVE_NETWORK_GET,
-      undefined
-    )
-
-    return data.data ? data.data.network : undefined
-  }
-
-  public async setNetwork(network: Network): Promise<void> {
-    await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_NETWORK_SET, { network })
   }
 
   public getDevSettingsEnabled(): Observable<boolean> {

@@ -1,7 +1,8 @@
-import { ChangeDetectorRef, Component } from '@angular/core'
+import { Component } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
-import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+import { Observable } from 'rxjs'
+import { WalletService } from 'src/app/services/local-wallet.service'
+import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-wallet-select',
@@ -9,44 +10,20 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 's
   styleUrls: ['./wallet-select.page.scss']
 })
 export class WalletSelectPage {
-  public activeWallet: WalletInfo<WalletType> | undefined
-  public wallets: WalletInfo<WalletType>[] = []
+  public activeWallet$: Observable<WalletInfo<WalletType>>
+  public wallets$: Observable<WalletInfo<WalletType>[]>
 
   constructor(
     private readonly modalController: ModalController,
-    private readonly chromeMessagingService: ChromeMessagingService,
-    private readonly alertController: AlertController,
-    private readonly cdr: ChangeDetectorRef
+    private readonly walletService: WalletService,
+    private readonly alertController: AlertController
   ) {
-    this.refreshWallets()
-  }
-
-  public async refreshWallets(): Promise<void> {
-    await Promise.all([
-      this.chromeMessagingService
-        .sendChromeMessage(Action.WALLETS_GET, undefined)
-        .then((accounts: ExtensionMessageOutputPayload<Action.WALLETS_GET>) => {
-          if (accounts.data) {
-            console.log('HAVE NEW WALLET DATA', accounts.data.wallets)
-            this.wallets = accounts.data.wallets
-          }
-        })
-        .catch(console.error),
-      this.chromeMessagingService
-        .sendChromeMessage(Action.ACTIVE_WALLET_GET, undefined)
-        .then((accounts: ExtensionMessageOutputPayload<Action.ACTIVE_WALLET_GET>) => {
-          if (accounts.data) {
-            this.activeWallet = accounts.data.wallet
-          }
-        })
-        .catch(console.error)
-    ])
-    this.cdr.detectChanges()
+    this.activeWallet$ = this.walletService.activeWallet$
+    this.wallets$ = this.walletService.wallets$
   }
 
   public async activateWallet(wallet: WalletInfo<WalletType>): Promise<void> {
-    await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet })
-    this.refreshWallets()
+    await this.walletService.setActiveWallet(wallet)
   }
 
   public async deleteWallet(wallet: WalletInfo<WalletType>): Promise<void> {
@@ -63,8 +40,7 @@ export class WalletSelectPage {
         {
           text: 'Yes',
           handler: async (): Promise<void> => {
-            await this.chromeMessagingService.sendChromeMessage(Action.WALLET_DELETE, { wallet })
-            await this.refreshWallets()
+            await this.walletService.deleteWallet(wallet)
           }
         }
       ]

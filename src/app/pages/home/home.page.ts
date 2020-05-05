@@ -1,4 +1,4 @@
-import { Network } from '@airgap/beacon-sdk'
+import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
@@ -27,7 +27,7 @@ export class HomePage {
   public currentSigningMethod: string = 'Unpaired'
   public balance: string = ''
   public tezblockLink: string = ''
-  public network: Network | undefined
+  public network: Network = { type: NetworkType.MAINNET }
   public address: string = ''
 
   constructor(
@@ -37,24 +37,28 @@ export class HomePage {
     private readonly chromeMessagingService: ChromeMessagingService,
     private readonly ref: ChangeDetectorRef
   ) {
-    this.settingsService
-      .getNetwork()
-      .then((network: Network | undefined) => (this.network = network))
-      .catch(console.error)
+    this.walletService.activeNetwork$.subscribe(async (network: Network) => {
+      this.network = network
+      await this.updateBalanceAndLink()
+    })
 
     this.checkOnboarding().catch(console.error)
 
     this.walletService.activeWallet$.subscribe(async (wallet: WalletInfo<WalletType>) => {
       this.address = wallet.address
       this.currentSigningMethod = wallet.type === WalletType.LEDGER ? 'Ledger' : 'Local Mnemonic'
-      const [balance, tezblockLink]: [string, string] = await Promise.all([
-        this.getBalance(wallet.address),
-        this.getBlockexplorer(wallet.address)
-      ])
-      this.balance = balance
-      this.tezblockLink = tezblockLink
+      await this.updateBalanceAndLink()
       this.ref.detectChanges()
     })
+  }
+
+  public async updateBalanceAndLink(): Promise<void> {
+    const [balance, tezblockLink]: [string, string] = await Promise.all([
+      this.getBalance(this.address),
+      this.getBlockexplorer(this.address)
+    ])
+    this.balance = balance
+    this.tezblockLink = tezblockLink
   }
 
   public async showPairPage(): Promise<void> {
@@ -90,18 +94,13 @@ export class HomePage {
     if (!address) {
       return ''
     }
-    const network: Network | undefined = await this.settingsService.getNetwork()
 
-    if (network) {
-      const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
+    const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(this.network)
 
-      const amount: string = await protocol.getBalanceOfAddresses([address])
-      console.log('getBalance', amount)
+    const amount: string = await protocol.getBalanceOfAddresses([address])
+    console.log('getBalance', amount)
 
-      return amount
-    } else {
-      return ''
-    }
+    return amount
   }
 
   public async getBlockexplorer(address: string | null): Promise<string> {

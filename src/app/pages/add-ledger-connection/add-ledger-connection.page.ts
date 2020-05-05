@@ -2,6 +2,7 @@ import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
+import { WalletService } from 'src/app/services/local-wallet.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 @Component({
@@ -19,6 +20,7 @@ export class AddLedgerConnectionPage implements OnInit {
 
   constructor(
     private readonly modalController: ModalController,
+    private readonly walletService: WalletService,
     private readonly chromeMessagingService: ChromeMessagingService,
     private readonly cdr: ChangeDetectorRef
   ) {}
@@ -37,10 +39,10 @@ export class AddLedgerConnectionPage implements OnInit {
         extras: undefined
       }
     )
-    console.log('LEDGER RESPONSE', response)
 
     this.isLoading = false
     if (response && response.error) {
+      console.log('received an error', response.error)
     } else {
       this.success = true
       if (this.targetMethod === Action.LEDGER_INIT) {
@@ -55,8 +57,7 @@ export class AddLedgerConnectionPage implements OnInit {
             added: new Date(),
             info: undefined
           }
-          await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
-          await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
+          await this.walletService.addAndActiveWallet(walletInfo)
         }
       }
       setTimeout(() => {

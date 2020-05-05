@@ -1,10 +1,7 @@
-import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { AlertController } from '@ionic/angular'
-import { TezosProtocol } from 'airgap-coin-lib'
-import { SettingsService } from 'src/app/services/settings.service'
-import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 import * as bip39 from 'bip39'
+import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 import { WalletService } from '../../services/local-wallet.service'
 
@@ -16,16 +13,12 @@ import { WalletService } from '../../services/local-wallet.service'
 export class LocalMnemonicPage {
   public saveButtonDisabled: boolean = true
   public mnemonic: string = ''
-  public privateKey: string = ''
   public publicKey: string = ''
   public address: string = ''
-
-  public balance: string = ''
 
   constructor(
     public readonly alertController: AlertController,
     public readonly walletService: WalletService,
-    private readonly settingsService: SettingsService,
     private readonly ref: ChangeDetectorRef
   ) {
     this.walletService.wallets$.subscribe(async (wallets: WalletInfo<WalletType>[]) => {
@@ -36,7 +29,6 @@ export class LocalMnemonicPage {
         this.mnemonic = localWallet.info.mnemonic
         this.publicKey = localWallet.pubkey
         this.address = localWallet.address
-        this.balance = await this.getBalance(localWallet.address)
         this.ref.detectChanges()
       } else {
         await this.generateAndSaveMnemonic()
@@ -63,7 +55,7 @@ export class LocalMnemonicPage {
           text: 'Yes',
           handler: async (): Promise<void> => {
             this.saveButtonDisabled = true
-            this.generateAndSaveMnemonic()
+            await this.generateAndSaveMnemonic()
           }
         }
       ]
@@ -94,25 +86,6 @@ export class LocalMnemonicPage {
     })
 
     await alert.present()
-  }
-
-  public async getBalance(address: string | null): Promise<string> {
-    console.log('getBalance', address)
-    if (!address) {
-      return ''
-    }
-    const network: Network | undefined = await this.settingsService.getNetwork()
-
-    if (network) {
-      const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
-
-      const amount: string = await protocol.getBalanceOfAddresses([address])
-      console.log('getBalance', amount)
-
-      return amount
-    } else {
-      return ''
-    }
   }
 
   private async generateAndSaveMnemonic(): Promise<void> {

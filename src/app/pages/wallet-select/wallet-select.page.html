@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content>
-  <ion-list *ngIf="activeWallet">
+  <ion-list *ngIf="activeWallet$ | async as activeWallet">
     <ion-list-header>
       <ion-label>Active Wallet</ion-label>
     </ion-list-header>
@@ -32,7 +32,7 @@
     <ion-list-header>
       <ion-label>Other Wallets</ion-label>
     </ion-list-header>
-    <ion-item lines="none" *ngFor="let wallet of wallets">
+    <ion-item lines="none" *ngFor="let wallet of wallets$ | async">
       <ion-label>
         <h3>
           <strong>{{ wallet.type }}</strong>

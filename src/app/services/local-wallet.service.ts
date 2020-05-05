@@ -1,3 +1,4 @@
+import { Network } from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
 import { TezosProtocol } from 'airgap-coin-lib'
 import * as bip39 from 'bip39'
@@ -12,41 +13,36 @@ import { ChromeMessagingService } from './chrome-messaging.service'
 export class WalletService {
   private readonly _wallets: ReplaySubject<WalletInfo<WalletType>[]> = new ReplaySubject(1)
   private readonly _activeWallet: ReplaySubject<WalletInfo<WalletType>> = new ReplaySubject(1)
-
-  private readonly protocol: TezosProtocol
+  private readonly _activeNetwork: ReplaySubject<Network> = new ReplaySubject(1)
 
   public readonly wallets$: Observable<WalletInfo<WalletType>[]> = this._wallets.asObservable()
   public readonly activeWallet$: Observable<WalletInfo<WalletType>> = this._activeWallet.asObservable()
+  public readonly activeNetwork$: Observable<Network> = this._activeNetwork.asObservable()
 
   constructor(private readonly chromeMessagingService: ChromeMessagingService) {
-    this.protocol = new TezosProtocol() // This protocol is only used to calculate addresses, so it is not different on testnets
+    this.updateWallets().catch(console.error)
+    this.loadNetwork().catch(console.error)
+  }
+
+  public async updateWallets(): Promise<void> {
     this.getWallets().catch(console.error)
     this.getActiveWallet().catch(console.error)
   }
 
-  public async mnemonicToAddress(
-    mnemonic: string
-  ): Promise<{
-    privateKey: string
-    publicKey: string
-    address: string
-  }> {
-    const privateKey: string = (
-      await this.protocol.getPrivateKeyFromMnemonic(mnemonic, this.protocol.standardDerivationPath)
-    ).toString('hex')
-
-    const publicKey: string = await this.protocol.getPublicKeyFromMnemonic(
-      mnemonic,
-      this.protocol.standardDerivationPath
+  public async loadNetwork(): Promise<void> {
+    const data: ExtensionMessageOutputPayload<Action.ACTIVE_NETWORK_GET> = await this.chromeMessagingService.sendChromeMessage(
+      Action.ACTIVE_NETWORK_GET,
+      undefined
     )
 
-    const address: string = await this.protocol.getAddressFromPublicKey(publicKey)
-
-    return {
-      privateKey,
-      publicKey,
-      address
+    if (data.data) {
+      this._activeNetwork.next(data.data.network)
     }
+  }
+
+  public async setNetwork(network: Network): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_NETWORK_SET, { network })
+    await this.loadNetwork()
   }
 
   public async getWallets(): Promise<void> {
@@ -99,6 +95,41 @@ export class WalletService {
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
 
-    await this.getWallets()
+    await this.updateWallets()
+  }
+
+  public async setActiveWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
+
+    await this.getActiveWallet()
+  }
+
+  public async deleteWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.WALLET_DELETE, { wallet: walletInfo })
+
+    await this.updateWallets()
+  }
+
+  private async mnemonicToAddress(
+    mnemonic: string
+  ): Promise<{
+    privateKey: string
+    publicKey: string
+    address: string
+  }> {
+    const protocol: TezosProtocol = new TezosProtocol()
+    const privateKey: string = (
+      await protocol.getPrivateKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
+    ).toString('hex')
+
+    const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
+
+    const address: string = await protocol.getAddressFromPublicKey(publicKey)
+
+    return {
+      privateKey,
+      publicKey,
+      address
+    }
   }
 }
