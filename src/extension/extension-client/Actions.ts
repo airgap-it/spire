@@ -12,7 +12,7 @@ interface WalletInfoTypeMap {
   [WalletType.LOCAL_MNEMONIC]: { mnemonic: string }
 }
 
-export interface WalletInfo<T extends WalletType> {
+export interface WalletInfo<T extends WalletType = WalletType> {
   address: string
   pubkey: string
   type: T
@@ -53,11 +53,11 @@ export enum Action {
 
 export interface ActionInputTypesMap {
   [Action.HANDSHAKE]: undefined
-  [Action.WALLET_ADD]: { wallet: WalletInfo<WalletType> }
-  [Action.WALLET_DELETE]: { wallet: WalletInfo<WalletType> }
+  [Action.WALLET_ADD]: { wallet: WalletInfo }
+  [Action.WALLET_DELETE]: { wallet: WalletInfo }
   [Action.WALLETS_GET]: undefined
   [Action.ACTIVE_WALLET_GET]: undefined
-  [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo<WalletType> }
+  [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo }
   [Action.PERMISSIONS_GET]: undefined
   [Action.PERMISSION_DELETE]: { permission: PermissionInfo }
   [Action.ACTIVE_NETWORK_GET]: undefined
@@ -74,8 +74,8 @@ export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
   [Action.WALLET_ADD]: undefined
   [Action.WALLET_DELETE]: undefined
-  [Action.WALLETS_GET]: { wallets: WalletInfo<WalletType>[] }
-  [Action.ACTIVE_WALLET_GET]: { wallet?: WalletInfo<WalletType> }
+  [Action.WALLETS_GET]: { wallets: WalletInfo[] }
+  [Action.ACTIVE_WALLET_GET]: { wallet?: WalletInfo }
   [Action.ACTIVE_WALLET_SET]: undefined
   [Action.PERMISSIONS_GET]: { permissions: PermissionInfo[] }
   [Action.PERMISSION_DELETE]: undefined

@@ -54,7 +54,7 @@ export class BeaconRequestPage implements OnInit {
     private readonly walletService: WalletService,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
-    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo<WalletType>) => {
+    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.address = wallet.address
     })
     if (this.walletType === WalletType.LEDGER) {
@@ -118,7 +118,7 @@ export class BeaconRequestPage implements OnInit {
     // })
 
     this.requestedNetwork = request.network
-    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo<WalletType>) => {
+    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.inputs = [
         {
           name: 'sign',

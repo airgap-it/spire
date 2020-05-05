@@ -50,7 +50,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       })
     }
 
-    const wallet: WalletInfo<WalletType> | undefined = await client.getWalletByAddress(operationRequest.sourceAddress)
+    const wallet: WalletInfo | undefined = await client.getWalletByAddress(operationRequest.sourceAddress)
     if (!wallet) {
       await sendError(
         { name: 'Wallet Error', message: `No wallet found for address ${operationRequest.sourceAddress}` },

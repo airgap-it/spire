@@ -11,12 +11,12 @@ import { ChromeMessagingService } from './chrome-messaging.service'
   providedIn: 'root'
 })
 export class WalletService {
-  private readonly _wallets: ReplaySubject<WalletInfo<WalletType>[]> = new ReplaySubject(1)
-  private readonly _activeWallet: ReplaySubject<WalletInfo<WalletType>> = new ReplaySubject(1)
+  private readonly _wallets: ReplaySubject<WalletInfo[]> = new ReplaySubject(1)
+  private readonly _activeWallet: ReplaySubject<WalletInfo> = new ReplaySubject(1)
   private readonly _activeNetwork: ReplaySubject<Network> = new ReplaySubject(1)
 
-  public readonly wallets$: Observable<WalletInfo<WalletType>[]> = this._wallets.asObservable()
-  public readonly activeWallet$: Observable<WalletInfo<WalletType>> = this._activeWallet.asObservable()
+  public readonly wallets$: Observable<WalletInfo[]> = this._wallets.asObservable()
+  public readonly activeWallet$: Observable<WalletInfo> = this._activeWallet.asObservable()
   public readonly activeNetwork$: Observable<Network> = this._activeNetwork.asObservable()
 
   constructor(private readonly chromeMessagingService: ChromeMessagingService) {
@@ -91,20 +91,20 @@ export class WalletService {
     }
   }
 
-  public async addAndActiveWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+  public async addAndActiveWallet(walletInfo: WalletInfo): Promise<void> {
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_ADD, { wallet: walletInfo })
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
 
     await this.updateWallets()
   }
 
-  public async setActiveWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+  public async setActiveWallet(walletInfo: WalletInfo): Promise<void> {
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_WALLET_SET, { wallet: walletInfo })
 
     await this.getActiveWallet()
   }
 
-  public async deleteWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+  public async deleteWallet(walletInfo: WalletInfo): Promise<void> {
     await this.chromeMessagingService.sendChromeMessage(Action.WALLET_DELETE, { wallet: walletInfo })
 
     await this.updateWallets()

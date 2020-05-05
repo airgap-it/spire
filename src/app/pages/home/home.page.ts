@@ -44,7 +44,7 @@ export class HomePage {
 
     this.checkOnboarding().catch(console.error)
 
-    this.walletService.activeWallet$.subscribe(async (wallet: WalletInfo<WalletType>) => {
+    this.walletService.activeWallet$.subscribe(async (wallet: WalletInfo) => {
       this.address = wallet.address
       this.currentSigningMethod = wallet.type === WalletType.LEDGER ? 'Ledger' : 'Local Mnemonic'
       await this.updateBalanceAndLink()

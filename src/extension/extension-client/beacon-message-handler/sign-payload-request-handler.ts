@@ -52,7 +52,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
       })
     }
 
-    const wallet: WalletInfo<WalletType> | undefined = await client.getWalletByAddress(signRequest.sourceAddress)
+    const wallet: WalletInfo | undefined = await client.getWalletByAddress(signRequest.sourceAddress)
     if (!wallet) {
       await sendError(
         { name: 'Wallet Error', message: `No wallet found for address ${signRequest.sourceAddress}` },

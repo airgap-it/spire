@@ -15,7 +15,7 @@ import {
 import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
-import { WalletInfo, WalletType } from '../Actions'
+import { WalletInfo } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 
@@ -75,9 +75,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
             sendResponse(response)
           }
 
-          const wallet: WalletInfo<WalletType> | undefined = await this.client.getWalletByAddress(
-            operationRequest.sourceAddress
-          )
+          const wallet: WalletInfo | undefined = await this.client.getWalletByAddress(operationRequest.sourceAddress)
           if (!wallet) {
             await sendError(
               { name: 'Wallet Error', message: `No wallet found for address ${operationRequest.sourceAddress}` },

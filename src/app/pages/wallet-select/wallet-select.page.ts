@@ -1,8 +1,9 @@
 import { Component } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
-import { Observable } from 'rxjs'
+import { Observable, combineLatest } from 'rxjs'
 import { WalletService } from 'src/app/services/local-wallet.service'
-import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+import { WalletInfo } from 'src/extension/extension-client/Actions'
+import { map } from 'rxjs/operators'
 
 @Component({
   selector: 'app-wallet-select',
@@ -10,8 +11,8 @@ import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
   styleUrls: ['./wallet-select.page.scss']
 })
 export class WalletSelectPage {
-  public activeWallet$: Observable<WalletInfo<WalletType>>
-  public wallets$: Observable<WalletInfo<WalletType>[]>
+  public activeWallet$: Observable<WalletInfo>
+  public wallets$: Observable<WalletInfo[]>
 
   constructor(
     private readonly modalController: ModalController,
@@ -19,14 +20,19 @@ export class WalletSelectPage {
     private readonly alertController: AlertController
   ) {
     this.activeWallet$ = this.walletService.activeWallet$
-    this.wallets$ = this.walletService.wallets$
+    this.wallets$ = combineLatest([this.walletService.wallets$, this.walletService.activeWallet$]).pipe(
+      map(([wallets, activeWallet]: [WalletInfo[], WalletInfo]) => {
+        return wallets.filter((wallet: WalletInfo) => wallet.pubkey !== activeWallet.pubkey)
+      })
+    )
   }
 
-  public async activateWallet(wallet: WalletInfo<WalletType>): Promise<void> {
+  public async activateWallet(wallet: WalletInfo): Promise<void> {
     await this.walletService.setActiveWallet(wallet)
+    await this.dismiss()
   }
 
-  public async deleteWallet(wallet: WalletInfo<WalletType>): Promise<void> {
+  public async deleteWallet(wallet: WalletInfo): Promise<void> {
     const alert: HTMLIonAlertElement = await this.alertController.create({
       header: 'Delete Wallet?',
       message:

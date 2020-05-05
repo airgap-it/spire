@@ -185,34 +185,34 @@ export class ExtensionClient extends BeaconClient {
     return this.storage.delete('permissions' as any)
   }
 
-  public async getWallets(): Promise<WalletInfo<WalletType>[]> {
+  public async getWallets(): Promise<WalletInfo[]> {
     logger.log('getWallets')
 
     return (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
   }
 
-  public async getWallet(pubkey: string): Promise<WalletInfo<WalletType> | undefined> {
-    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+  public async getWallet(pubkey: string): Promise<WalletInfo | undefined> {
+    const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
-    return wallets.find((wallet: WalletInfo<WalletType>) => wallet.pubkey === pubkey)
+    return wallets.find((wallet: WalletInfo) => wallet.pubkey === pubkey)
   }
 
-  public async getWalletByAddress(address: string): Promise<WalletInfo<WalletType> | undefined> {
-    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+  public async getWalletByAddress(address: string): Promise<WalletInfo | undefined> {
+    const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
-    return wallets.find((wallet: WalletInfo<WalletType>) => wallet.address === address)
+    return wallets.find((wallet: WalletInfo) => wallet.address === address)
   }
 
-  public async addWallet(walletInfo: WalletInfo<WalletType>): Promise<void> {
+  public async addWallet(walletInfo: WalletInfo): Promise<void> {
     logger.log('addWallet', walletInfo)
-    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+    const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
-    let newWallets: WalletInfo<WalletType>[] = wallets
-    if (!wallets.some((wallet: WalletInfo<WalletType>) => wallet.pubkey === walletInfo.pubkey)) {
+    let newWallets: WalletInfo[] = wallets
+    if (!wallets.some((wallet: WalletInfo) => wallet.pubkey === walletInfo.pubkey)) {
       if (walletInfo.type === WalletType.LOCAL_MNEMONIC) {
         // There can only be one local mnemonic. So we have to delete the old one if we add a new one
-        const filteredWallets: WalletInfo<WalletType>[] = wallets.filter(
-          (walletInfoElement: WalletInfo<WalletType>) => walletInfoElement.type !== WalletType.LOCAL_MNEMONIC
+        const filteredWallets: WalletInfo[] = wallets.filter(
+          (walletInfoElement: WalletInfo) => walletInfoElement.type !== WalletType.LOCAL_MNEMONIC
         )
         filteredWallets.push(walletInfo)
         newWallets = filteredWallets
@@ -225,11 +225,9 @@ export class ExtensionClient extends BeaconClient {
   }
 
   public async removeWallet(pubkey: string): Promise<void> {
-    const wallets: WalletInfo<WalletType>[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
+    const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
-    const filteredWallets: WalletInfo<WalletType>[] = wallets.filter(
-      (walletInfo: WalletInfo<WalletType>) => walletInfo.pubkey !== pubkey
-    )
+    const filteredWallets: WalletInfo[] = wallets.filter((walletInfo: WalletInfo) => walletInfo.pubkey !== pubkey)
 
     return this.storage.set('wallets' as any, filteredWallets)
   }

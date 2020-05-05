@@ -39,9 +39,8 @@ export class ChromeMessagingService {
             undefined
           )
           if (result.data) {
-            const wallet: WalletInfo<WalletType> | undefined = result.data.wallets.find(
-              (walletInfo: WalletInfo<WalletType>) =>
-                walletInfo.address === (deserialized as OperationRequest).sourceAddress
+            const wallet: WalletInfo | undefined = result.data.wallets.find(
+              (walletInfo: WalletInfo) => walletInfo.address === (deserialized as OperationRequest).sourceAddress
             )
             if (wallet) {
               walletType = wallet.type

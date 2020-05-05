@@ -21,9 +21,9 @@ export class LocalMnemonicPage {
     public readonly walletService: WalletService,
     private readonly ref: ChangeDetectorRef
   ) {
-    this.walletService.wallets$.subscribe(async (wallets: WalletInfo<WalletType>[]) => {
+    this.walletService.wallets$.subscribe(async (wallets: WalletInfo[]) => {
       const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> | undefined = wallets.find(
-        (wallet: WalletInfo<WalletType>) => wallet.type === WalletType.LOCAL_MNEMONIC
+        (wallet: WalletInfo) => wallet.type === WalletType.LOCAL_MNEMONIC
       ) as WalletInfo<WalletType.LOCAL_MNEMONIC>
       if (localWallet) {
         this.mnemonic = localWallet.info.mnemonic
