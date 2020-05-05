@@ -1,4 +1,5 @@
-p {
-  font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
-  font-weight: 600;
+div {
+  p {
+    margin: 0 8px;
+  }
 }

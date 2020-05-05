@@ -33,7 +33,10 @@
   </ion-list>
   <ion-row>
     <ion-col class="ion-no-padding">
-      <p class="ion-no-margin">{{ address }}</p>
+      <div class="d-flex ion-align-items-center">
+        <identicon [address]="address"></identicon>
+        <p class="ion-no-margin">{{ address }}</p>
+      </div>
     </ion-col>
   </ion-row>
 

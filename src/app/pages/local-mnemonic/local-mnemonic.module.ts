@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router'
 import { IonicModule } from '@ionic/angular'
 import { PipesModule } from 'src/app/pipes/pipes.module'
 
+import { ComponentsModule } from '../../components/components.module'
 import { LocalMnemonicPage } from './local-mnemonic.page'
 
 @NgModule({
@@ -18,7 +19,8 @@ import { LocalMnemonicPage } from './local-mnemonic.page'
         component: LocalMnemonicPage
       }
     ]),
-    PipesModule
+    PipesModule,
+    ComponentsModule
   ],
   declarations: [LocalMnemonicPage]
 })

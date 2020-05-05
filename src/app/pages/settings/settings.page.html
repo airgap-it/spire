@@ -36,7 +36,12 @@
       <ion-button (click)="updateNetwork()">Save</ion-button>
     </ng-container>
     <ion-list-header class="ion-no-padding">
-      <ion-label>Beacon ID: {{ beaconId }}</ion-label>
+      <ion-label>Beacon ID</ion-label>
     </ion-list-header>
+    <ion-row>
+      <ion-col class="ion-no-padding">
+        <p class="ion-no-margin">{{ beaconId }}</p>
+      </ion-col>
+    </ion-row>
   </ion-list>
 </ion-content>
