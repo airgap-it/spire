@@ -1,22 +1,19 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Error</ion-title>
+    <ion-title>
+      Error
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
   <ng-container *ngIf="error">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>{{ error.name }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        {{ error.message }}
-        <br />
-        <br />
+    <h3>{{ error.name }}</h3>
+    <p class="ion-margin-bottom">{{ error.message }}</p>
+    <pre>
         {{ error.stack | json }}
-      </ion-card-content>
-    </ion-card>
+      </pre
+    >
   </ng-container>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
