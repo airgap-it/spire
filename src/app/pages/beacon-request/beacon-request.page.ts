@@ -239,7 +239,7 @@ export class BeaconRequestPage implements OnInit {
       }
     )
     console.log(response)
-    if (response.error) {
+    if (response && response.error) {
       const modal = await this.modalController.create({
         component: ErrorPage,
         componentProps: {
@@ -261,7 +261,7 @@ export class BeaconRequestPage implements OnInit {
       return modal.present()
     } else {
       setTimeout(() => {
-        // TODO: window.close()
+        window.close()
       }, 1500)
 
       await this.showSuccessAlert()
