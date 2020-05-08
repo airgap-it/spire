@@ -223,10 +223,13 @@ export class BeaconRequestPage implements OnInit {
     )
 
     if (response && response.error) {
+      const error: Error = response.error as Error
       const modal = await this.modalController.create({
         component: ErrorPage,
         componentProps: {
-          error: response.error
+          title: error.name,
+          message: error.message,
+          data: error.stack
         }
       })
 

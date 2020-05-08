@@ -69,6 +69,10 @@ export class ToExtensionMessageHandler extends MessageHandler {
           ...responseInput
         }
         await this.client.sendToPage(await new Serializer().serialize(response))
+
+        const errorObject = { title: (error as any).name, message: (error as any).message, data: (error as any).data }
+
+        return this.sendToPopup({ ...data, payload: { error: errorObject } })
       }
 
       if (enriched.err) {
@@ -76,6 +80,8 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
         return
       }
+
+      // Check permissions
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
@@ -103,7 +109,12 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
           return this.sendToPopup({ ...data, payload: serialized })
         })().catch((operationPrepareError: Error) => {
-          logger.error('operationPrepareError', operationPrepareError)
+          if ((operationPrepareError as any).data) {
+            sendError(operationPrepareError, BeaconErrorType.PARAMETERS_INVALID_ERROR)
+            logger.error('operationPrepareError', (operationPrepareError as any).data)
+          } else {
+            logger.error('operationPrepareError', operationPrepareError)
+          }
         })
       } else {
         const serialized: string = await new Serializer().serialize(enriched.res)

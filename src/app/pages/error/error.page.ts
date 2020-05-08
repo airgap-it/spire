@@ -7,7 +7,9 @@ import { ModalController } from '@ionic/angular'
   styleUrls: ['./error.page.scss']
 })
 export class ErrorPage {
-  public error: Error | undefined
+  public title: string | undefined
+  public message: string | undefined
+  public data: unknown
 
   constructor(private readonly modalController: ModalController) {}
 

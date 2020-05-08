@@ -17,6 +17,7 @@ import {
 } from 'src/extension/extension-client/Actions'
 
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
+import { ErrorPage } from '../pages/error/error.page'
 
 @Injectable({
   providedIn: 'root'
@@ -27,8 +28,8 @@ export class ChromeMessagingService {
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
       console.log('GOT DATA FROM BACKGROUND', message.data)
-      const serializer: Serializer = new Serializer()
-      try {
+      if (typeof message.data === 'string') {
+        const serializer: Serializer = new Serializer()
         const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
 
         let walletType: WalletType = WalletType.LOCAL_MNEMONIC
@@ -51,8 +52,20 @@ export class ChromeMessagingService {
         this.beaconRequest(deserialized, walletType).catch((beaconRequestError: Error) => {
           console.log('beaconRequestError', beaconRequestError)
         })
-      } catch (e) {
-        console.error(e)
+      } else {
+        console.log('NOT STRING', message.data)
+        if (message.data.error) {
+          const modal: HTMLIonModalElement = await this.modalController.create({
+            component: ErrorPage,
+            componentProps: {
+              title: message.data.error.title,
+              message: message.data.error.message,
+              data: message.data.error.data
+            }
+          })
+
+          return modal.present()
+        }
       }
     })
   }

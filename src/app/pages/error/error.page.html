@@ -5,16 +5,18 @@
 </ion-header>
 
 <ion-content>
-  <ng-container *ngIf="error">
+  <ng-container>
     <ion-card>
       <ion-card-header>
-        <ion-card-title>{{ error.name }}</ion-card-title>
+        <ion-card-title>{{ title }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        {{ error.message }}
+        {{ message }}
         <br />
         <br />
-        {{ error.stack | json }}
+        <ng-container *ngIf="data">
+          {{ data | json }}
+        </ng-container>
       </ion-card-content>
     </ion-card>
   </ng-container>
