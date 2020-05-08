@@ -13,7 +13,7 @@ const logger: Logger = new Logger('BeaconMessageHandler')
 const beaconMessageHandlerNotSupported: (
   data: { request: BeaconBaseMessage; extras: unknown },
   sendToPage: (message: BeaconMessage) => void,
-  sendResponse: () => void
+  sendResponseToPopup: () => void
 ) => Promise<void> = (): Promise<void> => Promise.resolve()
 
 export type BeaconMessageHandlerFunction = (

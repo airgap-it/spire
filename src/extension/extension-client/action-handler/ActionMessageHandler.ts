@@ -32,15 +32,15 @@ export interface ActionContext<T extends Action> {
   setP2pPubkey(pubkey: string): void
 }
 
-export type MessageHandlerFunction<T extends Action> = (context: ActionContext<T>) => Promise<void>
+export type ActionHandlerFunction<T extends Action> = (context: ActionContext<T>) => Promise<void>
 
-export const actionNotSupported: MessageHandlerFunction<any> = async (context: ActionContext<any>): Promise<void> => {
+export const actionNotSupported: ActionHandlerFunction<any> = async (context: ActionContext<any>): Promise<void> => {
   logger.log('messageTypeNotHandled', context.data.action)
   context.sendResponse({ error: 'messageTypeNotHandled' })
 }
 
 export class ActionMessageHandler {
-  public actionHandler: { [key in Action]: MessageHandlerFunction<any> } = {
+  public actionHandler: { [key in Action]: ActionHandlerFunction<any> } = {
     [Action.HANDSHAKE]: actionNotSupported,
     [Action.WALLET_ADD]: walletAddAction(logger),
     [Action.WALLET_DELETE]: walletDeleteAction(logger),
@@ -59,7 +59,7 @@ export class ActionMessageHandler {
     [Action.RESPONSE]: responseAction(logger)
   }
 
-  public async getHandler(action: Action): Promise<MessageHandlerFunction<any>> {
+  public async getHandler(action: Action): Promise<ActionHandlerFunction<any>> {
     return this.actionHandler[action]
   }
 }

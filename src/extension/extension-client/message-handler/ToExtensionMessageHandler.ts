@@ -18,6 +18,7 @@ import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/type
 import { WalletInfo } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
+import { To, to } from '../utils'
 
 import { MessageHandler } from './MessageHandler'
 
@@ -45,35 +46,41 @@ export class ToExtensionMessageHandler extends MessageHandler {
       logger.log('beacon', 'sending to wallet')
       this.sendToBeacon(data.payload as string)
     } else {
-      logger.log('not beacon', 'sending to popup')
+      logger.log('not beacon', 'sending to popup', data)
       const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
       this.client.pendingRequests.push(deserialized)
 
-      const enriched: BeaconRequestOutputMessage = await this.enrichRequest(deserialized)
+      const enriched: To<BeaconRequestOutputMessage> = await to(this.enrichRequest(deserialized))
+
+      const sendError: (error: Error, errorType: BeaconErrorType) => Promise<void> = async (
+        error: Error,
+        errorType: BeaconErrorType
+      ): Promise<void> => {
+        logger.log('error', error)
+        const responseInput = {
+          id: deserialized.id,
+          type: BeaconMessageType.OperationResponse,
+          errorType
+        } as any
+
+        const response: OperationResponse = {
+          beaconId: await this.client.beaconId,
+          version: BEACON_VERSION,
+          ...responseInput
+        }
+        await this.client.sendToPage(await new Serializer().serialize(response))
+      }
+
+      if (enriched.err) {
+        await sendError({ name: 'Wallet Error', message: `No permission` }, BeaconErrorType.NOT_GRANTED_ERROR)
+
+        return
+      }
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
         ;(async (): Promise<void> => {
-          const operationRequest: OperationRequestOutput = enriched as OperationRequestOutput
-
-          const sendError: (error: Error, errorType: BeaconErrorType) => Promise<void> = async (
-            error: Error,
-            errorType: BeaconErrorType
-          ): Promise<void> => {
-            logger.log('error', error)
-            const responseInput = {
-              id: operationRequest.id,
-              type: BeaconMessageType.OperationResponse,
-              errorType
-            } as any
-
-            const response: OperationResponse = {
-              beaconId: await this.client.beaconId,
-              version: BEACON_VERSION,
-              ...responseInput
-            }
-            sendResponse(response)
-          }
+          const operationRequest: OperationRequestOutput = enriched.res as OperationRequestOutput
 
           const wallet: WalletInfo | undefined = await this.client.getWalletByAddress(operationRequest.sourceAddress)
           if (!wallet) {
@@ -99,7 +106,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
           logger.error('operationPrepareError', operationPrepareError)
         })
       } else {
-        const serialized: string = await new Serializer().serialize(enriched)
+        const serialized: string = await new Serializer().serialize(enriched.res)
 
         return this.sendToPopup({ ...data, payload: serialized })
       }

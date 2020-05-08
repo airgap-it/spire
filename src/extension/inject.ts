@@ -16,11 +16,16 @@ window.addEventListener(
         console.log('BEACON EXTENSION (inject.ts): sending message from page to background', data.payload)
         // tslint:enable:no-console
 
-        chrome.runtime.sendMessage({
-          target: ExtensionMessageTarget.EXTENSION,
-          sender: event.origin,
-          payload: data.payload
-        })
+        chrome.runtime.sendMessage(
+          {
+            target: ExtensionMessageTarget.EXTENSION,
+            sender: event.origin,
+            payload: data.payload
+          },
+          (data?: unknown) => {
+            console.log('sendMessage response', data)
+          }
+        )
       }
     }
   },

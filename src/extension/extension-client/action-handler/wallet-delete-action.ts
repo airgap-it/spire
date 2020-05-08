@@ -1,11 +1,11 @@
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
-export const walletDeleteAction: (logger: Logger) => MessageHandlerFunction<Action.WALLET_DELETE> = (
+export const walletDeleteAction: (logger: Logger) => ActionHandlerFunction<Action.WALLET_DELETE> = (
   logger: Logger
-): MessageHandlerFunction<Action.WALLET_DELETE> => async (
+): ActionHandlerFunction<Action.WALLET_DELETE> => async (
   context: ActionContext<Action.WALLET_DELETE>
 ): Promise<void> => {
   logger.log('walletDeleteAction', context.data)

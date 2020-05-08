@@ -1,11 +1,11 @@
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
-export const beaconIdGetAction: (logger: Logger) => MessageHandlerFunction<Action.BEACON_ID_GET> = (
+export const beaconIdGetAction: (logger: Logger) => ActionHandlerFunction<Action.BEACON_ID_GET> = (
   logger: Logger
-): MessageHandlerFunction<Action.BEACON_ID_GET> => async (
+): ActionHandlerFunction<Action.BEACON_ID_GET> => async (
   context: ActionContext<Action.BEACON_ID_GET>
 ): Promise<void> => {
   logger.log('beaconIdGetAction', context.data)

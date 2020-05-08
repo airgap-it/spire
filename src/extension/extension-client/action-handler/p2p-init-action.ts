@@ -1,11 +1,11 @@
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
-export const p2pInitAction: (logger: Logger) => MessageHandlerFunction<Action.P2P_INIT> = (
+export const p2pInitAction: (logger: Logger) => ActionHandlerFunction<Action.P2P_INIT> = (
   logger: Logger
-): MessageHandlerFunction<Action.P2P_INIT> => async (context: ActionContext<Action.P2P_INIT>): Promise<void> => {
+): ActionHandlerFunction<Action.P2P_INIT> => async (context: ActionContext<Action.P2P_INIT>): Promise<void> => {
   if (!context.p2pClient) {
     return // TODO: Improve
   }

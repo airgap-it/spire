@@ -4,11 +4,11 @@ import { Action } from '../Actions'
 import { BeaconMessageHandler, BeaconMessageHandlerFunction } from '../beacon-message-handler/BeaconMessageHandler'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
-export const responseAction: (logger: Logger) => MessageHandlerFunction<Action.RESPONSE> = (
+export const responseAction: (logger: Logger) => ActionHandlerFunction<Action.RESPONSE> = (
   logger: Logger
-): MessageHandlerFunction<Action.RESPONSE> => async (context: ActionContext<Action.RESPONSE>): Promise<void> => {
+): ActionHandlerFunction<Action.RESPONSE> => async (context: ActionContext<Action.RESPONSE>): Promise<void> => {
   logger.log('responseAction', context.data)
   const beaconMessageHandler: BeaconMessageHandler = new BeaconMessageHandler(context.client)
   const handler: BeaconMessageHandlerFunction = await beaconMessageHandler.getHandler(

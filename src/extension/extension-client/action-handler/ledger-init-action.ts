@@ -4,13 +4,13 @@ import { Action } from '../Actions'
 import { BeaconLedgerBridge } from '../ledger-bridge'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
 const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
 
-export const ledgerInitAction: (logger: Logger) => MessageHandlerFunction<Action.LEDGER_INIT> = (
+export const ledgerInitAction: (logger: Logger) => ActionHandlerFunction<Action.LEDGER_INIT> = (
   logger: Logger
-): MessageHandlerFunction<Action.LEDGER_INIT> => async (context: ActionContext<Action.LEDGER_INIT>): Promise<void> => {
+): ActionHandlerFunction<Action.LEDGER_INIT> => async (context: ActionContext<Action.LEDGER_INIT>): Promise<void> => {
   logger.log('ledgerInitAction')
 
   let publicKey: string | undefined

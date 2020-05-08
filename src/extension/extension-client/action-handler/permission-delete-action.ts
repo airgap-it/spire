@@ -1,11 +1,11 @@
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
-export const permissionDeleteAction: (logger: Logger) => MessageHandlerFunction<Action.PERMISSION_DELETE> = (
+export const permissionDeleteAction: (logger: Logger) => ActionHandlerFunction<Action.PERMISSION_DELETE> = (
   logger: Logger
-): MessageHandlerFunction<Action.PERMISSION_DELETE> => async (
+): ActionHandlerFunction<Action.PERMISSION_DELETE> => async (
   context: ActionContext<Action.PERMISSION_DELETE>
 ): Promise<void> => {
   logger.log('permissionDeleteAction', context.data.data.permission)

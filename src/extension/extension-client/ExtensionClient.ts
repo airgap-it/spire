@@ -19,7 +19,7 @@ import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
 
-import { ActionMessageHandler, MessageHandlerFunction } from './action-handler/ActionMessageHandler'
+import { ActionHandlerFunction, ActionMessageHandler } from './action-handler/ActionMessageHandler'
 import { Action, ExtensionMessageInputPayload, PermissionInfo, WalletInfo, WalletType } from './Actions'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
@@ -72,14 +72,7 @@ export class ExtensionClient extends BeaconClient {
       ExtensionMessageTarget.EXTENSION,
       new ToExtensionMessageHandler(this.sendToBeacon, sendToPopup, this)
     )
-    messageHandlerMap.set(
-      ExtensionMessageTarget.PAGE,
-      new ToPageMessageHandler(
-        (pageData: string): Promise<void> => {
-          return this.sendToPage(pageData)
-        }
-      )
-    )
+    messageHandlerMap.set(ExtensionMessageTarget.PAGE, new ToPageMessageHandler(this))
     messageHandlerMap.set(ExtensionMessageTarget.BACKGROUND, new ToBackgroundMessageHandler(this.handleMessage))
 
     const transportListener: any = (message: ExtensionMessage<unknown>, connectionContext: ConnectionContext): void => {
@@ -123,7 +116,7 @@ export class ExtensionClient extends BeaconClient {
     sendResponse: (message: unknown) => void
   ): Promise<void> => {
     logger.log('handleMessage', data, sendResponse)
-    const handler: MessageHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
+    const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
 
     await handler({
       data: data.payload,
@@ -307,7 +300,7 @@ export class ExtensionClient extends BeaconClient {
     }
   }
 
-  private async sendToPage(data: string): Promise<void> {
+  public async sendToPage(data: string): Promise<void> {
     logger.log('sendToPage', 'background.js: post ', data)
     await this.processMessage(data)
     const message: ExtensionMessage<string> = { target: ExtensionMessageTarget.PAGE, payload: data }

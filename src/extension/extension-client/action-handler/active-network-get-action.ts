@@ -3,11 +3,11 @@ import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
-import { ActionContext, MessageHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 
-export const activeNetworkGetAction: (logger: Logger) => MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> = (
+export const activeNetworkGetAction: (logger: Logger) => ActionHandlerFunction<Action.ACTIVE_NETWORK_GET> = (
   logger: Logger
-): MessageHandlerFunction<Action.ACTIVE_NETWORK_GET> => async (
+): ActionHandlerFunction<Action.ACTIVE_NETWORK_GET> => async (
   context: ActionContext<Action.ACTIVE_NETWORK_GET>
 ): Promise<void> => {
   logger.log('activeNetworkGetAction')

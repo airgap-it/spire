@@ -1,5 +1,6 @@
 import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
 
+import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 
 import { MessageHandler } from './MessageHandler'
@@ -7,7 +8,7 @@ import { MessageHandler } from './MessageHandler'
 const logger: Logger = new Logger('ToPageMessageHandler')
 
 export class ToPageMessageHandler extends MessageHandler {
-  constructor(private readonly sendToPage: (message: string) => void) {
+  constructor(private readonly client: ExtensionClient) {
     super()
   }
 
@@ -18,7 +19,7 @@ export class ToPageMessageHandler extends MessageHandler {
   ): Promise<void> {
     logger.log('ToPageMessageHandler', data)
     // Events need to be sent to the page
-    this.sendToPage(data.payload)
+    await this.client.sendToPage(data.payload)
     sendResponse()
   }
 }
