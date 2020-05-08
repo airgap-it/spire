@@ -8,15 +8,16 @@ import {
   OperationResponseInput
 } from '@airgap/beacon-sdk'
 import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
+import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 import { LedgerSigner, LocalSigner } from 'src/extension/AirGapSigner'
 
 import { WalletInfo, WalletType } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
+import { Signer } from '../Signer'
 import { to, To } from '../utils'
 
 import { BeaconMessageHandlerFunction } from './BeaconMessageHandler'
-import { Signer } from '../Signer'
 
 export const operationRequestHandler: (client: ExtensionClient, logger: Logger) => BeaconMessageHandlerFunction = (
   client: ExtensionClient,
@@ -61,11 +62,11 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
     }
 
     const forgedTx: To<string> = await to(
-      client.operationProvider.prepareAndWrapOperations(
-        operationRequest.operationDetails,
-        operationRequest.network,
-        wallet.pubkey
-      )
+      client.operationProvider
+        .prepareOperations(operationRequest.operationDetails, operationRequest.network, wallet.pubkey)
+        .then((wrappedOperation: TezosWrappedOperation) =>
+          client.operationProvider.forgeWrappedOperation(wrappedOperation, operationRequest.network)
+        )
     )
 
     if (forgedTx.err) {

@@ -7,7 +7,7 @@ export interface OperationProvider {
     network: Network,
     publicKey: string
   ): Promise<TezosWrappedOperation>
-  prepareAndWrapOperations(operations: TezosBaseOperation[], network: Network, publicKey: string): Promise<string>
+  forgeWrappedOperation(wrappedOperation: TezosWrappedOperation, network: Network): Promise<string>
   broadcast(network: Network, signedTx: string): Promise<string>
 }
 
