@@ -20,8 +20,8 @@
               <p>Requested by dApp</p>
               <h3>{{ requesterName }}</h3>
             </ion-label>
-            <ion-badge color="primary">
-              {{ $any(request).network.type }}
+            <ion-badge color="primary" *ngIf="$any(request).network as network">
+              {{ network.type }}
             </ion-badge>
           </ion-item>
         </ion-card-content>

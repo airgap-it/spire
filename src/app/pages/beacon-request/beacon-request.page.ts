@@ -102,21 +102,6 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
-    // console.error('Only mainnet and babylonnet is currently supported')
-    // const response: NetworkNotSupportedError = {
-    //   id: request.id,
-    //   senderId: 'Beacon Extension',
-    //   type: BeaconMessageType.PermissionResponse,
-    //   errorType: BeaconErrorType.NETWORK_NOT_SUPPORTED
-    // }
-
-    // chrome.runtime.sendMessage({ method: 'toBackground', type: Methods.RESPONSE, request: response }, res => {
-    //   console.log(res)
-    //   setTimeout(() => {
-    //     window.close()
-    //   }, 1000)
-    // })
-
     this.requestedNetwork = request.network
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.inputs = [
@@ -159,10 +144,9 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async signRequest(request: SignPayloadRequestOutput): Promise<void> {
-    console.log('sign payload', request.payload[0])
     this.transactions = await this.protocol.getTransactionDetails({
       publicKey: '',
-      transaction: { binaryTransaction: request.payload[0] }
+      transaction: { binaryTransaction: request.payload }
     })
     console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {
@@ -216,12 +200,11 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
-    console.log('signedTx', request.signedTransaction)
     this.transactions = await this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
       transaction: request.signedTransaction
     })
-    console.log(this.transactions)
+
     this.responseHandler = async (): Promise<void> => {
       await this.sendResponse(request, {})
     }
@@ -238,7 +221,7 @@ export class BeaconRequestPage implements OnInit {
         extras
       }
     )
-    console.log(response)
+
     if (response && response.error) {
       const modal = await this.modalController.create({
         component: ErrorPage,

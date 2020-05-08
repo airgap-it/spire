@@ -99,7 +99,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
           logger.error('operationPrepareError', operationPrepareError)
         })
       } else {
-        return this.sendToPopup(data)
+        const serialized: string = await new Serializer().serialize(enriched)
+
+        return this.sendToPopup({ ...data, payload: serialized })
       }
     }
     sendResponse()
