@@ -31,7 +31,7 @@ export class PopupManager {
     if (this.popupId) {
       chrome.windows.update(this.popupId, { focused: true })
       logger.log('sendToPopup', 'sending message')
-      chrome.runtime.sendMessage({ data: message })
+      chrome.runtime.sendMessage({ data: message.payload })
       logger.log('sendToPopup', 'message sent')
 
       return

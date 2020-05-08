@@ -27,7 +27,7 @@ export class ChromeMessagingService {
     chrome.runtime.sendMessage({ data: 'Handshake' })
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
-      console.log('GOT DATA FROM BACKGROUND', message.data)
+      console.log('GOT DATA FROM BACKGROUND', message)
       if (typeof message.data === 'string') {
         const serializer: Serializer = new Serializer()
         const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
@@ -53,8 +53,8 @@ export class ChromeMessagingService {
           console.log('beaconRequestError', beaconRequestError)
         })
       } else {
-        console.log('NOT STRING', message.data)
-        if (message.data.error) {
+        if (message.data && message.data.error) {
+          console.log('opening modal with error', message.data.error)
           const modal: HTMLIonModalElement = await this.modalController.create({
             component: ErrorPage,
             componentProps: {
