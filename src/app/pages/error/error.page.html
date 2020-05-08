@@ -1,25 +1,18 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Error</ion-title>
+    <ion-title>
+      Error
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ng-container>
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>{{ title }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        {{ message }}
-        <br />
-        <br />
-        <ng-container *ngIf="data">
-          {{ data | json }}
-        </ng-container>
-      </ion-card-content>
-    </ion-card>
-  </ng-container>
+<ion-content class="ion-padding">
+  <h3>{{ title }}</h3>
+  <p class="ion-margin-bottom">{{ message }}</p>
+  <pre *ngIf="data">
+      {{ data | json }}
+    </pre
+  >
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-button fill="outline" color="primary" (click)="dismiss()">
