@@ -6,7 +6,7 @@ import {
   Serializer
 } from '@airgap/beacon-sdk'
 import { Injectable, NgZone } from '@angular/core'
-import { ModalController } from '@ionic/angular'
+import { LoadingController, ModalController } from '@ionic/angular'
 import {
   Action,
   ActionInputTypesMap,
@@ -23,12 +23,23 @@ import { ErrorPage } from '../pages/error/error.page'
   providedIn: 'root'
 })
 export class ChromeMessagingService {
-  constructor(private readonly ngZone: NgZone, private readonly modalController: ModalController) {
+  private readonly loader: Promise<HTMLIonLoadingElement> = this.loadingController.create({
+    message: 'Preparing beacon message...'
+  })
+
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly loadingController: LoadingController,
+    private readonly modalController: ModalController
+  ) {
     chrome.runtime.sendMessage({ data: 'Handshake' })
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
       console.log('GOT DATA FROM BACKGROUND', message)
       if (typeof message.data === 'string') {
+        const loader: HTMLIonLoadingElement = await this.loader
+        await loader.dismiss()
+
         const serializer: Serializer = new Serializer()
         const deserialized: BeaconMessage = (await serializer.deserialize(message.data)) as BeaconMessage
 
@@ -52,7 +63,13 @@ export class ChromeMessagingService {
         this.beaconRequest(deserialized, walletType).catch((beaconRequestError: Error) => {
           console.log('beaconRequestError', beaconRequestError)
         })
+      } else if (message.data && message.data.type === 'preparing') {
+        const loader: HTMLIonLoadingElement = await this.loader
+        loader.present()
       } else {
+        const loader: HTMLIonLoadingElement = await this.loader
+        await loader.dismiss()
+
         if (message.data && message.data.error) {
           console.log('opening modal with error', message.data.error)
           const modal: HTMLIonModalElement = await this.modalController.create({

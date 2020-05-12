@@ -32,18 +32,13 @@ import { Signer } from './Signer'
 
 const logger: Logger = new Logger('ExtensionClient')
 
-const popupManager: PopupManager = new PopupManager()
-const sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void> = (
-  message: ExtensionMessage<unknown>
-): Promise<void> => {
-  return popupManager.sendToPopup(message)
-}
-
 export class ExtensionClient extends BeaconClient {
   public pendingRequests: BeaconMessage[] = []
 
   public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
   public readonly signer: Signer = new LocalSigner()
+
+  public readonly popupManager: PopupManager = new PopupManager()
 
   private p2pClient: P2PCommunicationClient | undefined
   private p2pPubkey: string | undefined = ''
@@ -68,10 +63,7 @@ export class ExtensionClient extends BeaconClient {
       .catch(console.error)
 
     const messageHandlerMap: Map<string, MessageHandler> = new Map<string, MessageHandler>()
-    messageHandlerMap.set(
-      ExtensionMessageTarget.EXTENSION,
-      new ToExtensionMessageHandler(this.sendToBeacon, sendToPopup, this)
-    )
+    messageHandlerMap.set(ExtensionMessageTarget.EXTENSION, new ToExtensionMessageHandler(this))
     messageHandlerMap.set(ExtensionMessageTarget.PAGE, new ToPageMessageHandler(this))
     messageHandlerMap.set(ExtensionMessageTarget.BACKGROUND, new ToBackgroundMessageHandler(this.handleMessage))
 
@@ -97,7 +89,11 @@ export class ExtensionClient extends BeaconClient {
     this.transport.addListener(transportListener).catch(console.error)
   }
 
-  public sendToBeacon = async (message: string): Promise<void> => {
+  public async sendToPopup(message: ExtensionMessage<unknown>): Promise<void> {
+    return this.popupManager.sendToPopup(message)
+  }
+
+  public async sendToBeacon(message: string): Promise<void> {
     logger.log('sending message', this.p2pPubkey, message)
     if (this.p2pPubkey && this.p2pClient) {
       this.p2pClient.sendMessage(this.p2pPubkey, message).catch((beaconSendError: Error) => {
@@ -124,9 +120,6 @@ export class ExtensionClient extends BeaconClient {
       client: this,
       p2pClient: this.p2pClient,
       storage: this.storage,
-      sendToPage: (pageData: string): Promise<void> => {
-        return this.sendToPage(pageData)
-      },
       setP2pPubkey: (pubkey: string): void => {
         this.p2pPubkey = pubkey
       }

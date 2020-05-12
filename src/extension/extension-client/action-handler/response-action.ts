@@ -18,7 +18,7 @@ export const responseAction: (logger: Logger) => ActionHandlerFunction<Action.RE
     context.data.data as any,
     async (beaconMessage: BeaconMessage) => {
       const message: string = await new Serializer().serialize(beaconMessage)
-      context.sendToPage(message)
+      await context.client.sendToPage(message)
     },
     context.sendResponse as any
   )

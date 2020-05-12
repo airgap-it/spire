@@ -20,9 +20,9 @@ export const p2pInitAction: (logger: Logger) => ActionHandlerFunction<Action.P2P
         return // TODO: Improve
       }
       context.p2pClient
-        .listenForEncryptedMessage(pubkey, (message: string) => {
+        .listenForEncryptedMessage(pubkey, async (message: string) => {
           logger.log('handleP2PInit', 'got message!', message)
-          context.sendToPage(message)
+          await context.client.sendToPage(message)
         })
         .catch((listenForEncryptedMessageError: Error) => {
           logger.error('handleP2PInit', listenForEncryptedMessageError)

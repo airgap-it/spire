@@ -25,11 +25,7 @@ import { MessageHandler } from './MessageHandler'
 const logger: Logger = new Logger('ToExtensionMessageHandler')
 
 export class ToExtensionMessageHandler extends MessageHandler {
-  constructor(
-    private readonly sendToBeacon: (message: string) => void,
-    private readonly sendToPopup: (message: ExtensionMessage<unknown>) => Promise<void>,
-    private readonly client: ExtensionClient
-  ) {
+  constructor(private readonly client: ExtensionClient) {
     super()
   }
 
@@ -43,10 +39,14 @@ export class ToExtensionMessageHandler extends MessageHandler {
     // Use a map and check all known addresses
     // We can only do this for the operation and the sign request
     if (beaconConnected) {
-      logger.log('beacon', 'sending to wallet')
-      this.sendToBeacon(data.payload as string)
+      logger.log('beacon', 'relaying to wallet', data)
+
+      return this.client.sendToBeacon(data.payload as string)
     } else {
       logger.log('not beacon', 'sending to popup', data)
+
+      await this.client.popupManager.startPopup()
+
       const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
       this.client.pendingRequests.push(deserialized)
 
@@ -72,7 +72,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
         const errorObject = { title: (error as any).name, message: (error as any).message, data: (error as any).data }
 
-        return this.sendToPopup({ ...data, payload: { error: errorObject } })
+        return this.client.sendToPopup({ ...data, payload: { error: errorObject } })
       }
 
       if (enriched.err) {
@@ -107,7 +107,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
           operationRequest.operationDetails = operations.contents
           const serialized: string = await new Serializer().serialize(operationRequest)
 
-          return this.sendToPopup({ ...data, payload: serialized })
+          return this.client.sendToPopup({ ...data, payload: serialized })
         })().catch((operationPrepareError: Error) => {
           if ((operationPrepareError as any).data) {
             sendError(operationPrepareError, BeaconErrorType.PARAMETERS_INVALID_ERROR)
@@ -119,7 +119,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
       } else {
         const serialized: string = await new Serializer().serialize(enriched.res)
 
-        return this.sendToPopup({ ...data, payload: serialized })
+        return this.client.sendToPopup({ ...data, payload: serialized })
       }
     }
     sendResponse()

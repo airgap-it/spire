@@ -28,7 +28,6 @@ export interface ActionContext<T extends Action> {
   p2pClient: P2PCommunicationClient | undefined
   storage: ChromeStorage
   sendResponse(message: ExtensionMessageOutputPayload<T>): void
-  sendToPage(message: unknown): void
   setP2pPubkey(pubkey: string): void
 }
 
