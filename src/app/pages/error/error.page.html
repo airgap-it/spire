@@ -1,13 +1,12 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>
-      Error
+      {{ title }}
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <h3>{{ title }}</h3>
   <p class="ion-margin-bottom">{{ message }}</p>
   <pre *ngIf="data">
       {{ data | json }}
