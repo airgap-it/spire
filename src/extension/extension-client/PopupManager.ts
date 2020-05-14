@@ -6,15 +6,19 @@ import { Logger } from './Logger'
 
 const logger: Logger = new Logger('PopupManager')
 
+enum PopupState {
+  CLOSED = 'CLOSED', // Popup is closed
+  STARTING = 'STARTING', // Popup was triggered to start, but callback was not invoked yet, which means we don't have an ID for the window yet
+  READY = 'READY' // The webapp has fully loaded and is ready to receive commands
+}
+
 export class PopupManager {
   /**
    * This is defined as soon as the popup is started, but it doesn't mean that the website has finished loading
    */
   private popupId: number | undefined
-  /**
-   * Will be set to true once the page in the popup has loaded
-   */
-  private popupReady: boolean = false
+
+  private popupState: PopupState = PopupState.CLOSED
 
   private showLoaderOnStartup: boolean = false
 
@@ -23,34 +27,55 @@ export class PopupManager {
   constructor() {
     chrome.runtime.onMessage.addListener((_message: unknown, sender: chrome.runtime.MessageSender) => {
       if (sender.url === chrome.extension.getURL('index.html')) {
-        this.popupReady = true
+        if (this.popupState !== PopupState.STARTING) {
+          return
+        }
 
         if (this.queue.length === 0 && this.showLoaderOnStartup) {
-          this.queue.push({ type: 'preparing' })
+          chrome.runtime.sendMessage({ data: { type: 'preparing' } })
         }
-
         this.showLoaderOnStartup = false
 
-        while (this.queue.length > 0) {
-          const item: unknown = this.queue.shift()
-          chrome.runtime.sendMessage({ data: item })
-        }
+        setTimeout(async () => {
+          if (this.popupState === PopupState.STARTING) {
+            this.popupState = PopupState.READY
+
+            await this.processQueue()
+          }
+        }, 200)
       }
     })
 
     chrome.windows.onRemoved.addListener((removedPopupId: number) => {
       logger.log('constructor', 'popup removed!', removedPopupId)
       this.popupId = undefined
-      this.popupReady = false
+      this.popupState = PopupState.CLOSED
     })
   }
 
   private async addToQueue(payload: unknown): Promise<void> {
     logger.log('addToQueue', payload)
     this.queue.push(payload)
+    await this.processQueue()
+  }
+
+  private async processQueue(): Promise<void> {
+    logger.log('processQueue')
+    if (this.popupState === PopupState.READY) {
+      logger.log('processQueue', 'ready')
+      while (this.queue.length > 0) {
+        const item: unknown = this.queue.shift()
+        chrome.runtime.sendMessage({ data: item })
+      }
+    }
   }
 
   public async startPopup(showLoader: boolean = true): Promise<void> {
+    if (this.popupState !== PopupState.CLOSED) {
+      return
+    }
+
+    this.popupState = PopupState.STARTING
     this.showLoaderOnStartup = showLoader
 
     const POPUP_HEIGHT: number = 680
@@ -60,7 +85,7 @@ export class PopupManager {
       currentPopup: chrome.windows.Window | undefined
     ): void => {
       this.popupId = currentPopup ? currentPopup.id : undefined
-      logger.log('sendToPopup', 'popup launched')
+      logger.log('startPopup', 'popup launched')
     }
 
     chrome.windows.create(
@@ -78,17 +103,12 @@ export class PopupManager {
   public async sendToPopup(message: ExtensionMessage<unknown>): Promise<void> {
     if (this.popupId) {
       chrome.windows.update(this.popupId, { focused: true })
-      if (this.popupReady) {
-        logger.log('sendToPopup', 'popup ready, sending message without adding to queue', message)
-        chrome.runtime.sendMessage({ data: message.payload })
-      } else {
-        await this.addToQueue(message.payload)
-      }
-
-      return
     }
 
     await this.addToQueue(message.payload)
-    await this.startPopup(false)
+
+    if (this.popupState === PopupState.CLOSED) {
+      await this.startPopup(false)
+    }
   }
 }
