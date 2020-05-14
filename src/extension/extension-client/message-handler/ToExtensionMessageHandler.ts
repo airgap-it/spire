@@ -1,4 +1,3 @@
-import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
 import {
   AppMetadata,
   BeaconErrorType,
@@ -10,13 +9,16 @@ import {
   OperationRequestOutput,
   OperationResponse,
   PermissionRequestOutput,
+  PermissionScope,
   Serializer,
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
 import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
+import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
+import { getAccountIdentifier } from '@airgap/beacon-sdk/dist/utils/get-account-identifier'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
-import { WalletInfo } from '../Actions'
+import { PermissionInfo, WalletInfo } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 import { To, to } from '../utils'
@@ -49,7 +51,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
       await this.client.popupManager.startPopup()
 
       const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
-      this.client.pendingRequests.push(deserialized)
+      this.client.pendingRequests.push({ message: deserialized, connectionContext })
 
       const enriched: To<BeaconRequestOutputMessage> = await to(this.enrichRequest(deserialized))
 
@@ -171,6 +173,41 @@ export class ToExtensionMessageHandler extends MessageHandler {
         }
 
         return request
+      }
+
+      default:
+        throw new Error('Message not handled')
+    }
+  }
+
+  public async checkPermission(message: BeaconMessage): Promise<boolean> {
+    switch (message.type) {
+      case BeaconMessageType.PermissionRequest: {
+        return true
+      }
+      case BeaconMessageType.OperationRequest: {
+        // const permissions = await this.client.getPermissions()
+        const accountIdentifier: string = await getAccountIdentifier(message.sourceAddress, message.network)
+
+        const permission: PermissionInfo | undefined = await this.client.getPermission(accountIdentifier)
+        if (!permission) {
+          return true
+        }
+
+        return permission.scopes.includes(PermissionScope.OPERATION_REQUEST)
+      }
+      case BeaconMessageType.SignPayloadRequest: {
+        const accountIdentifier: string = ''
+
+        const permission: PermissionInfo | undefined = await this.client.getPermission(accountIdentifier)
+        if (!permission) {
+          return true
+        }
+
+        return true
+      }
+      case BeaconMessageType.BroadcastRequest: {
+        return true
       }
 
       default:

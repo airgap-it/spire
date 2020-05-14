@@ -33,7 +33,7 @@ import { Signer } from './Signer'
 const logger: Logger = new Logger('ExtensionClient')
 
 export class ExtensionClient extends BeaconClient {
-  public pendingRequests: BeaconMessage[] = []
+  public pendingRequests: { message: BeaconMessage; connectionContext: ConnectionContext }[] = []
 
   public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
   public readonly signer: Signer = new LocalSigner()
@@ -100,17 +100,17 @@ export class ExtensionClient extends BeaconClient {
 
   public handleMessage: (
     data: ExtensionMessage<ExtensionMessageInputPayload<Action>>,
-    sendResponse: (message: unknown) => void
+    connectionContext: ConnectionContext
   ) => Promise<void> = async (
     data: ExtensionMessage<ExtensionMessageInputPayload<Action>>,
-    sendResponse: (message: unknown) => void
+    connectionContext: ConnectionContext
   ): Promise<void> => {
-    logger.log('handleMessage', data, sendResponse)
+    logger.log('handleMessage', data, connectionContext)
     const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
 
     await handler({
       data: data.payload,
-      sendResponse,
+      sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
       client: this,
       p2pClient: this.p2pClient,
       storage: this.storage,
@@ -264,19 +264,22 @@ export class ExtensionClient extends BeaconClient {
     const beaconMessage: BeaconMessage = (await new Serializer().deserialize(data)) as BeaconMessage
     if (beaconMessage.type === BeaconMessageType.PermissionResponse) {
       const permissionResponse: PermissionResponse = beaconMessage
-      const request: BeaconMessage | undefined = this.pendingRequests.find(
-        (requestElement: BeaconMessage) => requestElement.id === permissionResponse.id
+      const request:
+        | { message: BeaconMessage; connectionContext: ConnectionContext }
+        | undefined = this.pendingRequests.find(
+        (requestElement: { message: BeaconMessage; connectionContext: ConnectionContext }) =>
+          requestElement.message.id === permissionResponse.id
       )
       if (!request) {
         throw new Error('Matching request not found')
       }
 
-      const permissionRequest: PermissionRequest = request as PermissionRequest
+      const permissionRequest: PermissionRequest = request.message as PermissionRequest
       const permission: PermissionInfo = {
         accountIdentifier: await getAccountIdentifier(permissionResponse.pubkey, permissionResponse.network),
         beaconId: permissionResponse.beaconId,
         appMetadata: permissionRequest.appMetadata,
-        website: 'https://placeholder.com', // TODO: Use actual website
+        website: request.connectionContext.id,
         address: await getAddressFromPublicKey(permissionResponse.pubkey),
         pubkey: permissionResponse.pubkey,
         network: permissionResponse.network,
