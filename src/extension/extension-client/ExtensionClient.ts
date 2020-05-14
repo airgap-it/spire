@@ -275,12 +275,13 @@ export class ExtensionClient extends BeaconClient {
       }
 
       const permissionRequest: PermissionRequest = request.message as PermissionRequest
+      const address: string = await getAddressFromPublicKey(permissionResponse.pubkey)
       const permission: PermissionInfo = {
-        accountIdentifier: await getAccountIdentifier(permissionResponse.pubkey, permissionResponse.network),
+        accountIdentifier: await getAccountIdentifier(address, permissionResponse.network),
         beaconId: permissionResponse.beaconId,
         appMetadata: permissionRequest.appMetadata,
         website: request.connectionContext.id,
-        address: await getAddressFromPublicKey(permissionResponse.pubkey),
+        address,
         pubkey: permissionResponse.pubkey,
         network: permissionResponse.network,
         scopes: permissionResponse.scopes,

@@ -85,6 +85,11 @@ export class ToExtensionMessageHandler extends MessageHandler {
       }
 
       // Check permissions
+      if (!(await this.hasPermission(deserialized))) {
+        await sendError({ name: 'Wallet Error', message: `No permission` }, BeaconErrorType.NOT_GRANTED_ERROR)
+
+        return
+      }
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
@@ -180,31 +185,36 @@ export class ToExtensionMessageHandler extends MessageHandler {
     }
   }
 
-  public async checkPermission(message: BeaconMessage): Promise<boolean> {
+  public async hasPermission(message: BeaconMessage): Promise<boolean> {
+    logger.log('hasPermission', message)
+
     switch (message.type) {
       case BeaconMessageType.PermissionRequest: {
         return true
       }
       case BeaconMessageType.OperationRequest: {
-        // const permissions = await this.client.getPermissions()
         const accountIdentifier: string = await getAccountIdentifier(message.sourceAddress, message.network)
 
         const permission: PermissionInfo | undefined = await this.client.getPermission(accountIdentifier)
         if (!permission) {
-          return true
+          return false
         }
 
         return permission.scopes.includes(PermissionScope.OPERATION_REQUEST)
       }
       case BeaconMessageType.SignPayloadRequest: {
-        const accountIdentifier: string = ''
+        const permissions: PermissionInfo[] = await this.client.getPermissions()
+        const filteredPermissions: PermissionInfo[] = permissions.filter(
+          (permission: PermissionInfo) => permission.address === message.sourceAddress
+        )
 
-        const permission: PermissionInfo | undefined = await this.client.getPermission(accountIdentifier)
-        if (!permission) {
-          return true
+        if (filteredPermissions.length === 0) {
+          return false
         }
 
-        return true
+        return filteredPermissions.some((permission: PermissionInfo) =>
+          permission.scopes.includes(PermissionScope.SIGN)
+        )
       }
       case BeaconMessageType.BroadcastRequest: {
         return true
