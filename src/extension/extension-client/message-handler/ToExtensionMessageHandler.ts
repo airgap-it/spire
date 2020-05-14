@@ -1,3 +1,4 @@
+import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
 import {
   AppMetadata,
   BeaconErrorType,
@@ -31,7 +32,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
   public async handle(
     data: ExtensionMessage<unknown>,
-    sendResponse: (response?: unknown) => void,
+    connectionContext: ConnectionContext,
     beaconConnected: boolean
   ): Promise<void> {
     logger.log('ToExtensionMessageHandler')
@@ -108,9 +109,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
           const serialized: string = await new Serializer().serialize(operationRequest)
 
           return this.client.sendToPopup({ ...data, payload: serialized })
-        })().catch((operationPrepareError: Error) => {
+        })().catch(async (operationPrepareError: Error) => {
           if ((operationPrepareError as any).data) {
-            sendError(operationPrepareError, BeaconErrorType.PARAMETERS_INVALID_ERROR)
+            await sendError(operationPrepareError, BeaconErrorType.PARAMETERS_INVALID_ERROR)
             logger.error('operationPrepareError', (operationPrepareError as any).data)
           } else {
             logger.error('operationPrepareError', operationPrepareError)
@@ -122,7 +123,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
         return this.client.sendToPopup({ ...data, payload: serialized })
       }
     }
-    sendResponse()
+    if (connectionContext.extras && connectionContext.extras.sendResponse) {
+      connectionContext.extras.sendResponse()
+    }
   }
 
   public async enrichRequest(message: BeaconMessage): Promise<BeaconRequestOutputMessage> {

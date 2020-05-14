@@ -71,15 +71,9 @@ export class ExtensionClient extends BeaconClient {
       console.log('getting message!', message, connectionContext)
 
       const handler: MessageHandler = messageHandlerMap.get(message.target) || new MessageHandler()
-      handler
-        .handle(
-          message,
-          connectionContext.extras ? connectionContext.extras.sendResponse : (_response?: unknown): void => undefined,
-          false
-        )
-        .catch((handlerError: Error) => {
-          logger.error('messageHandlerError', handlerError)
-        })
+      handler.handle(message, connectionContext, false).catch((handlerError: Error) => {
+        logger.error('messageHandlerError', handlerError)
+      })
 
       this.listeners.forEach(listener => {
         listener(message, connectionContext)
