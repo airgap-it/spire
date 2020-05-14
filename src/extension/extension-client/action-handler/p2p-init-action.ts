@@ -35,5 +35,5 @@ export const p2pInitAction: (logger: Logger) => ActionHandlerFunction<Action.P2P
       logger.error('handleP2PInit', listenForChannelOpeningError)
     })
 
-  context.sendResponse({ data: { qr: context.p2pClient.getHandshakeInfo() } })
+  context.sendResponse({ data: { qr: await context.p2pClient.getHandshakeInfo() } })
 }
