@@ -9,6 +9,6 @@ export const walletDeleteAction: (logger: Logger) => ActionHandlerFunction<Actio
   context: ActionContext<Action.WALLET_DELETE>
 ): Promise<void> => {
   logger.log('walletDeleteAction', context.data)
-  await context.client.removeWallet(context.data.data.wallet.pubkey)
+  await context.client.removeWallet(context.data.data.wallet.publicKey)
   context.sendResponse({ data: undefined })
 }

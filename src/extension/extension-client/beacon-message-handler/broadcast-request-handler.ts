@@ -1,4 +1,5 @@
 import {
+  BEACON_VERSION,
   BeaconBaseMessage,
   BeaconErrorType,
   BeaconMessage,
@@ -7,7 +8,6 @@ import {
   BroadcastResponse,
   BroadcastResponseInput
 } from '@airgap/beacon-sdk'
-import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'

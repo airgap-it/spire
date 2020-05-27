@@ -1,4 +1,5 @@
 import {
+  BEACON_VERSION,
   BeaconBaseMessage,
   BeaconErrorType,
   BeaconMessage,
@@ -7,7 +8,6 @@ import {
   OperationResponse,
   OperationResponseInput
 } from '@airgap/beacon-sdk'
-import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 import { LedgerSigner, LocalSigner } from 'src/extension/AirGapSigner'
 
@@ -63,7 +63,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
 
     const forgedTx: To<string> = await to(
       client.operationProvider
-        .prepareOperations(operationRequest.operationDetails, operationRequest.network, wallet.pubkey)
+        .prepareOperations(operationRequest.operationDetails, operationRequest.network, wallet.publicKey)
         .then((wrappedOperation: TezosWrappedOperation) =>
           client.operationProvider.forgeWrappedOperation(wrappedOperation, operationRequest.network)
         )

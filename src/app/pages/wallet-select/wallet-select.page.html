@@ -23,7 +23,7 @@
           <identicon [address]="activeWallet.address"></identicon>
           <p class="ion-no-margin">{{ activeWallet.address }}</p>
         </div>
-        <p class="ion-text-wrap">{{ activeWallet.pubkey }}</p>
+        <p class="ion-text-wrap">{{ activeWallet.publicKey }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
@@ -41,7 +41,7 @@
           <identicon [address]="wallet.address"></identicon>
           <p class="ion-no-margin">{{wallet.address}}</p>
         </div>
-        <p class="ion-text-wrap">{{ wallet.pubkey }}</p>
+        <p class="ion-text-wrap">{{ wallet.publicKey }}</p>
       </ion-label>
       <div slot="end">
         <ion-button size="small" fill="outline" color="primary" (click)="activateWallet(wallet)">

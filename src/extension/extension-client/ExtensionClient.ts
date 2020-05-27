@@ -1,26 +1,29 @@
 import {
   AppMetadata,
+  AppMetadataManager,
+  BeaconClient,
   BeaconMessage,
   BeaconMessageType,
   ChromeMessageTransport,
   ChromeStorage,
+  ConnectionContext,
   ExtensionMessage,
   ExtensionMessageTarget,
+  getAccountIdentifier,
+  getAddressFromPublicKey,
   P2PCommunicationClient,
+  PermissionInfo,
+  PermissionManager,
   PermissionRequest,
   PermissionResponse,
   Serializer
 } from '@airgap/beacon-sdk'
-import { BeaconClient } from '@airgap/beacon-sdk/dist/clients/beacon-client/BeaconClient'
-import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
-import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
-import { getAccountIdentifier } from '@airgap/beacon-sdk/dist/utils/get-account-identifier'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
 
 import { ActionHandlerFunction, ActionMessageHandler } from './action-handler/ActionMessageHandler'
-import { Action, ExtensionMessageInputPayload, PermissionInfo, WalletInfo, WalletType } from './Actions'
+import { Action, ExtensionMessageInputPayload, WalletInfo, WalletType } from './Actions'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
@@ -40,6 +43,9 @@ export class ExtensionClient extends BeaconClient {
 
   public readonly popupManager: PopupManager = new PopupManager()
 
+  public readonly permissionManager: PermissionManager
+  public readonly appMetadataManager: AppMetadataManager
+
   private p2pClient: P2PCommunicationClient | undefined
   private p2pPubkey: string | undefined = ''
 
@@ -51,6 +57,8 @@ export class ExtensionClient extends BeaconClient {
     super({ name: config.name, storage: new ChromeStorage() })
 
     this.transport = new ChromeMessageTransport(config.name)
+    this.permissionManager = new PermissionManager(new ChromeStorage())
+    this.appMetadataManager = new AppMetadataManager(new ChromeStorage())
 
     this.keyPair
       .then((keyPair: sodium.KeyPair) => {
@@ -114,8 +122,8 @@ export class ExtensionClient extends BeaconClient {
       client: this,
       p2pClient: this.p2pClient,
       storage: this.storage,
-      setP2pPubkey: (pubkey: string): void => {
-        this.p2pPubkey = pubkey
+      setP2pPubkey: (publicKey: string): void => {
+        this.p2pPubkey = publicKey
       }
     })
   }
@@ -125,44 +133,35 @@ export class ExtensionClient extends BeaconClient {
   }
 
   public async getPermissions(): Promise<PermissionInfo[]> {
-    logger.log('getPermissions')
-
-    return (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
+    return this.permissionManager.getPermissions()
   }
 
   public async getPermission(accountIdentifier: string): Promise<PermissionInfo | undefined> {
-    const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when wallets type is in sdk
-
-    return permissions.find((permission: PermissionInfo) => permission.accountIdentifier === accountIdentifier)
-  }
-
-  public async addPermission(permissionInfo: PermissionInfo): Promise<void> {
-    logger.log('addPermission', permissionInfo)
-    const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
-
-    if (
-      !permissions.some(
-        (permission: PermissionInfo) => permission.accountIdentifier === permissionInfo.accountIdentifier
-      )
-    ) {
-      permissions.push(permissionInfo)
-    }
-
-    return this.storage.set('permissions' as any, permissions)
+    return this.permissionManager.getPermission(accountIdentifier)
   }
 
   public async removePermission(accountIdentifier: string): Promise<void> {
-    const permissions: PermissionInfo[] = (await this.storage.get('permissions' as any)) || [] // TODO: Fix when permissions type is in sdk
-
-    const filteredPermissions: PermissionInfo[] = permissions.filter(
-      (permissionInfo: PermissionInfo) => permissionInfo.accountIdentifier !== accountIdentifier
-    )
-
-    return this.storage.set('permissions' as any, filteredPermissions)
+    return this.permissionManager.removePermission(accountIdentifier)
   }
 
   public async removeAllPermissions(): Promise<void> {
-    return this.storage.delete('permissions' as any)
+    return this.permissionManager.removeAllPermissions()
+  }
+
+  public async getAppMetadataList(): Promise<AppMetadata[]> {
+    return this.appMetadataManager.getAppMetadataList()
+  }
+
+  public async getAppMetadata(beaconId: string): Promise<AppMetadata | undefined> {
+    return this.appMetadataManager.getAppMetadata(beaconId)
+  }
+
+  public async removeAppMetadata(beaconId: string): Promise<void> {
+    return this.appMetadataManager.removeAppMetadata(beaconId)
+  }
+
+  public async removeAllAppMetadata(): Promise<void> {
+    return this.appMetadataManager.removeAllAppMetadata()
   }
 
   public async getWallets(): Promise<WalletInfo[]> {
@@ -171,10 +170,10 @@ export class ExtensionClient extends BeaconClient {
     return (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
   }
 
-  public async getWallet(pubkey: string): Promise<WalletInfo | undefined> {
+  public async getWallet(publicKey: string): Promise<WalletInfo | undefined> {
     const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
-    return wallets.find((wallet: WalletInfo) => wallet.pubkey === pubkey)
+    return wallets.find((wallet: WalletInfo) => wallet.publicKey === publicKey)
   }
 
   public async getWalletByAddress(address: string): Promise<WalletInfo | undefined> {
@@ -188,7 +187,7 @@ export class ExtensionClient extends BeaconClient {
     const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
     let newWallets: WalletInfo[] = wallets
-    if (!wallets.some((wallet: WalletInfo) => wallet.pubkey === walletInfo.pubkey)) {
+    if (!wallets.some((wallet: WalletInfo) => wallet.publicKey === walletInfo.publicKey)) {
       if (walletInfo.type === WalletType.LOCAL_MNEMONIC) {
         // There can only be one local mnemonic. So we have to delete the old one if we add a new one
         const filteredWallets: WalletInfo[] = wallets.filter(
@@ -204,55 +203,16 @@ export class ExtensionClient extends BeaconClient {
     return this.storage.set('wallets' as any, newWallets)
   }
 
-  public async removeWallet(pubkey: string): Promise<void> {
+  public async removeWallet(publicKey: string): Promise<void> {
     const wallets: WalletInfo[] = (await this.storage.get('wallets' as any)) || [] // TODO: Fix when wallets type is in sdk
 
-    const filteredWallets: WalletInfo[] = wallets.filter((walletInfo: WalletInfo) => walletInfo.pubkey !== pubkey)
+    const filteredWallets: WalletInfo[] = wallets.filter((walletInfo: WalletInfo) => walletInfo.publicKey !== publicKey)
 
     return this.storage.set('wallets' as any, filteredWallets)
   }
 
   public async removeAllWallets(): Promise<void> {
     return this.storage.delete('wallets' as any)
-  }
-
-  public async getAppMetadataList(): Promise<AppMetadata[]> {
-    logger.log('getAppMetadataList')
-
-    return (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when appMetadataList type is in sdk
-  }
-
-  public async getAppMetadata(beaconId: string): Promise<AppMetadata | undefined> {
-    const appMetadataList: AppMetadata[] = (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when wallets type is in sdk
-
-    return appMetadataList.find((appMetadata: AppMetadata) => appMetadata.beaconId === beaconId)
-  }
-
-  public async addAppMetadata(appMetadata: AppMetadata): Promise<void> {
-    logger.log('addAppMetadata', appMetadata)
-    const appMetadataList: AppMetadata[] = (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when appMetadataList type is in sdk
-
-    if (
-      !appMetadataList.some((appMetadataElement: AppMetadata) => appMetadataElement.beaconId === appMetadata.beaconId)
-    ) {
-      appMetadataList.push(appMetadata)
-    }
-
-    return this.storage.set('appMetadataList' as any, appMetadataList)
-  }
-
-  public async removeAppMetadata(beaconId: string): Promise<void> {
-    const appMetadataList: AppMetadata[] = (await this.storage.get('appMetadataList' as any)) || [] // TODO: Fix when appMetadataList type is in sdk
-
-    const filteredAppMetadataList: AppMetadata[] = appMetadataList.filter(
-      (appMetadata: AppMetadata) => appMetadata.beaconId !== beaconId
-    )
-
-    return this.storage.set('appMetadataList' as any, filteredAppMetadataList)
-  }
-
-  public async removeAllAppMetadata(): Promise<void> {
-    return this.storage.delete('appMetadataList' as any)
   }
 
   /**
@@ -275,19 +235,19 @@ export class ExtensionClient extends BeaconClient {
       }
 
       const permissionRequest: PermissionRequest = request.message as PermissionRequest
-      const address: string = await getAddressFromPublicKey(permissionResponse.pubkey)
+      const address: string = await getAddressFromPublicKey(permissionResponse.publicKey)
       const permission: PermissionInfo = {
         accountIdentifier: await getAccountIdentifier(address, permissionResponse.network),
         beaconId: permissionResponse.beaconId,
         appMetadata: permissionRequest.appMetadata,
         website: request.connectionContext.id,
         address,
-        pubkey: permissionResponse.pubkey,
+        publicKey: permissionResponse.publicKey,
         network: permissionResponse.network,
         scopes: permissionResponse.scopes,
-        connectedAt: new Date()
+        connectedAt: new Date().getTime()
       }
-      await this.addPermission(permission)
+      await this.permissionManager.addPermission(permission)
     }
   }
 

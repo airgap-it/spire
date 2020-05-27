@@ -1,4 +1,6 @@
-import { Action, PermissionInfo } from '../Actions'
+import { PermissionInfo } from '@airgap/beacon-sdk'
+
+import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
 import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'

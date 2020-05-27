@@ -1,6 +1,6 @@
 /// <reference types="chrome"/>
 
-import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
+import { ExtensionMessage } from '@airgap/beacon-sdk'
 
 import { Logger } from './Logger'
 

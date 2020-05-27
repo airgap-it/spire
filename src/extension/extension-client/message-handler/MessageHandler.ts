@@ -1,5 +1,4 @@
-import { ConnectionContext } from '@airgap/beacon-sdk/dist/types/ConnectionContext'
-import { ExtensionMessage } from '@airgap/beacon-sdk/dist/types/ExtensionMessage'
+import { ConnectionContext, ExtensionMessage } from '@airgap/beacon-sdk'
 
 import { Logger } from '../Logger'
 

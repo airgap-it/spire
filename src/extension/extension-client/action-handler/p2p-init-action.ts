@@ -12,15 +12,15 @@ export const p2pInitAction: (logger: Logger) => ActionHandlerFunction<Action.P2P
   logger.log('p2pInitAction', 'handshake info', context.p2pClient.getHandshakeInfo())
 
   context.p2pClient
-    .listenForChannelOpening((pubkey: string) => {
-      logger.log('handleP2PInit', 'channel opening', pubkey)
-      context.setP2pPubkey(pubkey)
+    .listenForChannelOpening((publicKey: string) => {
+      logger.log('handleP2PInit', 'channel opening', publicKey)
+      context.setP2pPubkey(publicKey)
 
       if (!context.p2pClient) {
         return // TODO: Improve
       }
       context.p2pClient
-        .listenForEncryptedMessage(pubkey, async (message: string) => {
+        .listenForEncryptedMessage(publicKey, async (message: string) => {
           logger.log('handleP2PInit', 'got message!', message)
           await context.client.sendToPage(message)
         })

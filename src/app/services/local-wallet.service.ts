@@ -79,9 +79,9 @@ export class WalletService {
       } = await this.mnemonicToAddress(mnemonic)
       const walletInfo: WalletInfo<WalletType.LOCAL_MNEMONIC> = {
         address,
-        pubkey: publicKey,
+        publicKey,
         type: WalletType.LOCAL_MNEMONIC,
-        added: new Date(),
+        added: new Date().getTime(),
         info: {
           mnemonic
         }

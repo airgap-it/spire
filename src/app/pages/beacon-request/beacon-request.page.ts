@@ -135,7 +135,7 @@ export class BeaconRequestPage implements OnInit {
 
       this.responseHandler = async (): Promise<void> => {
         await this.sendResponse(request, {
-          pubkey: wallet.pubkey,
+          publicKey: wallet.publicKey,
           scopes: this.inputs.filter(input => input.checked).map(input => input.value)
         })
         await this.dismiss()

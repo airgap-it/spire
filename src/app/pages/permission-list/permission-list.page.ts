@@ -1,7 +1,8 @@
+import { PermissionInfo } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { AlertController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
-import { Action, ExtensionMessageOutputPayload, PermissionInfo } from 'src/extension/extension-client/Actions'
+import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-permission-list',

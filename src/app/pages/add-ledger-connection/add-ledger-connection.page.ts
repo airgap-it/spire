@@ -1,4 +1,4 @@
-import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
+import { getAddressFromPublicKey } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
@@ -51,10 +51,10 @@ export class AddLedgerConnectionPage implements OnInit {
         >
         if (data) {
           const walletInfo: WalletInfo<WalletType.LEDGER> = {
-            address: await getAddressFromPublicKey(data.pubkey),
-            pubkey: data.pubkey,
+            address: await getAddressFromPublicKey(data.publicKey),
+            publicKey: data.publicKey,
             type: WalletType.LEDGER,
-            added: new Date(),
+            added: new Date().getTime(),
             info: undefined
           }
           await this.walletService.addAndActiveWallet(walletInfo)

@@ -1,4 +1,4 @@
-import { Network, P2PPairInfo, PermissionScope, AppMetadata } from '@airgap/beacon-sdk'
+import { Network, P2PPairInfo, PermissionInfo } from '@airgap/beacon-sdk'
 
 export enum WalletType {
   P2P = 'P2P',
@@ -14,22 +14,10 @@ interface WalletInfoTypeMap {
 
 export interface WalletInfo<T extends WalletType = WalletType> {
   address: string
-  pubkey: string
+  publicKey: string
   type: T
   info: WalletInfoTypeMap[T]
-  added: Date
-}
-
-export interface PermissionInfo {
-  accountIdentifier: string
-  beaconId: string
-  appMetadata: AppMetadata
-  website: string
-  address: string
-  pubkey: string
-  network: Network
-  scopes: PermissionScope[]
-  connectedAt: Date
+  added: number
 }
 
 export enum Action {
@@ -81,10 +69,10 @@ export interface ActionOutputTypesMap {
   [Action.PERMISSION_DELETE]: undefined
   [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }
   [Action.ACTIVE_NETWORK_SET]: undefined
-  [Action.P2P_INIT]: { qr: { name: string; pubKey: string; relayServer: string } }
+  [Action.P2P_INIT]: { qr: P2PPairInfo }
   [Action.P2P_PEERS_GET]: undefined
   [Action.P2P_PEER_REMOVE]: undefined
-  [Action.LEDGER_INIT]: { pubkey: string; address: string }
+  [Action.LEDGER_INIT]: { publicKey: string; address: string }
   [Action.BEACON_ID_GET]: { id: string }
   [Action.RESPONSE]: { error?: unknown }
 }

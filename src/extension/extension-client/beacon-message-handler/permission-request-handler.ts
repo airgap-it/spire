@@ -1,4 +1,5 @@
 import {
+  BEACON_VERSION,
   BeaconBaseMessage,
   BeaconMessage,
   BeaconMessageType,
@@ -7,7 +8,6 @@ import {
   PermissionResponseInput,
   PermissionScope
 } from '@airgap/beacon-sdk'
-import { BEACON_VERSION } from '@airgap/beacon-sdk/dist/constants'
 
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
@@ -26,21 +26,26 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
     logger.log('permission-response', data)
     const request: PermissionRequestOutput = (data.request as any) as PermissionRequestOutput
     const extras: {
-      pubkey: string
+      publicKey: string
       scopes: PermissionScope[]
     } = data.extras as any
 
     const responseInput: PermissionResponseInput = {
       id: request.id,
       type: BeaconMessageType.PermissionResponse,
-      pubkey: extras.pubkey,
+      publicKey: extras.publicKey,
       network: {
         ...request.network
       },
       scopes: extras.scopes
     }
 
-    const response: PermissionResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: PermissionResponse = {
+      beaconId: await client.beaconId,
+      version: BEACON_VERSION,
+      ...responseInput
+    }
+    ;(response as any).pubkey = response.publicKey // TODO: 0.7.0 backwards compatibility. Should be removed after 1.0.0
 
     sendToPage(response)
     sendResponseToPopup()

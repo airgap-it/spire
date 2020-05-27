@@ -27,7 +27,7 @@ export class LocalMnemonicPage {
       ) as WalletInfo<WalletType.LOCAL_MNEMONIC>
       if (localWallet) {
         this.mnemonic = localWallet.info.mnemonic
-        this.publicKey = localWallet.pubkey
+        this.publicKey = localWallet.publicKey
         this.address = localWallet.address
         this.ref.detectChanges()
       } else {

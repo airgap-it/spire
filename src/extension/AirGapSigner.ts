@@ -1,4 +1,4 @@
-import { Network, TezosBaseOperation } from '@airgap/beacon-sdk'
+import { Network, TezosOperation } from '@airgap/beacon-sdk'
 import { TezosProtocol } from 'airgap-coin-lib'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 import { RawTezosTransaction } from 'airgap-coin-lib/dist/serializer/types'
@@ -17,13 +17,13 @@ const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.git
 
 export class AirGapOperationProvider implements OperationProvider {
   public async prepareOperations(
-    operations: TezosBaseOperation[],
+    operations: Partial<TezosOperation>[],
     network: Network,
     publicKey: string
   ): Promise<TezosWrappedOperation> {
     const protocol: TezosProtocol = await getProtocolForNetwork(network)
 
-    return protocol.prepareOperations(publicKey, operations)
+    return protocol.prepareOperations(publicKey, operations as any) // TODO: Fix type
   }
 
   public async forgeWrappedOperation(wrappedOperation: TezosWrappedOperation, network: Network): Promise<string> {

@@ -22,7 +22,7 @@ export class WalletSelectPage {
     this.activeWallet$ = this.walletService.activeWallet$
     this.wallets$ = combineLatest([this.walletService.wallets$, this.walletService.activeWallet$]).pipe(
       map(([wallets, activeWallet]: [WalletInfo[], WalletInfo]) => {
-        return wallets.filter((wallet: WalletInfo) => wallet.pubkey !== activeWallet.pubkey)
+        return wallets.filter((wallet: WalletInfo) => wallet.publicKey !== activeWallet.publicKey)
       })
     )
   }

@@ -1,4 +1,4 @@
-import { getAddressFromPublicKey } from '@airgap/beacon-sdk/dist/utils/crypto'
+import { getAddressFromPublicKey } from '@airgap/beacon-sdk'
 
 import { Action } from '../Actions'
 import { BeaconLedgerBridge } from '../ledger-bridge'
@@ -23,5 +23,5 @@ export const ledgerInitAction: (logger: Logger) => ActionHandlerFunction<Action.
   }
 
   const address: string = await getAddressFromPublicKey(publicKey)
-  context.sendResponse({ data: { pubkey: publicKey, address } })
+  context.sendResponse({ data: { publicKey, address } })
 }

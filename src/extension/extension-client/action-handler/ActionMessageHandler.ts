@@ -28,7 +28,7 @@ export interface ActionContext<T extends Action> {
   p2pClient: P2PCommunicationClient | undefined
   storage: ChromeStorage
   sendResponse(message: ExtensionMessageOutputPayload<T>): void
-  setP2pPubkey(pubkey: string): void
+  setP2pPubkey(publicKey: string): void
 }
 
 export type ActionHandlerFunction<T extends Action> = (context: ActionContext<T>) => Promise<void>
