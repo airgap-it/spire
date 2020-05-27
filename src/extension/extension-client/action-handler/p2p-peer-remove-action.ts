@@ -1,7 +1,7 @@
 import { Action } from '../Actions'
 import { Logger } from '../Logger'
 
-import { ActionContext, actionNotSupported, ActionHandlerFunction } from './ActionMessageHandler'
+import { ActionContext, ActionHandlerFunction, actionNotSupported } from './ActionMessageHandler'
 
 export const p2pPeerRemoveAction: (logger: Logger) => ActionHandlerFunction<Action.P2P_PEER_REMOVE> = (
   logger: Logger

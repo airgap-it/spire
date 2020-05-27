@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { IonicModule } from '@ionic/angular'
 
 import { ComponentsModule } from '../../components/components.module'
+
 import { PermissionListPageRoutingModule } from './permission-list-routing.module'
 import { PermissionListPage } from './permission-list.page'
 

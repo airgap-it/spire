@@ -1,9 +1,9 @@
 import { Component } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
-import { Observable, combineLatest } from 'rxjs'
+import { combineLatest, Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { WalletInfo } from 'src/extension/extension-client/Actions'
-import { map } from 'rxjs/operators'
 
 @Component({
   selector: 'app-wallet-select',
