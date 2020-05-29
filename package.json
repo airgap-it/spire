@@ -36,7 +36,7 @@
     "@download/blockies": "^1.0.3",
     "@ionic/angular": "^5.0.7",
     "@sentry/browser": "^5.15.5",
-    "airgap-coin-lib": "0.8.3-beta.8",
+    "airgap-coin-lib": "0.8.3",
     "angular2-qrcode": "^2.0.3",
     "axios": "^0.19.2",
     "bignumber.js": "^9.0.0",
