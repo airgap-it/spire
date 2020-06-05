@@ -56,7 +56,7 @@ build_extension:
     - npm install
     - npm install ionic
     - npm run postinstall
-    - npm run extension:build:prod
+    - npm run build:prod
     - mv www beacon-extension
   artifacts:
     name: 'beacon-extension'
