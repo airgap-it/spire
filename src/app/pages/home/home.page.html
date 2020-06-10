@@ -29,7 +29,7 @@
 
   <ng-container *ngIf="walletType">
     <ng-container *ngIf="walletType === walletTypes.P2P">
-      Requests will be redirected to your paired wallet!
+      <p class="ion-text-center"><strong>All requests will be redirected to your paired wallet.</strong></p>
     </ng-container>
 
     <ng-container *ngIf="walletType === walletTypes.LOCAL_MNEMONIC || walletType === walletTypes.LEDGER">
