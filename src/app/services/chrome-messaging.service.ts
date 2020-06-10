@@ -19,24 +19,23 @@ import {
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 import { ErrorPage } from '../pages/error/error.page'
 
-import { WalletService } from './local-wallet.service'
-
 @Injectable({
   providedIn: 'root'
 })
 export class ChromeMessagingService {
+  private updateWalletCallback: (() => Promise<void>) | undefined
+
   private readonly loader: Promise<HTMLIonLoadingElement> = this.loadingController.create({
     message: 'Preparing beacon message...'
   })
 
   constructor(
-    private readonly walletService: WalletService,
     private readonly ngZone: NgZone,
     private readonly loadingController: LoadingController,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController
   ) {
-    chrome.runtime.sendMessage({ data: 'Handshake' })
+    chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
       console.log('GOT DATA FROM BACKGROUND', message)
@@ -77,7 +76,9 @@ export class ChromeMessagingService {
         await this.modalController.dismiss(true /* close parent */)
 
         // We need to re-load the wallets because p2p has been set as active in the background
-        await this.walletService.updateWallets()
+        if (this.updateWalletCallback) {
+          await this.updateWalletCallback()
+        }
 
         const alert: HTMLIonAlertElement = await this.alertController.create({
           header: 'Success!',
@@ -132,6 +133,10 @@ export class ChromeMessagingService {
         })
       })
     })
+  }
+
+  public async registerUpdateWalletCallback(callback: () => Promise<void>): Promise<void> {
+    this.updateWalletCallback = callback
   }
 
   private async beaconRequest(request: BeaconMessage, walletType: WalletType): Promise<void> {

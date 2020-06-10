@@ -27,42 +27,44 @@
     </ion-col>
   </ion-row>
 
-  <ng-container *ngIf="walletType === walletTypes.P2P">
-    Requests will be redirected to your paired wallet!
-  </ng-container>
+  <ng-container *ngIf="walletType">
+    <ng-container *ngIf="walletType === walletTypes.P2P">
+      Requests will be redirected to your paired wallet!
+    </ng-container>
 
-  <ng-container *ngIf="walletType !== walletTypes.P2P">
-    <ion-row>
-      <ion-col>
-        <p class="ion-text-center ion-no-margin"><small>Address</small></p>
-        <div
-          (click)="openBlockexplorer()"
-          class="ion-justify-content-center ion-align-items-center d-flex address--container"
-        >
-          <identicon [address]="address"></identicon>
-          <h6>
-            {{ address }}
-            <ion-icon name="open-outline"></ion-icon>
-          </h6>
-        </div>
-      </ion-col>
-    </ion-row>
+    <ng-container *ngIf="walletType === walletTypes.LOCAL_MNEMONIC || walletType === walletTypes.LEDGER">
+      <ion-row>
+        <ion-col>
+          <p class="ion-text-center ion-no-margin"><small>Address</small></p>
+          <div
+            (click)="openBlockexplorer()"
+            class="ion-justify-content-center ion-align-items-center d-flex address--container"
+          >
+            <identicon [address]="address"></identicon>
+            <h6>
+              {{ address }}
+              <ion-icon name="open-outline"></ion-icon>
+            </h6>
+          </div>
+        </ion-col>
+      </ion-row>
 
-    <ion-row class="ion-padding-bottom">
-      <ion-col>
-        <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
-        <h3 class="ion-text-center ion-no-margin">
-          {{ balance | amountConverter: { protocolIdentifier: 'xtz', maxDigits: 10 } }}
-        </h3>
-      </ion-col>
-    </ion-row>
+      <ion-row class="ion-padding-bottom">
+        <ion-col>
+          <p class="ion-text-center ion-no-margin"><small>Amount</small></p>
+          <h3 class="ion-text-center ion-no-margin">
+            {{ balance | amountConverter: { protocolIdentifier: 'xtz', maxDigits: 10 } }}
+          </h3>
+        </ion-col>
+      </ion-row>
 
-    <ion-row *ngIf="network">
-      <ion-col>
-        <p class="ion-text-center ion-no-margin"><small>Network</small></p>
-        <h3 class="ion-text-center ion-no-margin">{{ (network).type }}</h3>
-      </ion-col>
-    </ion-row>
+      <ion-row *ngIf="network">
+        <ion-col>
+          <p class="ion-text-center ion-no-margin"><small>Network</small></p>
+          <h3 class="ion-text-center ion-no-margin">{{ (network).type }}</h3>
+        </ion-col>
+      </ion-row>
+    </ng-container>
   </ng-container>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">

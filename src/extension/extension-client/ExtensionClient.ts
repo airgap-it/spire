@@ -64,23 +64,17 @@ export class ExtensionClient extends BeaconClient {
         }
       },
       [BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS]: {
-        handler: async (): Promise<void> => {
+        handler: async (newPeer: P2PPairInfo): Promise<void> => {
           console.log('successfully connected!')
 
-          let peer: P2PPairInfo | undefined
-          if (this.p2pTransport) {
-            const peers: P2PPairInfo[] = await this.p2pTransport.getPeers()
-            peer = peers[0]
-          }
-
-          if (peer) {
+          if (newPeer) {
             console.log('adding wallet!')
             const walletInfo: WalletInfo<WalletType.P2P> = {
               address: '',
               publicKey: '',
               type: WalletType.P2P,
               added: new Date().getTime(),
-              info: peer
+              info: newPeer
             }
             await this.addWallet(walletInfo)
             await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
@@ -137,7 +131,7 @@ export class ExtensionClient extends BeaconClient {
       if (this.p2pTransport) {
         const activeWallet: WalletInfo = await this.storage.get('ACTIVE_WALLET' as any)
 
-        beaconConnected = activeWallet.type === WalletType.P2P
+        beaconConnected = activeWallet && activeWallet.type === WalletType.P2P
       }
       handler.handle(message, connectionContext, beaconConnected).catch((handlerError: Error) => {
         logger.error('messageHandlerError', handlerError)
