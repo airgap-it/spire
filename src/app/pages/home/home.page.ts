@@ -1,4 +1,4 @@
-import { Network, NetworkType } from '@airgap/beacon-sdk'
+import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
@@ -29,7 +29,7 @@ export class HomePage {
   public currentSigningMethod: string = 'Unpaired'
   public balance: string = ''
   public tezblockLink: string = ''
-  public network: Network = { type: NetworkType.MAINNET }
+  public network: Network | undefined
   public address: string = ''
 
   constructor(
@@ -60,18 +60,23 @@ export class HomePage {
       if (wallet.type !== WalletType.P2P) {
         await this.updateBalanceAndLink()
       }
-
-      this.ref.detectChanges()
     })
   }
 
   public async updateBalanceAndLink(): Promise<void> {
+    if (!this.network) {
+      return
+    }
+
     const [balance, tezblockLink]: [string, string] = await Promise.all([
-      this.getBalance(this.address),
-      this.getBlockexplorer(this.address)
+      this.getBalance(this.address, this.network),
+      this.getBlockexplorer(this.address, this.network)
     ])
+
     this.balance = balance
     this.tezblockLink = tezblockLink
+
+    this.ref.detectChanges()
   }
 
   public async showPairPage(): Promise<void> {
@@ -104,13 +109,13 @@ export class HomePage {
     return modal.present()
   }
 
-  public async getBalance(address: string | null): Promise<string> {
+  public async getBalance(address: string | null, network: Network): Promise<string> {
     console.log('getBalance', address)
     if (!address) {
       return ''
     }
 
-    const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(this.network)
+    const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
 
     const amount: string = await protocol.getBalanceOfAddresses([address])
     console.log('getBalance', amount)
@@ -118,8 +123,8 @@ export class HomePage {
     return amount
   }
 
-  public async getBlockexplorer(address: string | null): Promise<string> {
-    const link: string = await getTezblockLinkForNetwork(this.network)
+  public async getBlockexplorer(address: string | null, network: Network): Promise<string> {
+    const link: string = await getTezblockLinkForNetwork(network)
 
     return `${link}${address}`
   }
