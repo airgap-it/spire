@@ -24,6 +24,8 @@ enum SigningMethods {
 })
 export class HomePage {
   public signingMethods: typeof SigningMethods = SigningMethods
+  public walletTypes: typeof WalletType = WalletType
+  public walletType: WalletType | undefined
   public currentSigningMethod: string = 'Unpaired'
   public balance: string = ''
   public tezblockLink: string = ''
@@ -46,8 +48,19 @@ export class HomePage {
 
     this.walletService.activeWallet$.subscribe(async (wallet: WalletInfo) => {
       this.address = wallet.address
-      this.currentSigningMethod = wallet.type === WalletType.LEDGER ? 'Ledger' : 'Local Mnemonic'
-      await this.updateBalanceAndLink()
+      this.walletType = wallet.type
+
+      this.currentSigningMethod =
+        wallet.type === WalletType.LOCAL_MNEMONIC
+          ? 'Local Mnemonic'
+          : wallet.type === WalletType.LEDGER
+          ? 'Ledger'
+          : 'Beacon P2P'
+
+      if (wallet.type !== WalletType.P2P) {
+        await this.updateBalanceAndLink()
+      }
+
       this.ref.detectChanges()
     })
   }
@@ -85,6 +98,8 @@ export class HomePage {
     const modal: HTMLIonModalElement = await this.modalController.create({
       component: WalletSelectPage
     })
+
+    modal.onDidDismiss().then(() => {})
 
     return modal.present()
   }

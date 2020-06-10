@@ -1,4 +1,4 @@
-import { ChromeStorage, P2PCommunicationClient } from '@airgap/beacon-sdk'
+import { ChromeStorage, P2PTransport } from '@airgap/beacon-sdk'
 
 import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
@@ -25,10 +25,9 @@ const logger: Logger = new Logger('action-message-handler.ts')
 export interface ActionContext<T extends Action> {
   data: ExtensionMessageInputPayload<T>
   client: ExtensionClient
-  p2pClient: P2PCommunicationClient | undefined
+  p2pTransport: P2PTransport | undefined
   storage: ChromeStorage
   sendResponse(message: ExtensionMessageOutputPayload<T>): void
-  setP2pPubkey(publicKey: string): void
 }
 
 export type ActionHandlerFunction<T extends Action> = (context: ActionContext<T>) => Promise<void>

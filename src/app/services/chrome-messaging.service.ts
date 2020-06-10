@@ -6,7 +6,7 @@ import {
   Serializer
 } from '@airgap/beacon-sdk'
 import { Injectable, NgZone } from '@angular/core'
-import { LoadingController, ModalController } from '@ionic/angular'
+import { AlertController, LoadingController, ModalController } from '@ionic/angular'
 import {
   Action,
   ActionInputTypesMap,
@@ -19,6 +19,8 @@ import {
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 import { ErrorPage } from '../pages/error/error.page'
 
+import { WalletService } from './local-wallet.service'
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,9 +30,11 @@ export class ChromeMessagingService {
   })
 
   constructor(
+    private readonly walletService: WalletService,
     private readonly ngZone: NgZone,
     private readonly loadingController: LoadingController,
-    private readonly modalController: ModalController
+    private readonly modalController: ModalController,
+    private readonly alertController: AlertController
   ) {
     chrome.runtime.sendMessage({ data: 'Handshake' })
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
@@ -65,7 +69,27 @@ export class ChromeMessagingService {
         })
       } else if (message.data && message.data.type === 'preparing') {
         const loader: HTMLIonLoadingElement = await this.loader
-        loader.present()
+        await loader.present() // present
+      } else if (message.data && message.data.beaconEvent) {
+        const loader: HTMLIonLoadingElement = await this.loader
+        await loader.dismiss()
+
+        await this.modalController.dismiss(true /* close parent */)
+
+        // We need to re-load the wallets because p2p has been set as active in the background
+        await this.walletService.updateWallets()
+
+        const alert: HTMLIonAlertElement = await this.alertController.create({
+          header: 'Success!',
+          message: 'You successfully paired your wallet!.',
+          buttons: [
+            {
+              text: 'Ok'
+            }
+          ]
+        })
+
+        await alert.present()
       } else {
         const loader: HTMLIonLoadingElement = await this.loader
         await loader.dismiss()

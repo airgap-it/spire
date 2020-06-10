@@ -14,8 +14,11 @@
 </ion-header>
 
 <ion-content>
-  <!--TODO: set current paired method image -->
-  <ion-row class="ion-justify-content-center ion-padding-top"><img src="./assets/img/beacon_wallets.svg" /></ion-row>
+  <ion-row class="ion-justify-content-center ion-padding-top">
+    <img *ngIf="walletType === walletTypes.LOCAL_MNEMONIC" src="./assets/img/beacon_wallets.svg" />
+    <img *ngIf="walletType === walletTypes.LEDGER" src="./assets/img/beacon_ledger.svg" />
+    <img *ngIf="walletType === walletTypes.P2P" src="./assets/img/beacon_mobile.svg" />
+  </ion-row>
 
   <ion-row class="ion-padding-vertical">
     <ion-col>
@@ -24,7 +27,11 @@
     </ion-col>
   </ion-row>
 
-  <ng-container *ngIf="currentSigningMethod !== 'Wallet'">
+  <ng-container *ngIf="walletType === walletTypes.P2P">
+    Requests will be redirected to your paired wallet!
+  </ng-container>
+
+  <ng-container *ngIf="walletType !== walletTypes.P2P">
     <ion-row>
       <ion-col>
         <p class="ion-text-center ion-no-margin"><small>Address</small></p>

@@ -3,7 +3,7 @@ import { AlertController, ModalController } from '@ionic/angular'
 import { combineLatest, Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { WalletService } from 'src/app/services/local-wallet.service'
-import { WalletInfo } from 'src/extension/extension-client/Actions'
+import { WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 @Component({
   selector: 'app-wallet-select',
@@ -11,6 +11,7 @@ import { WalletInfo } from 'src/extension/extension-client/Actions'
   styleUrls: ['./wallet-select.page.scss']
 })
 export class WalletSelectPage {
+  public walletTypes: typeof WalletType = WalletType
   public activeWallet$: Observable<WalletInfo>
   public wallets$: Observable<WalletInfo[]>
 

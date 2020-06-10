@@ -11,13 +11,15 @@ import {
   ExtensionMessageTarget,
   getAccountIdentifier,
   getAddressFromPublicKey,
-  P2PCommunicationClient,
+  P2PPairInfo,
+  P2PTransport,
   PermissionInfo,
   PermissionManager,
   PermissionRequest,
   PermissionResponse,
   Serializer
 } from '@airgap/beacon-sdk'
+import { BeaconEvent, BeaconEventHandler } from '@airgap/beacon-sdk/dist/events'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
@@ -46,8 +48,7 @@ export class ExtensionClient extends BeaconClient {
   public readonly permissionManager: PermissionManager
   public readonly appMetadataManager: AppMetadataManager
 
-  private p2pClient: P2PCommunicationClient | undefined
-  private p2pPubkey: string | undefined = ''
+  private p2pTransport: P2PTransport | undefined
 
   private readonly transport: ChromeMessageTransport
 
@@ -56,17 +57,67 @@ export class ExtensionClient extends BeaconClient {
   constructor(config: ExtensionClientOptions) {
     super({ name: config.name, storage: new ChromeStorage() })
 
+    const events = new BeaconEventHandler({
+      [BeaconEvent.P2P_LISTEN_FOR_CHANNEL_OPEN]: {
+        handler: async (syncInfo: P2PPairInfo): Promise<void> => {
+          console.log('syncInfo', syncInfo)
+        }
+      },
+      [BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS]: {
+        handler: async (): Promise<void> => {
+          console.log('successfully connected!')
+
+          let peer: P2PPairInfo | undefined
+          if (this.p2pTransport) {
+            const peers: P2PPairInfo[] = await this.p2pTransport.getPeers()
+            peer = peers[0]
+          }
+
+          if (peer) {
+            console.log('adding wallet!')
+            const walletInfo: WalletInfo<WalletType.P2P> = {
+              address: '',
+              publicKey: '',
+              type: WalletType.P2P,
+              added: new Date().getTime(),
+              info: peer
+            }
+            await this.addWallet(walletInfo)
+            await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
+          }
+
+          this.popupManager
+            .sendToActivePopup({
+              target: ExtensionMessageTarget.EXTENSION,
+              sender: 'background',
+              payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
+            })
+            .catch(console.error)
+        }
+      }
+    })
+
     this.transport = new ChromeMessageTransport(config.name)
     this.permissionManager = new PermissionManager(new ChromeStorage())
     this.appMetadataManager = new AppMetadataManager(new ChromeStorage())
 
     this.keyPair
       .then((keyPair: sodium.KeyPair) => {
-        this.p2pClient = new P2PCommunicationClient(config.name, keyPair, 1, true)
+        this.p2pTransport = new P2PTransport(config.name, keyPair, new ChromeStorage(), events, false)
 
-        this.p2pClient.start().catch((p2pClientStartError: Error) => {
+        this.p2pTransport.connect().catch((p2pClientStartError: Error) => {
           logger.error('p2pClientStartError', p2pClientStartError)
         })
+
+        this.p2pTransport
+          .addListener(message => {
+            if (typeof message === 'string') {
+              this.sendToPage(message, false)
+            } else {
+              console.error('Message is not string!', message)
+            }
+          })
+          .catch(console.error)
       })
       .catch(console.error)
 
@@ -75,11 +126,20 @@ export class ExtensionClient extends BeaconClient {
     messageHandlerMap.set(ExtensionMessageTarget.PAGE, new ToPageMessageHandler(this))
     messageHandlerMap.set(ExtensionMessageTarget.BACKGROUND, new ToBackgroundMessageHandler(this.handleMessage))
 
-    const transportListener: any = (message: ExtensionMessage<unknown>, connectionContext: ConnectionContext): void => {
+    const transportListener: any = async (
+      message: ExtensionMessage<unknown>,
+      connectionContext: ConnectionContext
+    ): Promise<void> => {
       console.log('getting message!', message, connectionContext)
 
       const handler: MessageHandler = messageHandlerMap.get(message.target) || new MessageHandler()
-      handler.handle(message, connectionContext, false).catch((handlerError: Error) => {
+      let beaconConnected: boolean = false
+      if (this.p2pTransport) {
+        const activeWallet: WalletInfo = await this.storage.get('ACTIVE_WALLET' as any)
+
+        beaconConnected = activeWallet.type === WalletType.P2P
+      }
+      handler.handle(message, connectionContext, beaconConnected).catch((handlerError: Error) => {
         logger.error('messageHandlerError', handlerError)
       })
 
@@ -96,11 +156,14 @@ export class ExtensionClient extends BeaconClient {
   }
 
   public async sendToBeacon(message: string): Promise<void> {
-    logger.log('sending message', this.p2pPubkey, message)
-    if (this.p2pPubkey && this.p2pClient) {
-      this.p2pClient.sendMessage(this.p2pPubkey, message).catch((beaconSendError: Error) => {
-        logger.error('sendToBeacon', beaconSendError)
-      })
+    logger.log('sending message', message)
+    if (this.p2pTransport) {
+      const peers: P2PPairInfo[] = await this.p2pTransport.getPeers()
+      if (peers.length > 0) {
+        this.p2pTransport.send(message).catch((beaconSendError: Error) => {
+          logger.error('sendToBeacon', beaconSendError)
+        })
+      }
     } else {
       throw new Error('p2p not ready')
     }
@@ -120,11 +183,8 @@ export class ExtensionClient extends BeaconClient {
       data: data.payload,
       sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
       client: this,
-      p2pClient: this.p2pClient,
-      storage: this.storage,
-      setP2pPubkey: (publicKey: string): void => {
-        this.p2pPubkey = publicKey
-      }
+      p2pTransport: this.p2pTransport,
+      storage: this.storage
     })
   }
 
@@ -251,9 +311,11 @@ export class ExtensionClient extends BeaconClient {
     }
   }
 
-  public async sendToPage(data: string): Promise<void> {
+  public async sendToPage(data: string, processMessage: boolean = true): Promise<void> {
     logger.log('sendToPage', 'background.js: post ', data)
-    await this.processMessage(data)
+    if (processMessage) {
+      await this.processMessage(data)
+    }
     const message: ExtensionMessage<string> = { target: ExtensionMessageTarget.PAGE, payload: data }
     chrome.tabs.query({}, (tabs: chrome.tabs.Tab[]) => {
       // TODO: Find way to have direct communication with tab
