@@ -60,15 +60,12 @@ export class ExtensionClient extends BeaconClient {
     const events = new BeaconEventHandler({
       [BeaconEvent.P2P_LISTEN_FOR_CHANNEL_OPEN]: {
         handler: async (syncInfo: P2PPairInfo): Promise<void> => {
-          console.log('syncInfo', syncInfo)
+          console.log('Pairing QR data: ', syncInfo)
         }
       },
       [BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS]: {
         handler: async (newPeer: P2PPairInfo): Promise<void> => {
-          console.log('successfully connected!')
-
           if (newPeer) {
-            console.log('adding wallet!')
             const walletInfo: WalletInfo<WalletType.P2P> = {
               address: '',
               publicKey: '',
@@ -124,8 +121,6 @@ export class ExtensionClient extends BeaconClient {
       message: ExtensionMessage<unknown>,
       connectionContext: ConnectionContext
     ): Promise<void> => {
-      console.log('getting message!', message, connectionContext)
-
       const handler: MessageHandler = messageHandlerMap.get(message.target) || new MessageHandler()
       let beaconConnected: boolean = false
       if (this.p2pTransport) {

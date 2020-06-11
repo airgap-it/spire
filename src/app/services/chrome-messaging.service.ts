@@ -41,7 +41,6 @@ export class ChromeMessagingService {
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
       this.popupService.cancelClose().catch(console.error)
-      console.log('GOT DATA FROM BACKGROUND', message)
       if (typeof message.data === 'string') {
         const loader: HTMLIonLoadingElement = await this.loader
         await loader.dismiss()
