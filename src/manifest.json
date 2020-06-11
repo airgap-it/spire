@@ -1,6 +1,6 @@
 {
   "name": "Beacon",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Beacon connects Tezos decetralized applications with wallets.",
   "icons": {
     "16": "assets/icon/beacon_logo-16px.png",
