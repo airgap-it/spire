@@ -19,6 +19,7 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 's
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
+import { PopupService } from 'src/app/services/popup.service'
 
 @Component({
   selector: 'beacon-request',
@@ -49,6 +50,7 @@ export class BeaconRequestPage implements OnInit {
   public confirmButtonText: string = 'Confirm'
 
   constructor(
+    private readonly popupService: PopupService,
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly walletService: WalletService,
@@ -246,9 +248,7 @@ export class BeaconRequestPage implements OnInit {
 
       return modal.present()
     } else {
-      setTimeout(() => {
-        window.close()
-      }, 1500)
+      this.popupService.close(1500).catch(console.error)
 
       await this.showSuccessAlert()
       await this.dismiss()

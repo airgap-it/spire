@@ -18,6 +18,7 @@ import {
 
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 import { ErrorPage } from '../pages/error/error.page'
+import { PopupService } from './popup.service'
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,7 @@ export class ChromeMessagingService {
   })
 
   constructor(
+    private readonly popupService: PopupService,
     private readonly ngZone: NgZone,
     private readonly loadingController: LoadingController,
     private readonly modalController: ModalController,
@@ -38,6 +40,7 @@ export class ChromeMessagingService {
     chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
+      this.popupService.cancelClose().catch(console.error)
       console.log('GOT DATA FROM BACKGROUND', message)
       if (typeof message.data === 'string') {
         const loader: HTMLIonLoadingElement = await this.loader
