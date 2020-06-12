@@ -47,6 +47,17 @@ export class PairPage {
       }
     })
 
+    modal
+      .onWillDismiss()
+      .then(({ data: closeParent }) => {
+        if (closeParent) {
+          setTimeout(() => {
+            this.dismiss()
+          }, 500)
+        }
+      })
+      .catch(error => console.error(error))
+
     return modal.present()
   }
 

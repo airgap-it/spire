@@ -6,7 +6,7 @@ import {
   Serializer
 } from '@airgap/beacon-sdk'
 import { Injectable, NgZone } from '@angular/core'
-import { LoadingController, ModalController } from '@ionic/angular'
+import { AlertController, LoadingController, ModalController } from '@ionic/angular'
 import {
   Action,
   ActionInputTypesMap,
@@ -18,24 +18,29 @@ import {
 
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 import { ErrorPage } from '../pages/error/error.page'
+import { PopupService } from './popup.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChromeMessagingService {
+  private updateWalletCallback: (() => Promise<void>) | undefined
+
   private readonly loader: Promise<HTMLIonLoadingElement> = this.loadingController.create({
     message: 'Preparing beacon message...'
   })
 
   constructor(
+    private readonly popupService: PopupService,
     private readonly ngZone: NgZone,
     private readonly loadingController: LoadingController,
-    private readonly modalController: ModalController
+    private readonly modalController: ModalController,
+    private readonly alertController: AlertController
   ) {
-    chrome.runtime.sendMessage({ data: 'Handshake' })
+    chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
-      console.log('GOT DATA FROM BACKGROUND', message)
+      this.popupService.cancelClose().catch(console.error)
       if (typeof message.data === 'string') {
         const loader: HTMLIonLoadingElement = await this.loader
         await loader.dismiss()
@@ -65,7 +70,29 @@ export class ChromeMessagingService {
         })
       } else if (message.data && message.data.type === 'preparing') {
         const loader: HTMLIonLoadingElement = await this.loader
-        loader.present()
+        await loader.present() // present
+      } else if (message.data && message.data.beaconEvent) {
+        const loader: HTMLIonLoadingElement = await this.loader
+        await loader.dismiss()
+
+        await this.modalController.dismiss(true /* close parent */)
+
+        // We need to re-load the wallets because p2p has been set as active in the background
+        if (this.updateWalletCallback) {
+          await this.updateWalletCallback()
+        }
+
+        const alert: HTMLIonAlertElement = await this.alertController.create({
+          header: 'Success!',
+          message: 'You successfully paired your wallet!.',
+          buttons: [
+            {
+              text: 'Ok'
+            }
+          ]
+        })
+
+        await alert.present()
       } else {
         const loader: HTMLIonLoadingElement = await this.loader
         await loader.dismiss()
@@ -108,6 +135,10 @@ export class ChromeMessagingService {
         })
       })
     })
+  }
+
+  public async registerUpdateWalletCallback(callback: () => Promise<void>): Promise<void> {
+    this.updateWalletCallback = callback
   }
 
   private async beaconRequest(request: BeaconMessage, walletType: WalletType): Promise<void> {

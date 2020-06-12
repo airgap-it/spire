@@ -100,6 +100,9 @@ export class PopupManager {
     )
   }
 
+  /**
+   * This method will start the popup if it's closed
+   */
   public async sendToPopup(message: ExtensionMessage<unknown>): Promise<void> {
     if (this.popupId) {
       chrome.windows.update(this.popupId, { focused: true })
@@ -110,5 +113,12 @@ export class PopupManager {
     if (this.popupState === PopupState.CLOSED) {
       await this.startPopup(false)
     }
+  }
+
+  /**
+   * This method will not start the popup if it's closed
+   */
+  public async sendToActivePopup(message: ExtensionMessage<unknown>): Promise<void> {
+    chrome.runtime.sendMessage({ data: message.payload })
   }
 }

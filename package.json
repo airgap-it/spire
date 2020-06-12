@@ -1,6 +1,6 @@
 {
   "name": "beacon-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "AirGap",
   "homepage": "https://airgap.it/",
   "scripts": {
@@ -25,7 +25,7 @@
   },
   "private": true,
   "dependencies": {
-    "@airgap/beacon-sdk": "1.0.2",
+    "@airgap/beacon-sdk": "1.0.5",
     "@angular/common": "^9.1.0",
     "@angular/core": "^9.1.0",
     "@angular/forms": "^9.1.0",
@@ -35,7 +35,7 @@
     "@download/blockies": "^1.0.3",
     "@ionic/angular": "^5.0.7",
     "@sentry/browser": "^5.15.5",
-    "airgap-coin-lib": "0.8.3",
+    "airgap-coin-lib": "0.8.5",
     "angular2-qrcode": "^2.0.3",
     "axios": "^0.19.2",
     "bignumber.js": "^9.0.0",

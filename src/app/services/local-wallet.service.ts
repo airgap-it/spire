@@ -22,6 +22,11 @@ export class WalletService {
   constructor(private readonly chromeMessagingService: ChromeMessagingService) {
     this.updateWallets().catch(console.error)
     this.loadNetwork().catch(console.error)
+    this.chromeMessagingService
+      .registerUpdateWalletCallback(() => {
+        return this.updateWallets()
+      })
+      .catch(console.error)
   }
 
   public async updateWallets(): Promise<void> {

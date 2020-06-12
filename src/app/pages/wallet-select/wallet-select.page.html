@@ -19,11 +19,19 @@
         <h3>
           <strong>{{ activeWallet.type }}</strong>
         </h3>
-        <div class="d-flex ion-align-items-center">
-          <identicon [address]="activeWallet.address"></identicon>
-          <p class="ion-no-margin">{{ activeWallet.address }}</p>
-        </div>
-        <p class="ion-text-wrap">{{ activeWallet.publicKey }}</p>
+        <ng-container *ngIf="activeWallet.type !== walletTypes.P2P">
+          <div class="d-flex ion-align-items-center">
+            <identicon [address]="activeWallet.address"></identicon>
+            <p class="ion-no-margin">{{ activeWallet.address }}</p>
+          </div>
+          <p class="ion-text-wrap">{{ activeWallet.publicKey }}</p>
+        </ng-container>
+        <ng-container *ngIf="activeWallet.type === walletTypes.P2P">
+          <div class="d-flex ion-align-items-center">
+            <p class="ion-no-margin">Beacon connected wallet</p>
+          </div>
+          <p class="ion-text-wrap">{{ $any(activeWallet.info).publicKey }}</p>
+        </ng-container>
       </ion-label>
     </ion-item>
   </ion-list>
@@ -37,11 +45,19 @@
         <h3>
           <strong>{{ wallet.type }}</strong>
         </h3>
-        <div class="d-flex ion-align-items-center">
-          <identicon [address]="wallet.address"></identicon>
-          <p class="ion-no-margin">{{ wallet.address }}</p>
-        </div>
-        <p class="ion-text-wrap">{{ wallet.publicKey }}</p>
+        <ng-container *ngIf="wallet.type !== walletTypes.P2P">
+          <div class="d-flex ion-align-items-center">
+            <identicon [address]="wallet.address"></identicon>
+            <p class="ion-no-margin">{{ wallet.address }}</p>
+          </div>
+          <p class="ion-text-wrap">{{ wallet.publicKey }}</p>
+        </ng-container>
+        <ng-container *ngIf="wallet.type === walletTypes.P2P">
+          <div class="d-flex ion-align-items-center">
+            <p class="ion-no-margin">Beacon connected wallet</p>
+          </div>
+          <p class="ion-text-wrap">{{ $any(wallet.info).publicKey }}</p>
+        </ng-container>
       </ion-label>
       <div slot="end">
         <ion-button size="small" fill="outline" color="primary" (click)="activateWallet(wallet)">
