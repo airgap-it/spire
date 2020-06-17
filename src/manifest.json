@@ -1,7 +1,7 @@
 {
-  "name": "Beacon",
+  "name": "Beacon Extension",
   "version": "1.1.0",
-  "description": "Beacon connects Tezos decetralized applications with wallets.",
+  "description": "Beacon connects Tezos decentralized applications with wallets.",
   "icons": {
     "16": "assets/icon/beacon_logo-16px.png",
     "48": "assets/icon/beacon_logo-48px.png",
