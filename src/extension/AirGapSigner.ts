@@ -76,11 +76,29 @@ export class LocalSigner implements Signer {
 
     return protocol.signWithPrivateKey(privatekey, { binaryTransaction: forgedTx })
   }
+
+  public async signMessage(message: string, mnemonic: string): Promise<string> {
+    const protocol: TezosProtocol = new TezosProtocol()
+    const privatekey: Buffer = await protocol.getPrivateKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
+
+    console.log('message', message)
+    console.log('privatekey', privatekey)
+
+    return protocol.signMessage(message, Buffer.from(privatekey))
+  }
 }
 
 export class LedgerSigner implements Signer {
   public async sign(forgedTx: string): Promise<string> {
     logger.log('WILL SIGN', forgedTx)
+    const signature: string = await bridge.signOperation(forgedTx)
+    logger.log('SIGNATURE', signature)
+
+    return signature
+  }
+
+  public async signMessage(forgedTx: string): Promise<string> {
+    logger.log('WILL SIGN MESSAGE', forgedTx)
     const signature: string = await bridge.signOperation(forgedTx)
     logger.log('SIGNATURE', signature)
 
