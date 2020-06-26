@@ -40,6 +40,9 @@ export class ChromeMessagingService {
     chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
+      if (message && message.target === 'toPage') {
+        return // Ignore messages that are sent to the website
+      }
       this.popupService.cancelClose().catch(console.error)
       if (typeof message.data === 'string') {
         const loader: HTMLIonLoadingElement = await this.loader
