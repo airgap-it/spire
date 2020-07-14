@@ -85,7 +85,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
       signature: signature.res
     }
 
-    const response: SignPayloadResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: SignPayloadResponse = { senderId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponseToPopup()

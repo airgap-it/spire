@@ -1,4 +1,4 @@
-import { Network, P2PPairInfo, PermissionInfo } from '@airgap/beacon-sdk'
+import { Network, P2PPairingRequest, PermissionInfo } from '@airgap/beacon-sdk'
 
 export enum WalletType {
   P2P = 'P2P',
@@ -7,7 +7,7 @@ export enum WalletType {
 }
 
 interface WalletInfoTypeMap {
-  [WalletType.P2P]: P2PPairInfo
+  [WalletType.P2P]: P2PPairingRequest
   [WalletType.LEDGER]: undefined
   [WalletType.LOCAL_MNEMONIC]: { mnemonic: string }
 }
@@ -69,7 +69,7 @@ export interface ActionOutputTypesMap {
   [Action.PERMISSION_DELETE]: undefined
   [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }
   [Action.ACTIVE_NETWORK_SET]: undefined
-  [Action.P2P_INIT]: { qr: P2PPairInfo }
+  [Action.P2P_INIT]: { qr: P2PPairingRequest }
   [Action.P2P_PEERS_GET]: undefined
   [Action.P2P_PEER_REMOVE]: undefined
   [Action.LEDGER_INIT]: { publicKey: string; address: string }

@@ -2,6 +2,7 @@ import {
   BeaconMessageType,
   BroadcastRequestOutput,
   ChromeMessageTransport,
+  ChromeStorage,
   Network,
   OperationRequestOutput,
   PermissionRequestOutput,
@@ -15,11 +16,11 @@ import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
+import { PopupService } from 'src/app/services/popup.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
-import { PopupService } from 'src/app/services/popup.service'
 
 @Component({
   selector: 'beacon-request',
@@ -45,7 +46,12 @@ export class BeaconRequestPage implements OnInit {
 
   public responseHandler: (() => Promise<void>) | undefined
 
-  public transport: Transport = new ChromeMessageTransport('Beacon Extension')
+  public transport: Transport = new ChromeMessageTransport(
+    'Beacon Extension',
+    undefined as any,
+    new ChromeStorage(),
+    false
+  ) // TODO
 
   public confirmButtonText: string = 'Confirm'
 

@@ -69,7 +69,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
           version: BEACON_VERSION,
           ...responseInput
         }
-        await this.client.sendToPage(await new Serializer().serialize(response))
+        await this.client.sendToPage(response)
 
         const errorObject = { title: (error as any).name, message: (error as any).message, data: (error as any).data }
 
@@ -143,7 +143,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         return request
       }
       case BeaconMessageType.OperationRequest: {
-        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
         if (!result) {
           throw new Error('AppMetadata not available')
         }
@@ -155,7 +155,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         return request
       }
       case BeaconMessageType.SignPayloadRequest: {
-        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
         if (!result) {
           throw new Error('AppMetadata not available')
         }
@@ -167,7 +167,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         return request
       }
       case BeaconMessageType.BroadcastRequest: {
-        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
         if (!result) {
           throw new Error('AppMetadata not available')
         }
