@@ -94,7 +94,7 @@ export class ExtensionClient extends BeaconClient {
 
     this.keyPair
       .then((keyPair: sodium.KeyPair) => {
-        this.transport = new ChromeMessageTransport(config.name, keyPair, new ChromeStorage(), false)
+        this.transport = new ChromeMessageTransport(config.name, keyPair, new ChromeStorage())
         this.p2pTransport = new P2PTransport(config.name, keyPair, new ChromeStorage(), events, false)
 
         this.p2pTransport.connect().catch((p2pClientStartError: Error) => {
@@ -136,7 +136,9 @@ export class ExtensionClient extends BeaconClient {
           })
         }
 
-        this.transport.addListener(transportListener).catch(console.error)
+        if (this.transport) {
+          this.transport.addListener(transportListener).catch(console.error)
+        }
       })
       .catch(console.error)
   }
