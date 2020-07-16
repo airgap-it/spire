@@ -12,26 +12,29 @@ enum ExtensionMessageTarget {
 window.addEventListener(
   'message',
   (event: MessageEvent) => {
-    const data: { target: string; payload: unknown } = event.data as ExtensionMessage<string>
+    // tslint:disable-next-line: strict-comparisons
+    if (event.source !== window) {
+      // tslint:disable-next-line:no-console
+      console.log('message ignored because source was not us', event)
+
+      return
+    }
+    const data: ExtensionMessage<string> = event.data as ExtensionMessage<string>
+
     if (data && data.target === ExtensionMessageTarget.EXTENSION) {
       if (typeof data.payload === 'string' && data.payload === 'ping') {
         // To detect if extension is installed or not, we answer pings immediately
         window.postMessage({ target: ExtensionMessageTarget.PAGE, payload: 'pong' }, '*')
       } else {
-        // tslint:disable:no-console
+        // tslint:disable-next-line:no-console
         console.log('BEACON EXTENSION (inject.ts): sending message from page to background', data.payload)
-        // tslint:enable:no-console
 
-        chrome.runtime.sendMessage(
-          {
-            target: ExtensionMessageTarget.EXTENSION,
-            sender: event.origin,
-            payload: data.payload
-          },
-          (data?: unknown) => {
-            console.log('sendMessage response', data)
-          }
-        )
+        data.sender = event.origin
+
+        chrome.runtime.sendMessage(data, (responseData?: unknown) => {
+          // tslint:disable-next-line:no-console
+          console.log('sendMessage callback', responseData)
+        })
       }
     }
   },
@@ -44,9 +47,8 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage<string>, sender:
     return
   }
 
-  // tslint:disable:no-console
-  console.log('BEACON EXTENSION (inject.ts): sending message from background to page', message.payload)
-  // tslint:enable:no-console
+  // tslint:disable-next-line:no-console
+  console.log('BEACON EXTENSION (inject.ts): sending message from background to page', message)
 
   window.postMessage({ message, sender }, '*')
 })

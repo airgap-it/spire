@@ -314,21 +314,17 @@ export class ExtensionClient extends BeaconClient {
 
     console.log('found the request!', request)
 
-    // Encrypt message with request.senderId
-    // Send message only to tabs where hostname matches request.origin.id
-
     if (processMessage) {
       await this.processMessage(beaconMessage, request)
     }
+
     const serialized = await new Serializer().serialize(beaconMessage)
-    const message: ExtensionMessage<string> = { target: ExtensionMessageTarget.PAGE, payload: serialized }
-    chrome.tabs.query({}, (tabs: chrome.tabs.Tab[]) => {
-      // TODO: Find way to have direct communication with tab
-      tabs.forEach(({ id }: chrome.tabs.Tab) => {
-        if (id) {
-          chrome.tabs.sendMessage(id, message)
-        }
-      }) // Send message to all tabs
-    })
+
+    // Encrypt message with request.senderId
+    // Send message only to tabs where hostname matches request.origin.id
+
+    if (this.transport) {
+      this.transport.sendToTabs(request.message.senderId, serialized)
+    }
   }
 }
