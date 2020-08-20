@@ -243,7 +243,7 @@ export class BeaconRequestPage implements OnInit {
 
       return modal.present()
     } else {
-      this.popupService.close(1500).catch(console.error)
+      this.popupService.close(0).catch(console.error)
 
       await this.showSuccessAlert()
       await this.dismiss()
