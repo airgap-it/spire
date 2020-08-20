@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
 
 @Injectable({
   providedIn: 'root'
 })
 export class PopupService {
-  closeTimeout: NodeJS.Timeout | undefined
+  public closeTimeout: NodeJS.Timeout | undefined
 
-  constructor() { }
+  constructor() {}
 
   public async close(time: number): Promise<void> {
     this.closeTimeout = setTimeout(() => {

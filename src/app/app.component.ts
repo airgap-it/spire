@@ -1,5 +1,6 @@
 import { Component } from '@angular/core'
 
+import { ProtocolsService } from './services/protocols.service'
 import { SettingsService } from './services/settings.service'
 
 export function isUnknownObject(x: unknown): x is { [key in PropertyKey]: unknown } {
@@ -20,7 +21,7 @@ interface MenuItem {
 export class AppComponent {
   public appPages: MenuItem[] = []
 
-  constructor(private readonly settingsService: SettingsService) {
+  constructor(private readonly settingsService: SettingsService, private readonly protocolsService: ProtocolsService) {
     this.initializeApp()
   }
 
@@ -54,5 +55,7 @@ export class AppComponent {
         })
       }
     })
+
+    this.protocolsService.init()
   }
 }

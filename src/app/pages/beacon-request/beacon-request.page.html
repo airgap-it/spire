@@ -90,8 +90,12 @@
     </ion-row>
 
     <div *ngIf="request.type === 'sign_payload_request'" class="request--container">
-      <ng-container *ngFor="let transaction of transactions">
-        <beacon-from-to [transaction]="transaction"></beacon-from-to>
+      <ng-container>
+        You are about to sign the following payload. Only sign payloads from a trusted source. Signing untrusted data
+        could mean you lose all your funds!
+        <br />
+        <br />
+        <pre>{{ request.payload }}</pre>
       </ng-container>
     </div>
 
