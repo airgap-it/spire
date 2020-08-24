@@ -1,5 +1,13 @@
 import { Network, NetworkType } from '@airgap/beacon-sdk'
-import { TezosProtocol } from 'airgap-coin-lib'
+import {
+  TezblockBlockExplorer,
+  TezosProtocol,
+  TezosProtocolNetwork,
+  TezosProtocolNetworkExtras,
+  TezosProtocolOptions
+} from 'airgap-coin-lib'
+import { TezosNetwork } from 'airgap-coin-lib/dist/protocols/tezos/TezosProtocol'
+import { NetworkType as AirGapNetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 
 export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string; apiUrl: string }> = async (
   network: Network
@@ -26,7 +34,43 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
 ): Promise<TezosProtocol> => {
   const { rpcUrl, apiUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
 
-  return new TezosProtocol(rpcUrl, apiUrl)
+  const names: { [key in NetworkType]: string } = {
+    [NetworkType.MAINNET]: 'Mainnet',
+    [NetworkType.CARTHAGENET]: 'Carthagenet',
+    [NetworkType.CUSTOM]: 'Custom'
+  }
+  const airgapNetworks: { [key in NetworkType]: AirGapNetworkType } = {
+    [NetworkType.MAINNET]: AirGapNetworkType.MAINNET,
+    [NetworkType.CARTHAGENET]: AirGapNetworkType.TESTNET,
+    [NetworkType.CUSTOM]: AirGapNetworkType.CUSTOM
+  }
+  const blockExplorers: { [key in NetworkType]: string } = {
+    [NetworkType.MAINNET]: 'https://tezblock.io',
+    [NetworkType.CARTHAGENET]: 'https://carthagenet.tezblock.io',
+    [NetworkType.CUSTOM]: 'https://carthagenet.tezblock.io'
+  }
+  const tezosNetworks: { [key in NetworkType]: TezosNetwork } = {
+    [NetworkType.MAINNET]: TezosNetwork.MAINNET,
+    [NetworkType.CARTHAGENET]: TezosNetwork.CARTHAGENET,
+    [NetworkType.CUSTOM]: TezosNetwork.CARTHAGENET
+  }
+
+  const name: string = names[network.type]
+  const airgapNetwork: AirGapNetworkType = airgapNetworks[network.type]
+  const blockExplorer: string = blockExplorers[network.type]
+  const tezosNetwork: TezosNetwork = tezosNetworks[network.type]
+
+  return new TezosProtocol(
+    new TezosProtocolOptions(
+      new TezosProtocolNetwork(
+        name,
+        airgapNetwork,
+        rpcUrl,
+        new TezblockBlockExplorer(blockExplorer),
+        new TezosProtocolNetworkExtras(tezosNetwork, apiUrl, tezosNetwork, 'airgap00391')
+      )
+    )
+  )
 }
 
 export const getTezblockLinkForNetwork: (network: Network | undefined) => Promise<string> = async (

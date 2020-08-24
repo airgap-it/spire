@@ -10,6 +10,7 @@ import { AppComponent } from './app.component'
 import { SentryErrorHandler } from './classes/sentry-error-handler'
 import { ComponentsModule } from './components/components.module'
 import { PipesModule } from './pipes/pipes.module'
+import { ProtocolsService } from './services/protocols.service'
 
 @NgModule({
   declarations: [AppComponent],
@@ -18,7 +19,8 @@ import { PipesModule } from './pipes/pipes.module'
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: LocationStrategy, useClass: HashLocationStrategy },
-    { provide: ErrorHandler, useClass: SentryErrorHandler }
+    { provide: ErrorHandler, useClass: SentryErrorHandler },
+    ProtocolsService
   ],
   bootstrap: [AppComponent]
 })

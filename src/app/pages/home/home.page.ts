@@ -2,6 +2,7 @@ import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
 import { TezosProtocol } from 'airgap-coin-lib'
+import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { SettingsService } from 'src/app/services/settings.service'
@@ -23,6 +24,7 @@ enum SigningMethods {
   styleUrls: ['./home.page.scss']
 })
 export class HomePage {
+  public protocolIndentifiers: typeof MainProtocolSymbols = MainProtocolSymbols
   public signingMethods: typeof SigningMethods = SigningMethods
   public walletTypes: typeof WalletType = WalletType
   public walletType: WalletType | undefined

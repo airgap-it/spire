@@ -1,6 +1,7 @@
 enum Action {
   GET_ADDRESS = 'getAddress',
   SIGN_TRANSACTION = 'signTransaction',
+  SIGN_HASH = 'signHash',
   GET_VERSION = 'getVersion'
 }
 
@@ -9,6 +10,7 @@ interface BeaconLedgerBridgeMessage {
   params?: {
     derivationPath: string
     operation?: string
+    hash?: string
   }
 }
 
@@ -52,6 +54,16 @@ export class BeaconLedgerBridge {
       params: {
         derivationPath,
         operation
+      }
+    })
+  }
+
+  public async signHash(hash: string, derivationPath: string = "44'/1729'/0'/0'"): Promise<string> {
+    return this.sendMessage({
+      action: Action.SIGN_HASH,
+      params: {
+        derivationPath,
+        hash
       }
     })
   }
