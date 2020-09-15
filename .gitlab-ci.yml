@@ -1,6 +1,9 @@
 image: docker:latest
 
 variables:
+  GOOGLE_TAG: eu.gcr.io/papers-kubernetes/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_SHA
+
+variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE
   IMAGE_TAG_CURRENT: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   IMAGE_TAG_LATEST: $CI_REGISTRY_IMAGE:latest
@@ -15,16 +18,11 @@ stages:
 
 build_ionic:
   stage: build
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker build --cache-from $IMAGE_TAG_LATEST -t $IMAGE_TAG .
-    - docker tag $IMAGE_TAG $IMAGE_TAG_CURRENT
-    - docker tag $IMAGE_TAG $IMAGE_TAG_LATEST
-    - docker push $IMAGE_TAG_CURRENT
-    - docker push $IMAGE_TAG_LATEST
+    - docker build -t $GOOGLE_TAG .
   tags:
     - docker
+
 
 # unit:
 #   stage: test
@@ -46,7 +44,7 @@ build_ionic:
 #       - lintReport.json
 
 build_extension:
-  image: $IMAGE_TAG_CURRENT
+  image: $GOOGLE_TAG
   stage: native_build
   when: manual
   script:
