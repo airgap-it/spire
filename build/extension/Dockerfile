@@ -12,12 +12,10 @@ RUN mkdir /app
 WORKDIR /app
 
 # using npm 6.5.0 to fix installing certain cordova/ionic plugins
-RUN npm install -g npm@6.5.0 ionic@5.4.0 @capacitor/core@2.4.0 @capacitor/android@2.4.0 @capacitor/cli@2.4.0
+RUN npm install -g npm@6.5.0 @ionic/cli
 RUN npm cache clean -f
 RUN npm install -g n
 RUN n 10.14.1
-
-RUN npm install @ionic/cli
 
 # Install app dependencies, using wildcard if package-lock exists
 COPY package.json /app/package.json
@@ -42,7 +40,7 @@ RUN sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/app/services/app-info/app-info.s
 RUN sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/app/services/app-info/app-info.service.ts
 # RUN sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
 
-# browserify coin-lib
+# fix crypto libraries
 RUN npm run postinstall
 
 # build ionic
