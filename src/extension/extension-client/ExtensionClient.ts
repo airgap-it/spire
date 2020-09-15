@@ -20,7 +20,7 @@ import {
   Serializer,
   BeaconBaseMessage
 } from '@airgap/beacon-sdk'
-import { BeaconEvent, BeaconEventHandler } from '@airgap/beacon-sdk/dist/events'
+import { BeaconEvent, BeaconEventHandler } from '@airgap/beacon-sdk/dist/cjs/events'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
@@ -95,7 +95,7 @@ export class ExtensionClient extends BeaconClient {
     this.keyPair
       .then((keyPair: sodium.KeyPair) => {
         this.transport = new ChromeMessageTransport(config.name, keyPair, new ChromeStorage())
-        this.p2pTransport = new P2PTransport(config.name, keyPair, new ChromeStorage(), events, false)
+        this.p2pTransport = new P2PTransport(config.name, keyPair, new ChromeStorage(), events, [], false)
 
         this.p2pTransport.connect().catch((p2pClientStartError: Error) => {
           logger.error('p2pClientStartError', p2pClientStartError)
