@@ -1,6 +1,14 @@
 import { Network, NetworkType } from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
-import { TezosProtocol } from 'airgap-coin-lib'
+import {
+  TezblockBlockExplorer,
+  TezosProtocol,
+  TezosProtocolNetwork,
+  TezosProtocolNetworkExtras,
+  TezosProtocolOptions
+} from 'airgap-coin-lib'
+import { TezosNetwork } from 'airgap-coin-lib/dist/protocols/tezos/TezosProtocol'
+import { NetworkType as AirGapNetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { Observable, ReplaySubject } from 'rxjs'
 
 import { StorageKey, StorageService } from './storage.service'
@@ -41,9 +49,45 @@ export class SettingsService {
       [NetworkType.CARTHAGENET]: 'https://tezos-carthagenet-conseil-1.kubernetes.papers.tech',
       [NetworkType.CUSTOM]: ''
     }
+
+    const names: { [key in NetworkType]: string } = {
+      [NetworkType.MAINNET]: 'Mainnet',
+      [NetworkType.CARTHAGENET]: 'Carthagenet',
+      [NetworkType.CUSTOM]: 'Custom'
+    }
+    const airgapNetworks: { [key in NetworkType]: AirGapNetworkType } = {
+      [NetworkType.MAINNET]: AirGapNetworkType.MAINNET,
+      [NetworkType.CARTHAGENET]: AirGapNetworkType.TESTNET,
+      [NetworkType.CUSTOM]: AirGapNetworkType.CUSTOM
+    }
+    const blockExplorers: { [key in NetworkType]: string } = {
+      [NetworkType.MAINNET]: 'https://tezblock.io',
+      [NetworkType.CARTHAGENET]: 'https://carthagenet.tezblock.io',
+      [NetworkType.CUSTOM]: 'https://carthagenet.tezblock.io'
+    }
+    const tezosNetworks: { [key in NetworkType]: TezosNetwork } = {
+      [NetworkType.MAINNET]: TezosNetwork.MAINNET,
+      [NetworkType.CARTHAGENET]: TezosNetwork.CARTHAGENET,
+      [NetworkType.CUSTOM]: TezosNetwork.CARTHAGENET
+    }
+
+    const name: string = names[network.type]
+    const airgapNetwork: AirGapNetworkType = airgapNetworks[network.type]
+    const blockExplorer: string = blockExplorers[network.type]
+    const tezosNetwork: TezosNetwork = tezosNetworks[network.type]
     const rpcUrl: string = network.rpcUrl ? network.rpcUrl : rpcUrls[network.type]
     const apiUrl: string = apiUrls[network.type]
 
-    return new TezosProtocol(rpcUrl, apiUrl)
+    return new TezosProtocol(
+      new TezosProtocolOptions(
+        new TezosProtocolNetwork(
+          name,
+          airgapNetwork,
+          rpcUrl,
+          new TezblockBlockExplorer(blockExplorer),
+          new TezosProtocolNetworkExtras(tezosNetwork, apiUrl, tezosNetwork, 'airgap00391')
+        )
+      )
+    )
   }
 }

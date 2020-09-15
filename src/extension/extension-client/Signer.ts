@@ -13,4 +13,5 @@ export interface OperationProvider {
 
 export interface Signer {
   sign(forgedTx: string, mnemonic?: string): Promise<string>
+  signMessage(message: string, mnemonic?: string): Promise<string>
 }

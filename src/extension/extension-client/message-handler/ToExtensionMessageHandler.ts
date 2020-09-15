@@ -116,10 +116,10 @@ export class ToExtensionMessageHandler extends MessageHandler {
           return this.client.sendToPopup({ ...data, payload: serialized })
         })().catch(async (operationPrepareError: Error) => {
           if ((operationPrepareError as any).data) {
-            await sendError(operationPrepareError, BeaconErrorType.PARAMETERS_INVALID_ERROR)
+            await sendError((operationPrepareError as any).data, BeaconErrorType.TRANSACTION_INVALID_ERROR)
             logger.error('operationPrepareError', (operationPrepareError as any).data)
           } else {
-            await sendError(operationPrepareError, BeaconErrorType.PARAMETERS_INVALID_ERROR)
+            await sendError(operationPrepareError, BeaconErrorType.TRANSACTION_INVALID_ERROR)
             logger.error('operationPrepareError', operationPrepareError)
           }
         })

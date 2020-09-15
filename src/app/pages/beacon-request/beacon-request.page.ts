@@ -147,11 +147,6 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async signRequest(request: SignPayloadRequestOutput): Promise<void> {
-    this.transactions = await this.protocol.getTransactionDetails({
-      publicKey: '',
-      transaction: { binaryTransaction: request.payload }
-    })
-    console.log(this.transactions)
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
@@ -272,7 +267,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   public async openBlockexplorer(address: string, hash: string): Promise<void> {
-    let blockexplorer: string = this.protocol.blockExplorer
+    let blockexplorer: string = this.protocol.options.network.blockExplorer.blockExplorer
 
     if (hash) {
       blockexplorer = await this.protocol.getBlockExplorerLinkForTxId(hash)

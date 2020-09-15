@@ -66,10 +66,10 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
     if (wallet.type === WalletType.LOCAL_MNEMONIC) {
       const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> = wallet as WalletInfo<WalletType.LOCAL_MNEMONIC>
       const signer: Signer = new LocalSigner()
-      signature = await to(signer.sign(signRequest.payload, localWallet.info.mnemonic))
+      signature = await to(signer.signMessage(signRequest.payload, localWallet.info.mnemonic))
     } else {
       const signer: Signer = new LedgerSigner()
-      signature = await to(signer.sign(signRequest.payload))
+      signature = await to(signer.signMessage(signRequest.payload))
     }
 
     if (signature.err) {
