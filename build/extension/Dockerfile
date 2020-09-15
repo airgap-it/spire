@@ -27,13 +27,14 @@ COPY . /app
 
 # post-install hook, to be safe if it got cached
 RUN node scripts/patch-crypto.js
+RUN ls
 
 # set version code
 ARG VERSION
 ARG CI_PIPELINE_ID
-RUN sed -i -e "s/VERSION_NUMBER/$VERSION/g" app/src/app/services/app-info/app-info.service.ts
-RUN sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" app/src/app/services/app-info/app-info.service.ts
-# RUN sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," app/src/manifest.json
+RUN sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/app/services/app-info/app-info.service.ts
+RUN sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/app/services/app-info/app-info.service.ts
+# RUN sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
 
 # browserify coin-lib
 RUN npm run postinstall
