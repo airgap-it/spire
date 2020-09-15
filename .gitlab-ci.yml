@@ -36,9 +36,10 @@ build_ionic:
 #       - lintReport.json
 
 build_extension:
-  image: $GOOGLE_TAG
   stage: native_build
   when: manual
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/app/services/app-info/app-info.service.ts
     - sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/app/services/app-info/app-info.service.ts
