@@ -36,6 +36,10 @@ export class ToExtensionMessageHandler extends MessageHandler {
     beaconConnected: boolean
   ): Promise<void> {
     logger.log('ToExtensionMessageHandler')
+
+    const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
+    this.client.pendingRequests.push({ message: deserialized, connectionContext })
+
     // TODO: Decide where to send the request to
     // Use a map and check all known addresses
     // We can only do this for the operation and the sign request
@@ -47,9 +51,6 @@ export class ToExtensionMessageHandler extends MessageHandler {
       logger.log('not beacon', 'sending to popup', data)
 
       await this.client.popupManager.startPopup()
-
-      const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
-      this.client.pendingRequests.push({ message: deserialized, connectionContext })
 
       const enriched: To<BeaconRequestOutputMessage> = await to(this.enrichRequest(deserialized))
 
