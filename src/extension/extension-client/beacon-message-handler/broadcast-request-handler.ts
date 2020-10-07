@@ -39,7 +39,7 @@ export const broadcastRequestHandler: (client: ExtensionClient, logger: Logger) 
       } as any
 
       const response: BroadcastResponse = {
-        beaconId: await client.beaconId,
+        senderId: await client.beaconId,
         version: BEACON_VERSION,
         ...responseInput
       }

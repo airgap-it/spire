@@ -205,12 +205,12 @@ export class ExtensionClient extends BeaconClient {
     return this.appMetadataManager.getAppMetadataList()
   }
 
-  public async getAppMetadata(beaconId: string): Promise<AppMetadata | undefined> {
-    return this.appMetadataManager.getAppMetadata(beaconId)
+  public async getAppMetadata(senderId: string): Promise<AppMetadata | undefined> {
+    return this.appMetadataManager.getAppMetadata(senderId)
   }
 
-  public async removeAppMetadata(beaconId: string): Promise<void> {
-    return this.appMetadataManager.removeAppMetadata(beaconId)
+  public async removeAppMetadata(senderId: string): Promise<void> {
+    return this.appMetadataManager.removeAppMetadata(senderId)
   }
 
   public async removeAllAppMetadata(): Promise<void> {
@@ -321,13 +321,17 @@ export class ExtensionClient extends BeaconClient {
       await this.processMessage(beaconMessage, request)
     }
 
+    // TODO: Remove v1 compatibility in later version
+    ;(beaconMessage as any).beaconId = beaconMessage.senderId
+
     const serialized = await new Serializer().serialize(beaconMessage)
 
     // Encrypt message with request.senderId
     // Send message only to tabs where hostname matches request.origin.id
-
     if (this.transport) {
-      this.transport.sendToTabs(request.message.senderId, serialized)
+      const sender = request.message.version === '1' ? undefined : request.message.senderId
+
+      await this.transport.sendToTabs(sender, serialized)
     }
   }
 }

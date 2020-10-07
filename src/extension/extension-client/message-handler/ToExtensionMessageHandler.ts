@@ -38,6 +38,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
     logger.log('ToExtensionMessageHandler')
 
     const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
+
     this.client.pendingRequests.push({ message: deserialized, connectionContext })
 
     // TODO: Decide where to send the request to
@@ -51,6 +52,12 @@ export class ToExtensionMessageHandler extends MessageHandler {
       logger.log('not beacon', 'sending to popup', data)
 
       await this.client.popupManager.startPopup()
+
+      // TODO: Remove v1 compatibility in later version
+      if ((deserialized as any).beaconId && !deserialized.senderId) {
+        deserialized.senderId = (deserialized as any).beaconId
+        delete (deserialized as any).beaconId
+      }
 
       const enriched: To<BeaconRequestOutputMessage> = await to(this.enrichRequest(deserialized))
 
@@ -66,7 +73,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         } as any
 
         const response: OperationResponse = {
-          beaconId: await this.client.beaconId,
+          senderId: await this.client.beaconId,
           version: BEACON_VERSION,
           ...responseInput
         }
@@ -138,6 +145,11 @@ export class ToExtensionMessageHandler extends MessageHandler {
   public async enrichRequest(message: BeaconMessage): Promise<BeaconRequestOutputMessage> {
     switch (message.type) {
       case BeaconMessageType.PermissionRequest: {
+        // TODO: Remove v1 compatibility in later version
+        if ((message.appMetadata as any).beaconId && !message.appMetadata.senderId) {
+          message.appMetadata.senderId = (message.appMetadata as any).beaconId
+          delete (message.appMetadata as any).beaconId
+        }
         await this.client.appMetadataManager.addAppMetadata(message.appMetadata)
         const request: PermissionRequestOutput = message
 
