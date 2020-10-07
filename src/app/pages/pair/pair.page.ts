@@ -1,3 +1,4 @@
+import { Serializer } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
@@ -43,7 +44,9 @@ export class PairPage {
     const modal: HTMLIonModalElement = await this.modalController.create({
       component: AddWalletConnectionPage,
       componentProps: {
-        handshakeData: JSON.stringify(response.data ? response.data.qr : {})
+        handshakeData: response.data
+          ? `tezos://?type=tzip10&data=${await new Serializer().serialize(response.data.qr)}`
+          : JSON.stringify({})
       }
     })
 
