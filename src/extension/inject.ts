@@ -24,17 +24,24 @@ window.addEventListener(
     if (data && data.target === ExtensionMessageTarget.EXTENSION) {
       if (typeof data.payload === 'string' && data.payload === 'ping') {
         // To detect if extension is installed or not, we answer pings immediately
-        window.postMessage({ target: ExtensionMessageTarget.PAGE, payload: 'pong' }, '*')
+        window.postMessage({ target: ExtensionMessageTarget.PAGE, payload: 'pong', sender: {
+          id: chrome.runtime.id, // The ID of the extension
+          name: 'Beacon Extension', // The name of the extension, eg "Beacon Extension"
+          // iconUrl: '' URL to an icon
+        } }, '*')
       } else {
         // tslint:disable-next-line:no-console
         console.log('BEACON EXTENSION (inject.ts): sending message from page to background', data.payload)
 
         data.sender = event.origin
 
-        chrome.runtime.sendMessage(data, (responseData?: unknown) => {
-          // tslint:disable-next-line:no-console
-          console.log('sendMessage callback', responseData)
-        })
+        // We only respond to messages that don't have a target ID specified (broadcast), or are addressed to us
+        if (!data.targetId || data.targetId === chrome.runtime.id) {
+          chrome.runtime.sendMessage(data, (responseData?: unknown) => {
+            // tslint:disable-next-line:no-console
+            console.log('sendMessage callback', responseData)
+          })  
+        }
       }
     }
   },
