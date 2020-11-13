@@ -2,6 +2,8 @@ import {
   AppMetadata,
   AppMetadataManager,
   BeaconClient,
+  BeaconEvent,
+  BeaconEventHandler,
   BeaconMessage,
   BeaconMessageType,
   ChromeMessageTransport,
@@ -19,7 +21,6 @@ import {
   PermissionResponse,
   Serializer
 } from '@airgap/beacon-sdk'
-import { BeaconEvent, BeaconEventHandler } from '@airgap/beacon-sdk/dist/events'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
