@@ -25,6 +25,15 @@
             <p class="ion-no-margin">{{ activeWallet.address }}</p>
           </div>
           <p class="ion-text-wrap">{{ activeWallet.publicKey }}</p>
+          <ion-text *ngIf="activeWallet.type === walletTypes.LEDGER">
+            <small>
+              <span>
+                <strong>Derivation Path: </strong>
+              </span>
+            </small>
+            <p class="ion-text-wrap">{{ activeWallet.derivationPath }}</p>
+          </ion-text>
+
         </ng-container>
         <ng-container *ngIf="activeWallet.type === walletTypes.P2P">
           <div class="d-flex ion-align-items-center">

@@ -81,7 +81,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       signedTx = await to(signer.sign(forgedTx.res, localWallet.info.mnemonic))
     } else {
       const signer: Signer = new LedgerSigner()
-      signedTx = await to(signer.sign(forgedTx.res))
+      signedTx = await to(signer.sign(forgedTx.res, wallet.derivationPath))
     }
 
     if (signedTx.err) {

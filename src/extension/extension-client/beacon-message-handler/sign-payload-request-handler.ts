@@ -69,7 +69,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
       signature = await to(signer.signMessage(signRequest.payload, localWallet.info.mnemonic))
     } else {
       const signer: Signer = new LedgerSigner()
-      signature = await to(signer.signMessage(signRequest.payload))
+      signature = await to(signer.signMessage(signRequest.payload, wallet.derivationPath))
     }
 
     if (signature.err) {

@@ -18,6 +18,7 @@ export interface WalletInfo<T extends WalletType = WalletType> {
   type: T
   info: WalletInfoTypeMap[T]
   added: number
+  derivationPath?: string
 }
 
 export enum Action {
@@ -27,6 +28,7 @@ export enum Action {
   WALLETS_GET = 'WALLETS_GET',
   ACTIVE_WALLET_GET = 'ACTIVE_WALLET_GET',
   ACTIVE_WALLET_SET = 'ACTIVE_WALLET_SET',
+  DERIVATION_PATH_SET = 'DERIVATION_PATH_SET',
   PERMISSIONS_GET = 'PERMISSIONS_GET',
   PERMISSION_DELETE = 'PERMISSION_DELETE',
   ACTIVE_NETWORK_GET = 'ACTIVE_NETWORK_GET',
@@ -46,6 +48,7 @@ export interface ActionInputTypesMap {
   [Action.WALLETS_GET]: undefined
   [Action.ACTIVE_WALLET_GET]: undefined
   [Action.ACTIVE_WALLET_SET]: { wallet: WalletInfo }
+  [Action.DERIVATION_PATH_SET]: { derivationPath: string }
   [Action.PERMISSIONS_GET]: undefined
   [Action.PERMISSION_DELETE]: { permission: PermissionInfo }
   [Action.ACTIVE_NETWORK_GET]: undefined
@@ -65,6 +68,7 @@ export interface ActionOutputTypesMap {
   [Action.WALLETS_GET]: { wallets: WalletInfo[] }
   [Action.ACTIVE_WALLET_GET]: { wallet?: WalletInfo }
   [Action.ACTIVE_WALLET_SET]: undefined
+  [Action.DERIVATION_PATH_SET]: undefined
   [Action.PERMISSIONS_GET]: { permissions: PermissionInfo[] }
   [Action.PERMISSION_DELETE]: undefined
   [Action.ACTIVE_NETWORK_GET]: { network: Network | undefined }

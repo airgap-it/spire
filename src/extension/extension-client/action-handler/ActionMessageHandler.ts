@@ -9,6 +9,7 @@ import { activeNetworkSetAction } from './active-network-set-action'
 import { activeWalletGetAction } from './active-wallet-get-action'
 import { activeWalletSetAction } from './active-wallet-set-action'
 import { beaconIdGetAction } from './beacon-id-get-action'
+import { derivationPathSetAction } from './derivation-path-set-action'
 import { ledgerInitAction } from './ledger-init-action'
 import { p2pInitAction } from './p2p-init-action'
 import { p2pPeerRemoveAction } from './p2p-peer-remove-action'
@@ -45,6 +46,7 @@ export class ActionMessageHandler {
     [Action.WALLETS_GET]: walletsGetAction(logger),
     [Action.ACTIVE_WALLET_GET]: activeWalletGetAction(logger),
     [Action.ACTIVE_WALLET_SET]: activeWalletSetAction(logger),
+    [Action.DERIVATION_PATH_SET]: derivationPathSetAction(logger),
     [Action.PERMISSION_DELETE]: permissionDeleteAction(logger),
     [Action.PERMISSIONS_GET]: permissionsGetAction(logger),
     [Action.ACTIVE_NETWORK_GET]: activeNetworkGetAction(logger),
