@@ -1,9 +1,15 @@
 import { getAddressFromPublicKey } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core'
-import { ModalController } from '@ionic/angular'
+import { ModalController, ToastController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+
+const enum DerivationPathTypes {
+  DEFAULT = 'DEFAULT',
+  GALLEON = 'GALLEON',
+  CUSTOM = 'CUSTOM'
+}
 
 @Component({
   selector: 'app-add-ledger-connection',
@@ -14,7 +20,15 @@ export class AddLedgerConnectionPage implements OnInit {
   public targetMethod: Action = Action.LEDGER_INIT
   public request: unknown | undefined
 
+  public derivationPathType: DerivationPathTypes = DerivationPathTypes.DEFAULT
+
+  public readonly defaultDerivationPath: string = "m/44'/1729'/0'/0'"
+  public derivationPathMap = new Map<string, string>()
+
+  public derivationPath: string | undefined = ''
+  public customDerivationPath: string = ''
   public isLoading: boolean = true
+  public hideCustom: boolean = false
   public success: boolean = false
   public error: string = ''
 
@@ -22,14 +36,31 @@ export class AddLedgerConnectionPage implements OnInit {
     private readonly modalController: ModalController,
     private readonly walletService: WalletService,
     private readonly chromeMessagingService: ChromeMessagingService,
-    private readonly cdr: ChangeDetectorRef
-  ) {}
+    private readonly cdr: ChangeDetectorRef,
+    private readonly toastController: ToastController
+  ) {
+    this.derivationPathMap.set(DerivationPathTypes.DEFAULT, this.defaultDerivationPath)
+    this.derivationPathMap.set(DerivationPathTypes.GALLEON, "m/44'/1729'/0'/0'/0'")
+    this.derivationPathMap.set(DerivationPathTypes.CUSTOM, this.customDerivationPath)
+
+    this.walletService.selectedDerivationPath$.subscribe(derivationPath => {
+      if (derivationPath) {
+        this.derivationPath = `m/${derivationPath}`
+      }
+    })
+  }
 
   public async ngOnInit(): Promise<void> {
+    this.derivationPath = this.defaultDerivationPath
+    this.customDerivationPath = this.defaultDerivationPath
+
     return this.connect()
   }
 
   public async connect(): Promise<void> {
+    this.derivationPath = this.derivationPathMap.get(this.derivationPathType)
+    await this.setDerivationPath()
+
     this.isLoading = true
 
     const response: ExtensionMessageOutputPayload<Action> = await this.chromeMessagingService.sendChromeMessage(
@@ -55,7 +86,8 @@ export class AddLedgerConnectionPage implements OnInit {
             publicKey: data.publicKey,
             type: WalletType.LEDGER,
             added: new Date().getTime(),
-            info: undefined
+            info: undefined,
+            derivationPath: this.derivationPath
           }
           await this.walletService.addAndActiveWallet(walletInfo)
         }
@@ -65,6 +97,26 @@ export class AddLedgerConnectionPage implements OnInit {
       }, 2000)
     }
     this.cdr.detectChanges()
+  }
+  public async setDerivationPath() {
+    return this.walletService
+      .setDerivationPath(
+        this.derivationPath!.slice(2) // we prefix the derivation path in the UI with 'm/', but the ledger expects it without said prefix
+      )
+      .then(async () => {
+        if (this.derivationPath) {
+          const toast = await this.toastController.create({
+            message: `Set derivation path to ${this.derivationPath}`,
+            duration: 3000
+          })
+          return toast.present()
+        }
+      })
+  }
+
+  public setCustomDerivationPath() {
+    this.derivationPathMap.set(DerivationPathTypes.CUSTOM, this.customDerivationPath)
+    this.connect()
   }
 
   public async dismiss(closeParent: boolean = false): Promise<void> {

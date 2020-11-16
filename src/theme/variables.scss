@@ -79,4 +79,8 @@
     --box-shadow: none;
     text-transform: initial;
   }
+  ion-alert {
+    --max-width: 80%;
+    --width: 80%;
+  }
 }

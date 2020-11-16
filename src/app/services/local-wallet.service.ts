@@ -14,10 +14,12 @@ export class WalletService {
   private readonly _wallets: ReplaySubject<WalletInfo[]> = new ReplaySubject(1)
   private readonly _activeWallet: ReplaySubject<WalletInfo> = new ReplaySubject(1)
   private readonly _activeNetwork: ReplaySubject<Network> = new ReplaySubject(1)
+  private readonly _selectedDerivationPath: ReplaySubject<string> = new ReplaySubject(1)
 
   public readonly wallets$: Observable<WalletInfo[]> = this._wallets.asObservable()
   public readonly activeWallet$: Observable<WalletInfo> = this._activeWallet.asObservable()
   public readonly activeNetwork$: Observable<Network> = this._activeNetwork.asObservable()
+  public readonly selectedDerivationPath$: Observable<string> = this._selectedDerivationPath.asObservable()
 
   constructor(private readonly chromeMessagingService: ChromeMessagingService) {
     this.updateWallets().catch(console.error)
@@ -49,6 +51,12 @@ export class WalletService {
     await this.chromeMessagingService.sendChromeMessage(Action.ACTIVE_NETWORK_SET, { network })
     await this.loadNetwork()
   }
+
+  public async setDerivationPath(derivationPath: string): Promise<void> {
+    await this.chromeMessagingService.sendChromeMessage(Action.DERIVATION_PATH_SET, { derivationPath: derivationPath })
+    this._selectedDerivationPath.next(derivationPath)
+  }
+
 
   public async getWallets(): Promise<void> {
     this.chromeMessagingService
