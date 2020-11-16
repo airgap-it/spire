@@ -2,6 +2,7 @@ import {
   BeaconMessageType,
   BroadcastRequestOutput,
   ChromeMessageTransport,
+  ChromeStorage,
   Network,
   OperationRequestOutput,
   PermissionRequestOutput,
@@ -45,7 +46,7 @@ export class BeaconRequestPage implements OnInit {
 
   public responseHandler: (() => Promise<void>) | undefined
 
-  public transport: Transport = new ChromeMessageTransport('Beacon Extension')
+  public transport: Transport = new ChromeMessageTransport('Beacon Extension', undefined as any, new ChromeStorage()) // TODO
 
   public confirmButtonText: string = 'Confirm'
 

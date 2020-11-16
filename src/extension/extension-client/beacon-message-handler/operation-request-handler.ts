@@ -44,7 +44,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
         errorType
       } as any
 
-      const response: OperationResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+      const response: OperationResponse = { senderId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
       sendToPage(response)
       sendResponseToPopup({
         error: { name: error.name, message: error.message, stack: error.stack }
@@ -103,7 +103,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       transactionHash: hash.res
     }
 
-    const response: OperationResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: OperationResponse = { senderId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponseToPopup()

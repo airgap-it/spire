@@ -39,7 +39,7 @@ export const broadcastRequestHandler: (client: ExtensionClient, logger: Logger) 
       } as any
 
       const response: BroadcastResponse = {
-        beaconId: await client.beaconId,
+        senderId: await client.beaconId,
         version: BEACON_VERSION,
         ...responseInput
       }
@@ -57,7 +57,7 @@ export const broadcastRequestHandler: (client: ExtensionClient, logger: Logger) 
       transactionHash: hash.res
     }
 
-    const response: BroadcastResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: BroadcastResponse = { senderId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
 
     sendToPage(response)
     sendResponseToPopup()

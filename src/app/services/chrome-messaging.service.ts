@@ -40,6 +40,7 @@ export class ChromeMessagingService {
     chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
+      console.log('debug', message)
       if (message && message.target === 'toPage') {
         return // Ignore messages that are sent to the website
       }

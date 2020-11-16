@@ -31,7 +31,9 @@ export class BeaconMessageHandler {
     [BeaconMessageType.PermissionResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.OperationResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
-    [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported
+    [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.Error]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.Disconnect]: beaconMessageHandlerNotSupported
   }
 
   constructor(private readonly client: ExtensionClient) {

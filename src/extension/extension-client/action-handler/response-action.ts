@@ -1,4 +1,4 @@
-import { BeaconMessage, Serializer } from '@airgap/beacon-sdk'
+import { BeaconMessage } from '@airgap/beacon-sdk'
 
 import { Action } from '../Actions'
 import { BeaconMessageHandler, BeaconMessageHandlerFunction } from '../beacon-message-handler/BeaconMessageHandler'
@@ -17,8 +17,7 @@ export const responseAction: (logger: Logger) => ActionHandlerFunction<Action.RE
   await handler(
     context.data.data as any,
     async (beaconMessage: BeaconMessage) => {
-      const message: string = await new Serializer().serialize(beaconMessage)
-      await context.client.sendToPage(message)
+      await context.client.sendToPage(beaconMessage)
     },
     context.sendResponse as any
   )

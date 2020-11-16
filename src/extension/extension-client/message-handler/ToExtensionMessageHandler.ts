@@ -36,6 +36,11 @@ export class ToExtensionMessageHandler extends MessageHandler {
     beaconConnected: boolean
   ): Promise<void> {
     logger.log('ToExtensionMessageHandler')
+
+    const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
+
+    this.client.pendingRequests.push({ message: deserialized, connectionContext })
+
     // TODO: Decide where to send the request to
     // Use a map and check all known addresses
     // We can only do this for the operation and the sign request
@@ -48,8 +53,11 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
       await this.client.popupManager.startPopup()
 
-      const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
-      this.client.pendingRequests.push({ message: deserialized, connectionContext })
+      // TODO: Remove v1 compatibility in later version
+      if ((deserialized as any).beaconId && !deserialized.senderId) {
+        deserialized.senderId = (deserialized as any).beaconId
+        delete (deserialized as any).beaconId
+      }
 
       const enriched: To<BeaconRequestOutputMessage> = await to(this.enrichRequest(deserialized))
 
@@ -65,11 +73,11 @@ export class ToExtensionMessageHandler extends MessageHandler {
         } as any
 
         const response: OperationResponse = {
-          beaconId: await this.client.beaconId,
+          senderId: await this.client.beaconId,
           version: BEACON_VERSION,
           ...responseInput
         }
-        await this.client.sendToPage(await new Serializer().serialize(response))
+        await this.client.sendToPage(response)
 
         const errorObject = { title: (error as any).name, message: (error as any).message, data: (error as any).data }
 
@@ -137,13 +145,18 @@ export class ToExtensionMessageHandler extends MessageHandler {
   public async enrichRequest(message: BeaconMessage): Promise<BeaconRequestOutputMessage> {
     switch (message.type) {
       case BeaconMessageType.PermissionRequest: {
+        // TODO: Remove v1 compatibility in later version
+        if ((message.appMetadata as any).beaconId && !message.appMetadata.senderId) {
+          message.appMetadata.senderId = (message.appMetadata as any).beaconId
+          delete (message.appMetadata as any).beaconId
+        }
         await this.client.appMetadataManager.addAppMetadata(message.appMetadata)
         const request: PermissionRequestOutput = message
 
         return request
       }
       case BeaconMessageType.OperationRequest: {
-        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
         if (!result) {
           throw new Error('AppMetadata not available')
         }
@@ -155,7 +168,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         return request
       }
       case BeaconMessageType.SignPayloadRequest: {
-        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
         if (!result) {
           throw new Error('AppMetadata not available')
         }
@@ -167,7 +180,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         return request
       }
       case BeaconMessageType.BroadcastRequest: {
-        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.beaconId)
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
         if (!result) {
           throw new Error('AppMetadata not available')
         }

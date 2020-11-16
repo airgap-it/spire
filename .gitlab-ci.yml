@@ -1,11 +1,8 @@
 image: docker:latest
 
 variables:
-  IMAGE_TAG: $CI_REGISTRY_IMAGE
-  IMAGE_TAG_CURRENT: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-  IMAGE_TAG_LATEST: $CI_REGISTRY_IMAGE:latest
-  IMAGE_TAG_ANDROID_CURRENT: $CI_REGISTRY_IMAGE:android-$CI_COMMIT_SHA
-  IMAGE_TAG_ANDROID_LATEST: $CI_REGISTRY_IMAGE:android-latest
+  GOOGLE_TAG: eu.gcr.io/papers-kubernetes/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_SHA
+  GOOGLE_TAG_EXTENSION_CURRENT: eu.gcr.io/papers-kubernetes/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:extension-$CI_COMMIT_SHA
 
 stages:
   - build
@@ -15,14 +12,8 @@ stages:
 
 build_ionic:
   stage: build
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker build --cache-from $IMAGE_TAG_LATEST -t $IMAGE_TAG .
-    - docker tag $IMAGE_TAG $IMAGE_TAG_CURRENT
-    - docker tag $IMAGE_TAG $IMAGE_TAG_LATEST
-    - docker push $IMAGE_TAG_CURRENT
-    - docker push $IMAGE_TAG_LATEST
+    - docker build -t $GOOGLE_TAG .
   tags:
     - docker
 
@@ -46,25 +37,20 @@ build_ionic:
 #       - lintReport.json
 
 build_extension:
-  image: $IMAGE_TAG_CURRENT
   stage: native_build
   when: manual
   script:
-    - sed -i -e "s/VERSION_NUMBER/$VERSION/g" src/app/services/app-info/app-info.service.ts
-    - sed -i -e "s/VERSION_CODE/$CI_PIPELINE_ID/g" src/app/services/app-info/app-info.service.ts
-    # - sed -i -e "/\"version\"/c\ \"version\" :\"$VERSION\"," src/manifest.json
-    - npm install
-    - npm install ionic
-    - npm run postinstall
-    - npm run build:prod
-    - mv www beacon-extension
+    - docker build -f build/extension/Dockerfile -t $GOOGLE_TAG_EXTENSION_CURRENT --build-arg VERSION="$VERSION"  --build-arg CI_PIPELINE_ID="$CI_PIPELINE_ID" .
+    - docker run --name extension-$CI_PIPELINE_ID $GOOGLE_TAG_EXTENSION_CURRENT echo "container ran."
+    - docker cp extension-$CI_PIPELINE_ID:/app/www beacon-extension
+  after_script:
+    - docker rm -f extension-$CI_PIPELINE_ID || true
   artifacts:
     name: 'beacon-extension'
     paths:
       - beacon-extension/
   tags:
     - docker
-
 # qa:
 #   stage: qa
 #   before_script:
