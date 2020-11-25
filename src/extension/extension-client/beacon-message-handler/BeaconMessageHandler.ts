@@ -32,6 +32,7 @@ export class BeaconMessageHandler {
     [BeaconMessageType.OperationResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.Acknowledge]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.Error]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.Disconnect]: beaconMessageHandlerNotSupported
   }

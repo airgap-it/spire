@@ -3,31 +3,30 @@ import {
   AppMetadataManager,
   BeaconBaseMessage,
   BeaconClient,
-  BeaconEvent,
-  BeaconEventHandler,
   BeaconMessage,
   BeaconMessageType,
-  ChromeMessageTransport,
   ChromeStorage,
   ConnectionContext,
+  DappP2PTransport,
   ExtensionMessage,
   ExtensionMessageTarget,
   getAccountIdentifier,
   getAddressFromPublicKey,
-  P2PPairingRequest,
-  P2PTransport,
   PermissionInfo,
   PermissionManager,
   PermissionRequest,
   PermissionResponse,
   Serializer
 } from '@airgap/beacon-sdk'
+import { ExtendedP2PPairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/P2PPairingResponse'
+import { ExtendedPostMessagePairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/PostMessagePairingResponse'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
 
 import { ActionHandlerFunction, ActionMessageHandler } from './action-handler/ActionMessageHandler'
 import { Action, ExtensionMessageInputPayload, WalletInfo, WalletType } from './Actions'
+import { WalletChromeMessageTransport } from './chrome-message-transport/WalletChromeMessageTransport'
 import { ExtensionClientOptions } from './ExtensionClientOptions'
 import { Logger } from './Logger'
 import { MessageHandler } from './message-handler/MessageHandler'
@@ -50,53 +49,53 @@ export class ExtensionClient extends BeaconClient {
   public readonly permissionManager: PermissionManager
   public readonly appMetadataManager: AppMetadataManager
 
-  private p2pTransport: P2PTransport | undefined
+  private p2pTransport: DappP2PTransport | undefined
 
-  private transport: ChromeMessageTransport | undefined
+  private transport: WalletChromeMessageTransport | undefined
 
   private readonly listeners: any[] = []
 
   constructor(config: ExtensionClientOptions) {
     super({ name: config.name, storage: new ChromeStorage() })
 
-    const events = new BeaconEventHandler({
-      [BeaconEvent.P2P_LISTEN_FOR_CHANNEL_OPEN]: {
-        handler: async (syncInfo: P2PPairingRequest): Promise<void> => {
-          console.log('Pairing QR data: ', syncInfo)
-        }
-      },
-      [BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS]: {
-        handler: async (newPeer: P2PPairingRequest): Promise<void> => {
-          if (newPeer) {
-            const walletInfo: WalletInfo<WalletType.P2P> = {
-              address: '',
-              publicKey: '',
-              type: WalletType.P2P,
-              added: new Date().getTime(),
-              info: newPeer
-            }
-            await this.addWallet(walletInfo)
-            await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
-          }
+    // const events = new BeaconEventHandler({
+    //   [BeaconEvent.P2P_LISTEN_FOR_CHANNEL_OPEN]: {
+    //     handler: async (syncInfo: P2PPairingRequest): Promise<void> => {
+    //       console.log('Pairing QR data: ', syncInfo)
+    //     }
+    //   },
+    //   [BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS]: {
+    //     handler: async (newPeer: P2PPairingRequest): Promise<void> => {
+    //       if (newPeer) {
+    //         const walletInfo: WalletInfo<WalletType.P2P> = {
+    //           address: '',
+    //           publicKey: '',
+    //           type: WalletType.P2P,
+    //           added: new Date().getTime(),
+    //           info: newPeer
+    //         }
+    //         await this.addWallet(walletInfo)
+    //         await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
+    //       }
 
-          this.popupManager
-            .sendToActivePopup({
-              target: ExtensionMessageTarget.EXTENSION,
-              sender: 'background',
-              payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
-            })
-            .catch(console.error)
-        }
-      }
-    })
+    //       this.popupManager
+    //         .sendToActivePopup({
+    //           target: ExtensionMessageTarget.EXTENSION,
+    //           sender: 'background',
+    //           payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
+    //         })
+    //         .catch(console.error)
+    //     }
+    //   }
+    // })
 
     this.permissionManager = new PermissionManager(new ChromeStorage())
     this.appMetadataManager = new AppMetadataManager(new ChromeStorage())
 
     this.keyPair
       .then((keyPair: sodium.KeyPair) => {
-        this.transport = new ChromeMessageTransport(config.name, keyPair, new ChromeStorage())
-        this.p2pTransport = new P2PTransport(config.name, keyPair, new ChromeStorage(), events, [], false)
+        this.transport = new WalletChromeMessageTransport(config.name, keyPair, new ChromeStorage())
+        this.p2pTransport = new DappP2PTransport(config.name, keyPair, new ChromeStorage(), [])
 
         this.p2pTransport.connect().catch((p2pClientStartError: Error) => {
           logger.error('p2pClientStartError', p2pClientStartError)
@@ -151,7 +150,7 @@ export class ExtensionClient extends BeaconClient {
   public async sendToBeacon(message: string): Promise<void> {
     logger.log('sending message', message)
     if (this.p2pTransport) {
-      const peers: P2PPairingRequest[] = await this.p2pTransport.getPeers()
+      const peers: ExtendedP2PPairingResponse[] = await this.p2pTransport.getPeers()
       if (peers.length > 0) {
         this.p2pTransport.send(message).catch((beaconSendError: Error) => {
           logger.error('sendToBeacon', beaconSendError)
@@ -329,9 +328,14 @@ export class ExtensionClient extends BeaconClient {
     // Encrypt message with request.senderId
     // Send message only to tabs where hostname matches request.origin.id
     if (this.transport) {
-      const sender = request.message.version === '1' ? undefined : request.message.senderId
+      const senderId = request.message.version === '1' ? undefined : request.message.senderId
 
-      await this.transport.sendToTabs(sender, serialized)
+      const peers: ExtendedPostMessagePairingResponse[] = ((await this.transport.getPeers()) as any) || []
+      const peer = peers.find(peerEl => peerEl.senderId === senderId)
+
+      if (peer) {
+        await this.transport.sendToTabs(peer.publicKey, serialized)
+      }
     }
   }
 }

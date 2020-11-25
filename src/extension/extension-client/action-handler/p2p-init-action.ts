@@ -11,7 +11,7 @@ export const p2pInitAction: (logger: Logger) => ActionHandlerFunction<Action.P2P
   }
   logger.log('p2pInitAction', 'handshake info', await (context.p2pTransport as any).client.getHandshakeInfo())
 
-  context.p2pTransport.connectNewPeer().catch(error => logger.error(error))
+  context.p2pTransport.listenForNewPeer(() => {}).catch(error => logger.error(error))
 
   context.sendResponse({ data: { qr: await (context.p2pTransport as any).client.getHandshakeInfo() } })
 }

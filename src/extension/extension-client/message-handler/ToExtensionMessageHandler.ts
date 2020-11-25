@@ -8,6 +8,7 @@ import {
   BroadcastRequestOutput,
   ConnectionContext,
   ExtensionMessage,
+  getSenderId,
   OperationRequestOutput,
   OperationResponse,
   PermissionRequestOutput,
@@ -73,7 +74,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         } as any
 
         const response: OperationResponse = {
-          senderId: await this.client.beaconId,
+          senderId: await getSenderId(await this.client.beaconId),
           version: BEACON_VERSION,
           ...responseInput
         }

@@ -8,8 +8,9 @@ import {
   PermissionRequestOutput,
   PermissionScope,
   SignPayloadRequestOutput,
-  Transport
+  StorageKey
 } from '@airgap/beacon-sdk'
+import { PostMessagePairingRequest } from '@airgap/beacon-sdk/dist/cjs/types/PostMessagePairingRequest'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
@@ -18,6 +19,7 @@ import { ChromeMessagingService } from 'src/app/services/chrome-messaging.servic
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { PopupService } from 'src/app/services/popup.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
@@ -46,7 +48,11 @@ export class BeaconRequestPage implements OnInit {
 
   public responseHandler: (() => Promise<void>) | undefined
 
-  public transport: Transport = new ChromeMessageTransport('Beacon Extension', undefined as any, new ChromeStorage()) // TODO
+  public transport: WalletChromeMessageTransport = new WalletChromeMessageTransport(
+    'Beacon Extension',
+    undefined as any,
+    new ChromeStorage()
+  )
 
   public confirmButtonText: string = 'Confirm'
 

@@ -3,6 +3,7 @@ import {
   BeaconBaseMessage,
   BeaconMessage,
   BeaconMessageType,
+  getSenderId,
   PermissionRequestOutput,
   PermissionResponse,
   PermissionResponseInput,
@@ -41,7 +42,7 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
     }
 
     const response: PermissionResponse = {
-      senderId: await client.beaconId,
+      senderId: await getSenderId(await client.beaconId),
       version: BEACON_VERSION,
       ...responseInput
     }

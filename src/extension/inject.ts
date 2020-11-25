@@ -30,17 +30,19 @@ window.addEventListener(
           // iconUrl: '' URL to an icon
         } }, '*')
       } else {
-        // tslint:disable-next-line:no-console
-        console.log('BEACON EXTENSION (inject.ts): sending message from page to background', data.payload)
-
         data.sender = event.origin
 
         // We only respond to messages that don't have a target ID specified (broadcast), or are addressed to us
         if (!data.targetId || data.targetId === chrome.runtime.id) {
+          // tslint:disable-next-line:no-console
+          // console.log('BEACON EXTENSION (inject.ts): sending message from page to background (addressed to us)', data)
           chrome.runtime.sendMessage(data, (responseData?: unknown) => {
             // tslint:disable-next-line:no-console
             console.log('sendMessage callback', responseData)
           })  
+        } else {
+          // tslint:disable-next-line:no-console
+          // console.log('BEACON EXTENSION (inject.ts): sending message from page to background (NOT addressed to us)', data)
         }
       }
     }
@@ -55,7 +57,7 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage<string>, sender:
   }
 
   // tslint:disable-next-line:no-console
-  console.log('BEACON EXTENSION (inject.ts): sending message from background to page', message)
+  // console.log('BEACON EXTENSION (inject.ts): sending message from background to page', message)
 
   window.postMessage({ message, sender }, '*')
 })
