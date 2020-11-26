@@ -1,16 +1,13 @@
 import {
   BeaconMessageType,
   BroadcastRequestOutput,
-  ChromeMessageTransport,
   ChromeStorage,
   Network,
   OperationRequestOutput,
   PermissionRequestOutput,
   PermissionScope,
-  SignPayloadRequestOutput,
-  StorageKey
+  SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
-import { PostMessagePairingRequest } from '@airgap/beacon-sdk/dist/cjs/types/PostMessagePairingRequest'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
