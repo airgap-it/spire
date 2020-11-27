@@ -3,6 +3,7 @@ import {
   AppMetadataManager,
   BeaconBaseMessage,
   BeaconClient,
+  BeaconEvent,
   BeaconMessage,
   BeaconMessageType,
   ChromeStorage,
@@ -57,37 +58,6 @@ export class ExtensionClient extends BeaconClient {
 
   constructor(config: ExtensionClientOptions) {
     super({ name: config.name, storage: new ChromeStorage() })
-
-    // const events = new BeaconEventHandler({
-    //   [BeaconEvent.P2P_LISTEN_FOR_CHANNEL_OPEN]: {
-    //     handler: async (syncInfo: P2PPairingRequest): Promise<void> => {
-    //       console.log('Pairing QR data: ', syncInfo)
-    //     }
-    //   },
-    //   [BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS]: {
-    //     handler: async (newPeer: P2PPairingRequest): Promise<void> => {
-    //       if (newPeer) {
-    //         const walletInfo: WalletInfo<WalletType.P2P> = {
-    //           address: '',
-    //           publicKey: '',
-    //           type: WalletType.P2P,
-    //           added: new Date().getTime(),
-    //           info: newPeer
-    //         }
-    //         await this.addWallet(walletInfo)
-    //         await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
-    //       }
-
-    //       this.popupManager
-    //         .sendToActivePopup({
-    //           target: ExtensionMessageTarget.EXTENSION,
-    //           sender: 'background',
-    //           payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
-    //         })
-    //         .catch(console.error)
-    //     }
-    //   }
-    // })
 
     this.permissionManager = new PermissionManager(new ChromeStorage())
     this.appMetadataManager = new AppMetadataManager(new ChromeStorage())
@@ -171,11 +141,35 @@ export class ExtensionClient extends BeaconClient {
     logger.log('handleMessage', data, connectionContext)
     const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
 
+    const p2pConnectedCallback = async (newPeer: ExtendedP2PPairingResponse): Promise<void> => {
+      console.log('CONNECTED')
+      if (newPeer) {
+        const walletInfo: WalletInfo<WalletType.P2P> = {
+          address: '',
+          publicKey: '',
+          type: WalletType.P2P,
+          added: new Date().getTime(),
+          info: newPeer
+        }
+        await this.addWallet(walletInfo)
+        await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
+      }
+
+      this.popupManager
+        .sendToActivePopup({
+          target: ExtensionMessageTarget.EXTENSION,
+          sender: 'background',
+          payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
+        })
+        .catch(console.error)
+    }
+
     await handler({
       data: data.payload,
       sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
       client: this,
       p2pTransport: this.p2pTransport,
+      p2pTransportConnectedCallback: p2pConnectedCallback,
       storage: this.storage
     })
   }

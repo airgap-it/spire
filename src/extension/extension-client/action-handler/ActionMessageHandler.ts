@@ -1,4 +1,5 @@
 import { ChromeStorage, DappP2PTransport } from '@airgap/beacon-sdk'
+import { ExtendedP2PPairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/P2PPairingResponse'
 
 import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
@@ -27,6 +28,7 @@ export interface ActionContext<T extends Action> {
   data: ExtensionMessageInputPayload<T>
   client: ExtensionClient
   p2pTransport: DappP2PTransport | undefined
+  p2pTransportConnectedCallback(newPeer: ExtendedP2PPairingResponse): Promise<void>
   storage: ChromeStorage
   sendResponse(message: ExtensionMessageOutputPayload<T>): void
 }

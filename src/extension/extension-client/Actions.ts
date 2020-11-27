@@ -1,4 +1,5 @@
 import { Network, P2PPairingRequest, PermissionInfo } from '@airgap/beacon-sdk'
+import { ExtendedP2PPairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/P2PPairingResponse'
 
 export enum WalletType {
   P2P = 'P2P',
@@ -7,7 +8,7 @@ export enum WalletType {
 }
 
 interface WalletInfoTypeMap {
-  [WalletType.P2P]: P2PPairingRequest
+  [WalletType.P2P]: ExtendedP2PPairingResponse
   [WalletType.LEDGER]: undefined
   [WalletType.LOCAL_MNEMONIC]: { mnemonic: string }
 }
