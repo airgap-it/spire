@@ -1,4 +1,5 @@
 import {
+  AcknowledgeResponse,
   AppMetadata,
   BEACON_VERSION,
   BeaconErrorType,
@@ -15,6 +16,7 @@ import {
   Serializer,
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
+import { BeaconRequestMessage } from '@airgap/beacon-sdk/dist/cjs/types/beacon/BeaconRequestMessage'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
 import { WalletInfo } from '../Actions'
@@ -38,7 +40,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
   ): Promise<void> {
     logger.log('ToExtensionMessageHandler')
 
-    const deserialized: BeaconMessage = (await new Serializer().deserialize(data.payload as string)) as BeaconMessage
+    const deserialized: BeaconRequestMessage = (await new Serializer().deserialize(
+      data.payload as string
+    )) as BeaconRequestMessage
 
     this.client.pendingRequests.push({ message: deserialized, connectionContext })
 
@@ -51,6 +55,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
       return this.client.sendToBeacon(data.payload as string)
     } else {
       logger.log('not beacon', 'sending to popup', data)
+
+      // TODO: Send acknowledge message
+      await this.sendAcknowledgeResponse(deserialized)
 
       await this.client.popupManager.startPopup()
 
@@ -196,5 +203,22 @@ export class ToExtensionMessageHandler extends MessageHandler {
       default:
         throw new Error('Message not handled')
     }
+  }
+
+  /**
+   * Send an acknowledge message back to the sender
+   *
+   * @param request The message that was received
+   */
+  private async sendAcknowledgeResponse(request: BeaconRequestMessage): Promise<void> {
+    // Acknowledge the message
+    const acknowledgeResponse: AcknowledgeResponse = {
+      id: request.id,
+      type: BeaconMessageType.Acknowledge,
+      senderId: await getSenderId(await this.client.beaconId),
+      version: BEACON_VERSION
+    }
+
+    await this.client.sendToPage(acknowledgeResponse)
   }
 }
