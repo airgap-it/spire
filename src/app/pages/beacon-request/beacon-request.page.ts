@@ -1,4 +1,5 @@
 import {
+  BeaconErrorType,
   BeaconMessageType,
   BroadcastRequestOutput,
   ChromeStorage,
@@ -93,6 +94,13 @@ export class BeaconRequestPage implements OnInit {
       this.requesterName = this.request.appMetadata.name
       await this.broadcastRequest(this.request)
     }
+  }
+
+  public async cancel(): Promise<void> {
+    if (this.request) {
+      await this.sendAbortedError(this.request)
+    }
+    this.dismiss().catch(console.error)
   }
 
   public async dismiss(): Promise<void> {
@@ -283,5 +291,13 @@ export class BeaconRequestPage implements OnInit {
 
   private openUrl(url: string): void {
     window.open(url, '_blank')
+  }
+
+  private async sendAbortedError(
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
+  ): Promise<void> {
+    await this.sendResponse(request, {
+      errorType: BeaconErrorType.ABORTED_ERROR
+    })
   }
 }
