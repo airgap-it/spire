@@ -57,7 +57,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
       logger.log('not beacon', 'sending to popup', data)
 
       // TODO: Send acknowledge message
-      await this.sendAcknowledgeResponse(deserialized)
+      if (deserialized.version !== '1') {
+        await this.sendAcknowledgeResponse(deserialized)
+      }
 
       await this.client.popupManager.startPopup()
 
