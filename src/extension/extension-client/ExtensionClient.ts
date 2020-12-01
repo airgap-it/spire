@@ -9,6 +9,8 @@ import {
   ChromeStorage,
   ConnectionContext,
   DappP2PTransport,
+  ExtendedP2PPairingResponse,
+  ExtendedPostMessagePairingResponse,
   ExtensionMessage,
   ExtensionMessageTarget,
   getAccountIdentifier,
@@ -19,8 +21,6 @@ import {
   PermissionResponse,
   Serializer
 } from '@airgap/beacon-sdk'
-import { ExtendedP2PPairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/P2PPairingResponse'
-import { ExtendedPostMessagePairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/PostMessagePairingResponse'
 import * as sodium from 'libsodium-wrappers'
 
 import { AirGapOperationProvider, LocalSigner } from '../AirGapSigner'
@@ -327,9 +327,7 @@ export class ExtensionClient extends BeaconClient {
       const peers: ExtendedPostMessagePairingResponse[] = ((await this.transport.getPeers()) as any) || []
       const peer = peers.find(peerEl => peerEl.senderId === senderId)
 
-      if (peer) {
-        await this.transport.sendToTabs(peer.publicKey, serialized)
-      }
+      await this.transport.sendToTabs(peer ? peer.publicKey : undefined, serialized)
     }
   }
 }

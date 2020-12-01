@@ -1,5 +1,4 @@
-import { ChromeStorage, DappP2PTransport } from '@airgap/beacon-sdk'
-import { ExtendedP2PPairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/P2PPairingResponse'
+import { ChromeStorage, DappP2PTransport, ExtendedP2PPairingResponse } from '@airgap/beacon-sdk'
 
 import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
