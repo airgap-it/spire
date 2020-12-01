@@ -1,6 +1,7 @@
-import { ChromeMessageTransport, Storage, StorageKey } from '@airgap/beacon-sdk'
-import { PostMessagePairingRequest } from '@airgap/beacon-sdk/dist/cjs/types/PostMessagePairingRequest'
+import { PostMessagePairingRequest, Storage, StorageKey } from '@airgap/beacon-sdk'
 import * as sodium from 'libsodium-wrappers'
+
+import { ChromeMessageTransport } from './ChromeMessageTransport'
 
 // const logger = new Logger('DappP2PTransport')
 

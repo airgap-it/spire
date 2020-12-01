@@ -5,6 +5,7 @@ import {
   BeaconMessage,
   BeaconMessageType,
   getSenderId,
+  SigningType,
   SignPayloadRequestOutput,
   SignPayloadResponse,
   SignPayloadResponseInput
@@ -83,6 +84,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
     const responseInput: SignPayloadResponseInput = {
       id: signRequest.id,
       type: BeaconMessageType.SignPayloadResponse,
+      signingType: SigningType.RAW,
       signature: signature.res
     }
 

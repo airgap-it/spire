@@ -4,9 +4,9 @@ import {
   BeaconMessage,
   BeaconMessageType,
   ErrorResponse,
+  ErrorResponseInput,
   getSenderId
 } from '@airgap/beacon-sdk'
-import { ErrorResponseInput } from '@airgap/beacon-sdk/dist/cjs/types/beacon/messages/BeaconResponseInputMessage'
 
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'

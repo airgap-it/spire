@@ -5,6 +5,7 @@ import {
   BeaconErrorType,
   BeaconMessage,
   BeaconMessageType,
+  BeaconRequestMessage,
   BeaconRequestOutputMessage,
   BroadcastRequestOutput,
   ConnectionContext,
@@ -16,7 +17,6 @@ import {
   Serializer,
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
-import { BeaconRequestMessage } from '@airgap/beacon-sdk/dist/cjs/types/beacon/BeaconRequestMessage'
 import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
 
 import { WalletInfo } from '../Actions'

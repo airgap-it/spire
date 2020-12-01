@@ -1,5 +1,4 @@
-import { Network, P2PPairingRequest, PermissionInfo } from '@airgap/beacon-sdk'
-import { ExtendedP2PPairingResponse } from '@airgap/beacon-sdk/dist/cjs/types/P2PPairingResponse'
+import { ExtendedP2PPairingResponse, Network, P2PPairingRequest, PermissionInfo } from '@airgap/beacon-sdk'
 
 export enum WalletType {
   P2P = 'P2P',
