@@ -1,13 +1,14 @@
-import { Serializer } from '@airgap/beacon-sdk'
+import { BroadcastRequestOutput, OperationRequestOutput, PermissionRequestOutput, Serializer, SignPayloadRequestOutput } from '@airgap/beacon-sdk'
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { ModalController } from '@ionic/angular'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { SettingsService } from 'src/app/services/settings.service'
-import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
+import { Action, ExtensionMessageOutputPayload, WalletType } from 'src/extension/extension-client/Actions'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
+import { BeaconRequestPage } from '../beacon-request/beacon-request.page'
 
 @Component({
   selector: 'beacon-pair',
@@ -15,6 +16,16 @@ import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-con
   styleUrls: ['pair.page.scss']
 })
 export class PairPage {
+
+  public beaconRequestCallback: boolean = false
+  public walletType: WalletType | undefined
+  public request:
+    | PermissionRequestOutput
+    | OperationRequestOutput
+    | SignPayloadRequestOutput
+    | BroadcastRequestOutput
+    | undefined
+
   public developerModeEnabled: boolean = false
   public dismissEnabled: Promise<boolean>
 
@@ -96,6 +107,17 @@ export class PairPage {
   }
 
   public async dismiss(): Promise<void> {
+
+    if (this.beaconRequestCallback) {
+      const modal: HTMLIonModalElement = await this.modalController.create({
+        component: BeaconRequestPage,
+        componentProps: {
+          walletType: this.walletType,
+          request: this.request
+        }
+      })
+      modal.present()
+    }
     await this.modalController.dismiss()
   }
 }

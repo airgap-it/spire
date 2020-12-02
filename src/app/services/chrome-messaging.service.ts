@@ -7,6 +7,7 @@ import {
 } from '@airgap/beacon-sdk'
 import { Injectable, NgZone } from '@angular/core'
 import { AlertController, LoadingController, ModalController } from '@ionic/angular'
+import { ReplaySubject } from 'rxjs'
 import {
   Action,
   ActionInputTypesMap,
@@ -18,6 +19,7 @@ import {
 
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 import { ErrorPage } from '../pages/error/error.page'
+import { PairPage } from '../pages/pair/pair.page'
 import { PopupService } from './popup.service'
 
 @Injectable({
@@ -25,6 +27,7 @@ import { PopupService } from './popup.service'
 })
 export class ChromeMessagingService {
   private updateWalletCallback: (() => Promise<void>) | undefined
+  private accountPresent: boolean = false
 
   private readonly loader: Promise<HTMLIonLoadingElement> = this.loadingController.create({
     message: 'Preparing beacon message...'
@@ -141,14 +144,24 @@ export class ChromeMessagingService {
     })
   }
 
-  public async registerUpdateWalletCallback(callback: () => Promise<void>): Promise<void> {
+  public async registerUpdateWalletCallback(wallets: ReplaySubject<WalletInfo[]>, callback: () => Promise<void>): Promise<void> {
     this.updateWalletCallback = callback
+    wallets.asObservable().subscribe(wallets => {
+      this.accountPresent = wallets && wallets.length > 0 ? true : false
+    })
   }
 
   private async beaconRequest(request: BeaconMessage, walletType: WalletType): Promise<void> {
-    const modal: HTMLIonModalElement = await this.modalController.create({
+    const modal: HTMLIonModalElement = this.accountPresent ? await this.modalController.create({
       component: BeaconRequestPage,
       componentProps: {
+        walletType,
+        request
+      }
+    }) : await this.modalController.create({
+      component: PairPage,
+      componentProps: {
+        beaconRequestCallback: true,
         walletType,
         request
       }
