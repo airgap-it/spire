@@ -19,7 +19,6 @@ import {
 
 import { BeaconRequestPage } from '../pages/beacon-request/beacon-request.page'
 import { ErrorPage } from '../pages/error/error.page'
-import { PairPage } from '../pages/pair/pair.page'
 import { PopupService } from './popup.service'
 
 @Injectable({
@@ -152,21 +151,38 @@ export class ChromeMessagingService {
   }
 
   private async beaconRequest(request: BeaconMessage, walletType: WalletType): Promise<void> {
-    const modal: HTMLIonModalElement = this.accountPresent ? await this.modalController.create({
-      component: BeaconRequestPage,
-      componentProps: {
-        walletType,
-        request
-      }
-    }) : await this.modalController.create({
-      component: PairPage,
-      componentProps: {
-        beaconRequestCallback: true,
-        walletType,
-        request
-      }
+    if (!this.accountPresent) {
+      this.showMissingAccountAlert()
+    }
+    else {
+      const modal: HTMLIonModalElement = await this.modalController.create({
+        component: BeaconRequestPage,
+        componentProps: {
+          walletType,
+          request
+        }
+      })
+      return modal.present()
+    }
+  }
+
+  private async showMissingAccountAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {
+    const alert: HTMLIonAlertElement = await this.alertController.create({
+      header: 'No account found!',
+      message: 'You first need to pair your wallet with Beacon Extension',
+      buttons: [
+        ...buttons,
+        {
+          text: 'Ok'
+        }
+      ]
     })
 
-    return modal.present()
+    await alert.present()
   }
+
+  public async dismiss(): Promise<void> {
+    this.modalController.dismiss().catch(console.error)
+  }
+
 }
