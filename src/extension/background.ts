@@ -10,6 +10,18 @@ setTag('location', 'background')
 
 const logger: Logger = new Logger('background.ts')
 
+// This will open the extension after it was installed
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  switch (reason) {
+    case 'install':
+      chrome.tabs.create({
+        url: chrome.runtime.getURL('index.html')
+      })
+      break
+    default:
+  }
+})
+
 const client: ExtensionClient = new ExtensionClient({ name: 'Beacon Extension' })
 client
   .addListener((message: unknown) => {
