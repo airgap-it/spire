@@ -28,7 +28,7 @@ jobs:
       #   run: npm run actions:prettier
 
       - name: Build
-        run: npm run build -- --prod
+        run: npm run build:prod
 
       # - name: Unit Tests
       #   run: npm test -- --configuration=ci
