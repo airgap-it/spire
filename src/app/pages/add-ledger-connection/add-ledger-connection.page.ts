@@ -17,8 +17,13 @@ const enum DerivationPathTypes {
   styleUrls: ['./add-ledger-connection.page.scss']
 })
 export class AddLedgerConnectionPage implements OnInit {
+  public title: string = 'Pair Ledger'
+  public confirmText: string = 'Confirm Public Key Hash to share your Tezos address with Beacon Extension.'
+
   public targetMethod: Action = Action.LEDGER_INIT
   public request: unknown | undefined
+
+  public showDerivationPath: boolean = true
 
   public derivationPathType: DerivationPathTypes = DerivationPathTypes.DEFAULT
 
@@ -53,6 +58,12 @@ export class AddLedgerConnectionPage implements OnInit {
   public async ngOnInit(): Promise<void> {
     this.derivationPath = this.defaultDerivationPath
     this.customDerivationPath = this.defaultDerivationPath
+
+    if (this.targetMethod === Action.RESPONSE) {
+      this.title = 'Sign Transaction'
+      this.showDerivationPath = false
+      this.confirmText = 'Confirm Transaction on your ledger.'
+    }
 
     return this.connect()
   }
