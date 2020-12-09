@@ -25,7 +25,7 @@ export class WalletService {
     this.updateWallets().catch(console.error)
     this.loadNetwork().catch(console.error)
     this.chromeMessagingService
-      .registerUpdateWalletCallback(() => {
+      .registerUpdateWalletCallback(this._wallets, () => {
         return this.updateWallets()
       })
       .catch(console.error)
