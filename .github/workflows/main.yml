@@ -1,0 +1,43 @@
+name: Build
+
+on: push
+
+jobs:
+  build_angular:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Node 14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Prepare
+        run: npm ci
+
+      # - name: Prettier
+      #   run: npm run actions:prettier
+
+      - name: Build
+        run: npm run build:prod
+
+      # - name: Unit Tests
+      #   run: npm test -- --configuration=ci
+
+      # - name: E2E Tests
+      #   run: npm run e2e -- --configuration=ci
+
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: beacon-extension
+          path: www
