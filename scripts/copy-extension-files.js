@@ -11,7 +11,7 @@ files.forEach(file => {
   }
 })
 
-const needle = `<link rel="icon" type="image/png" href="assets/icon/favicon.png" />`
+const needle = `<link rel="icon" type="image/png" href="assets/icon/favicon.png"/>`
 const css = `
 <style>
 	html {
