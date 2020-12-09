@@ -148,8 +148,8 @@ export class ChromeMessagingService {
     callback: () => Promise<void>
   ): Promise<void> {
     this.updateWalletCallback = callback
-    wallets.asObservable().subscribe(wallets => {
-      this.accountPresent = wallets && wallets.length > 0 ? true : false
+    wallets.subscribe((walletList: WalletInfo[]) => {
+      this.accountPresent = walletList && walletList.length > 0 ? true : false
     })
   }
 
