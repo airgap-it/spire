@@ -4,6 +4,8 @@ import {
   BeaconErrorType,
   BeaconMessage,
   BeaconMessageType,
+  getSenderId,
+  SigningType,
   SignPayloadRequestOutput,
   SignPayloadResponse,
   SignPayloadResponseInput
@@ -42,7 +44,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
       } as any
 
       const response: SignPayloadResponse = {
-        beaconId: await client.beaconId,
+        beaconId: await getSenderId(await client.beaconId),
         version: BEACON_VERSION,
         ...responseInput
       }
@@ -69,7 +71,7 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
       signature = await to(signer.signMessage(signRequest.payload, localWallet.info.mnemonic))
     } else {
       const signer: Signer = new LedgerSigner()
-      signature = await to(signer.signMessage(signRequest.payload))
+      signature = await to(signer.signMessage(signRequest.payload, wallet.derivationPath))
     }
 
     if (signature.err) {
@@ -82,10 +84,15 @@ export const signPayloadRequestHandler: (client: ExtensionClient, logger: Logger
     const responseInput: SignPayloadResponseInput = {
       id: signRequest.id,
       type: BeaconMessageType.SignPayloadResponse,
+      signingType: SigningType.RAW,
       signature: signature.res
     }
 
-    const response: SignPayloadResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: SignPayloadResponse = {
+      senderId: await getSenderId(await client.beaconId),
+      version: BEACON_VERSION,
+      ...responseInput
+    }
 
     sendToPage(response)
     sendResponseToPopup()

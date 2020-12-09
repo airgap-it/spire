@@ -4,6 +4,7 @@ import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 
 import { broadcastRequestHandler } from './broadcast-request-handler'
+import { errorResponseHandler } from './error-response-handler'
 import { operationRequestHandler } from './operation-request-handler'
 import { permissionRequestHandler } from './permission-request-handler'
 import { signPayloadRequestHandler } from './sign-payload-request-handler'
@@ -31,7 +32,10 @@ export class BeaconMessageHandler {
     [BeaconMessageType.PermissionResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.OperationResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
-    [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported
+    [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.Acknowledge]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.Error]: errorResponseHandler(this.client, logger),
+    [BeaconMessageType.Disconnect]: beaconMessageHandlerNotSupported
   }
 
   constructor(private readonly client: ExtensionClient) {

@@ -1,6 +1,6 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Pair Ledger</ion-title>
+    <ion-title>{{ title }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
         <ion-icon name="close"></ion-icon>
@@ -40,6 +40,25 @@
       <ng-container *ngIf="!isLoading && !success">
         <ion-button (click)="connect()">Retry</ion-button>
       </ng-container>
+
+      <ion-item *ngIf="showDerivationPath" class="ion-no-padding ion-margin-bottom" lines="none">
+        <ion-label>Derivation Path</ion-label>
+        <ion-select [(ngModel)]="derivationPathType" (ionChange)="connect()" placeholder="custom">
+          <ion-select-option value="DEFAULT">Default (m/44'/1729'/0'/0')</ion-select-option>
+          <ion-select-option value="GALLEON">Galleon (m/44'/1729'/0'/0'/0')</ion-select-option>
+          <ion-select-option value="CUSTOM">Custom</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ng-container *ngIf="derivationPathType === 'CUSTOM'">
+        <ion-list-header class=" ion-no-padding">
+          <ion-label>Derivation Path</ion-label>
+        </ion-list-header>
+        <ion-item class="ion-no-padding ion-margin-bottom">
+          <ion-input [(ngModel)]="customDerivationPath"></ion-input>
+        </ion-item>
+        <ion-button (click)="setCustomDerivationPath()">Save</ion-button>
+      </ng-container>
     </ion-card-content>
   </ion-card>
 
@@ -74,7 +93,7 @@
         <ion-col>
           <p class="ion-text-center ion-no-margin"><small>Step 3</small></p>
           <h6 class="ion-text-center ion-no-margin">
-            Confirm Public Key Hash to share your Tezos address with Beacon.
+            {{ confirmText }}
           </h6>
         </ion-col>
       </ion-row>

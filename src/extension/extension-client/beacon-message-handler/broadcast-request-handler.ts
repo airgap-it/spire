@@ -6,7 +6,8 @@ import {
   BeaconMessageType,
   BroadcastRequestOutput,
   BroadcastResponse,
-  BroadcastResponseInput
+  BroadcastResponseInput,
+  getSenderId
 } from '@airgap/beacon-sdk'
 
 import { ExtensionClient } from '../ExtensionClient'
@@ -39,7 +40,7 @@ export const broadcastRequestHandler: (client: ExtensionClient, logger: Logger) 
       } as any
 
       const response: BroadcastResponse = {
-        beaconId: await client.beaconId,
+        senderId: await getSenderId(await client.beaconId),
         version: BEACON_VERSION,
         ...responseInput
       }
@@ -57,7 +58,11 @@ export const broadcastRequestHandler: (client: ExtensionClient, logger: Logger) 
       transactionHash: hash.res
     }
 
-    const response: BroadcastResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: BroadcastResponse = {
+      senderId: await getSenderId(await client.beaconId),
+      version: BEACON_VERSION,
+      ...responseInput
+    }
 
     sendToPage(response)
     sendResponseToPopup()

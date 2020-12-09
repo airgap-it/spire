@@ -1,4 +1,4 @@
-import { ConnectionContext, ExtensionMessage } from '@airgap/beacon-sdk'
+import { ConnectionContext, ExtensionMessage, Serializer, BeaconMessage } from '@airgap/beacon-sdk'
 
 import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
@@ -19,7 +19,7 @@ export class ToPageMessageHandler extends MessageHandler {
   ): Promise<void> {
     logger.log('ToPageMessageHandler', data)
     // Events need to be sent to the page
-    await this.client.sendToPage(data.payload)
+    await this.client.sendToPage((await new Serializer().deserialize(data.payload)) as BeaconMessage)
     if (connectionContext.extras && connectionContext.extras.sendResponse) {
       connectionContext.extras.sendResponse()
     }

@@ -7,6 +7,7 @@ import {
 } from '@airgap/beacon-sdk'
 import { Injectable, NgZone } from '@angular/core'
 import { AlertController, LoadingController, ModalController } from '@ionic/angular'
+import { ReplaySubject } from 'rxjs'
 import {
   Action,
   ActionInputTypesMap,
@@ -25,6 +26,7 @@ import { PopupService } from './popup.service'
 })
 export class ChromeMessagingService {
   private updateWalletCallback: (() => Promise<void>) | undefined
+  private accountPresent: boolean = false
 
   private readonly loader: Promise<HTMLIonLoadingElement> = this.loadingController.create({
     message: 'Preparing beacon message...'
@@ -40,6 +42,7 @@ export class ChromeMessagingService {
     chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
+      console.log('debug', message)
       if (message && message.target === 'toPage') {
         return // Ignore messages that are sent to the website
       }
@@ -140,19 +143,48 @@ export class ChromeMessagingService {
     })
   }
 
-  public async registerUpdateWalletCallback(callback: () => Promise<void>): Promise<void> {
+  public async registerUpdateWalletCallback(
+    wallets: ReplaySubject<WalletInfo[]>,
+    callback: () => Promise<void>
+  ): Promise<void> {
     this.updateWalletCallback = callback
+    wallets.subscribe((walletList: WalletInfo[]) => {
+      this.accountPresent = walletList && walletList.length > 0 ? true : false
+    })
   }
 
   private async beaconRequest(request: BeaconMessage, walletType: WalletType): Promise<void> {
-    const modal: HTMLIonModalElement = await this.modalController.create({
-      component: BeaconRequestPage,
-      componentProps: {
-        walletType,
-        request
-      }
+    if (!this.accountPresent) {
+      await this.showMissingAccountAlert()
+    } else {
+      const modal: HTMLIonModalElement = await this.modalController.create({
+        component: BeaconRequestPage,
+        componentProps: {
+          walletType,
+          request
+        }
+      })
+
+      return modal.present()
+    }
+  }
+
+  private async showMissingAccountAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {
+    const alert: HTMLIonAlertElement = await this.alertController.create({
+      header: 'No account found!',
+      message: 'You first need to pair your wallet with Beacon Extension',
+      buttons: [
+        ...buttons,
+        {
+          text: 'Ok'
+        }
+      ]
     })
 
-    return modal.present()
+    return alert.present()
+  }
+
+  public async dismiss(): Promise<void> {
+    this.modalController.dismiss().catch(console.error)
   }
 }

@@ -4,6 +4,7 @@ import {
   BeaconErrorType,
   BeaconMessage,
   BeaconMessageType,
+  getSenderId,
   OperationRequestOutput,
   OperationResponse,
   OperationResponseInput
@@ -44,7 +45,11 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
         errorType
       } as any
 
-      const response: OperationResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+      const response: OperationResponse = {
+        senderId: await getSenderId(await client.beaconId),
+        version: BEACON_VERSION,
+        ...responseInput
+      }
       sendToPage(response)
       sendResponseToPopup({
         error: { name: error.name, message: error.message, stack: error.stack }
@@ -81,7 +86,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       signedTx = await to(signer.sign(forgedTx.res, localWallet.info.mnemonic))
     } else {
       const signer: Signer = new LedgerSigner()
-      signedTx = await to(signer.sign(forgedTx.res))
+      signedTx = await to(signer.sign(forgedTx.res, wallet.derivationPath))
     }
 
     if (signedTx.err) {
@@ -103,7 +108,11 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
       transactionHash: hash.res
     }
 
-    const response: OperationResponse = { beaconId: await client.beaconId, version: BEACON_VERSION, ...responseInput }
+    const response: OperationResponse = {
+      senderId: await getSenderId(await client.beaconId),
+      version: BEACON_VERSION,
+      ...responseInput
+    }
 
     sendToPage(response)
     sendResponseToPopup()

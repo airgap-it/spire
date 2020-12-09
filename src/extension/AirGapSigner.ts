@@ -89,8 +89,8 @@ export class LocalSigner implements Signer {
 }
 
 export class LedgerSigner implements Signer {
-  public async sign(forgedTx: string): Promise<string> {
-    const signature: string = await bridge.signOperation(forgedTx)
+  public async sign(forgedTx: string, derivationPath: string): Promise<string> {
+    const signature: string = await bridge.signOperation(forgedTx, derivationPath)
 
     return forgedTx + signature
   }

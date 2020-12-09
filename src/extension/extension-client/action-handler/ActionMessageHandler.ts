@@ -1,4 +1,4 @@
-import { ChromeStorage, P2PTransport } from '@airgap/beacon-sdk'
+import { ChromeStorage, DappP2PTransport, ExtendedP2PPairingResponse } from '@airgap/beacon-sdk'
 
 import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
@@ -9,6 +9,7 @@ import { activeNetworkSetAction } from './active-network-set-action'
 import { activeWalletGetAction } from './active-wallet-get-action'
 import { activeWalletSetAction } from './active-wallet-set-action'
 import { beaconIdGetAction } from './beacon-id-get-action'
+import { derivationPathSetAction } from './derivation-path-set-action'
 import { ledgerInitAction } from './ledger-init-action'
 import { p2pInitAction } from './p2p-init-action'
 import { p2pPeerRemoveAction } from './p2p-peer-remove-action'
@@ -25,7 +26,8 @@ const logger: Logger = new Logger('action-message-handler.ts')
 export interface ActionContext<T extends Action> {
   data: ExtensionMessageInputPayload<T>
   client: ExtensionClient
-  p2pTransport: P2PTransport | undefined
+  p2pTransport: DappP2PTransport | undefined
+  p2pTransportConnectedCallback(newPeer: ExtendedP2PPairingResponse): Promise<void>
   storage: ChromeStorage
   sendResponse(message: ExtensionMessageOutputPayload<T>): void
 }
@@ -45,6 +47,7 @@ export class ActionMessageHandler {
     [Action.WALLETS_GET]: walletsGetAction(logger),
     [Action.ACTIVE_WALLET_GET]: activeWalletGetAction(logger),
     [Action.ACTIVE_WALLET_SET]: activeWalletSetAction(logger),
+    [Action.DERIVATION_PATH_SET]: derivationPathSetAction(logger),
     [Action.PERMISSION_DELETE]: permissionDeleteAction(logger),
     [Action.PERMISSIONS_GET]: permissionsGetAction(logger),
     [Action.ACTIVE_NETWORK_GET]: activeNetworkGetAction(logger),

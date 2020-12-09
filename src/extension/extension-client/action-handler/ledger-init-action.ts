@@ -15,10 +15,10 @@ export const ledgerInitAction: (logger: Logger) => ActionHandlerFunction<Action.
 
   let publicKey: string | undefined
   try {
-    publicKey = (await bridge.getAddress()).substr(2)
+    const derivationPath = await context.storage.get('DERIVATION_PATH' as any)
+    publicKey = (await bridge.getAddress(derivationPath)).substr(2)
   } catch (error) {
     context.sendResponse({ error })
-
     return
   }
 

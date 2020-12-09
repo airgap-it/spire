@@ -1,13 +1,13 @@
 import {
+  BeaconErrorType,
   BeaconMessageType,
   BroadcastRequestOutput,
-  ChromeMessageTransport,
+  ChromeStorage,
   Network,
   OperationRequestOutput,
   PermissionRequestOutput,
   PermissionScope,
-  SignPayloadRequestOutput,
-  Transport
+  SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
@@ -17,6 +17,7 @@ import { ChromeMessagingService } from 'src/app/services/chrome-messaging.servic
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { PopupService } from 'src/app/services/popup.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
+import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
 
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
@@ -45,7 +46,11 @@ export class BeaconRequestPage implements OnInit {
 
   public responseHandler: (() => Promise<void>) | undefined
 
-  public transport: Transport = new ChromeMessageTransport('Beacon Extension')
+  public transport: WalletChromeMessageTransport = new WalletChromeMessageTransport(
+    'Beacon Extension',
+    undefined as any,
+    new ChromeStorage()
+  )
 
   public confirmButtonText: string = 'Confirm'
 
@@ -89,6 +94,13 @@ export class BeaconRequestPage implements OnInit {
       this.requesterName = this.request.appMetadata.name
       await this.broadcastRequest(this.request)
     }
+  }
+
+  public async cancel(): Promise<void> {
+    if (this.request) {
+      await this.sendAbortedError(this.request)
+    }
+    this.dismiss().catch(console.error)
   }
 
   public async dismiss(): Promise<void> {
@@ -279,5 +291,13 @@ export class BeaconRequestPage implements OnInit {
 
   private openUrl(url: string): void {
     window.open(url, '_blank')
+  }
+
+  private async sendAbortedError(
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
+  ): Promise<void> {
+    await this.sendResponse(request, {
+      errorType: BeaconErrorType.ABORTED_ERROR
+    })
   }
 }
