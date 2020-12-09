@@ -11,7 +11,7 @@ export const responseAction: (logger: Logger) => ActionHandlerFunction<Action.RE
 ): ActionHandlerFunction<Action.RESPONSE> => async (context: ActionContext<Action.RESPONSE>): Promise<void> => {
   logger.log('responseAction', context.data)
   const beaconMessageHandler: BeaconMessageHandler = new BeaconMessageHandler(context.client)
-  const isError: boolean = Boolean((context.data.data.extras as any).errorType)
+  const isError: boolean = Boolean(context.data.data.extras && (context.data.data.extras as any).errorType)
   const handler: BeaconMessageHandlerFunction = await beaconMessageHandler.getHandler(
     isError ? BeaconMessageType.Error : (context.data.data.request as any).type
   )
