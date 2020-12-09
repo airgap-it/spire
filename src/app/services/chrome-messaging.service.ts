@@ -143,7 +143,10 @@ export class ChromeMessagingService {
     })
   }
 
-  public async registerUpdateWalletCallback(wallets: ReplaySubject<WalletInfo[]>, callback: () => Promise<void>): Promise<void> {
+  public async registerUpdateWalletCallback(
+    wallets: ReplaySubject<WalletInfo[]>,
+    callback: () => Promise<void>
+  ): Promise<void> {
     this.updateWalletCallback = callback
     wallets.asObservable().subscribe(wallets => {
       this.accountPresent = wallets && wallets.length > 0 ? true : false
@@ -152,9 +155,8 @@ export class ChromeMessagingService {
 
   private async beaconRequest(request: BeaconMessage, walletType: WalletType): Promise<void> {
     if (!this.accountPresent) {
-      this.showMissingAccountAlert()
-    }
-    else {
+      await this.showMissingAccountAlert()
+    } else {
       const modal: HTMLIonModalElement = await this.modalController.create({
         component: BeaconRequestPage,
         componentProps: {
@@ -162,6 +164,7 @@ export class ChromeMessagingService {
           request
         }
       })
+
       return modal.present()
     }
   }
@@ -178,11 +181,10 @@ export class ChromeMessagingService {
       ]
     })
 
-    await alert.present()
+    return alert.present()
   }
 
   public async dismiss(): Promise<void> {
     this.modalController.dismiss().catch(console.error)
   }
-
 }
