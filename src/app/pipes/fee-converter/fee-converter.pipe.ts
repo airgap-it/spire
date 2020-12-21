@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core'
-import { getProtocolByIdentifier } from 'airgap-coin-lib'
-import { ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { getProtocolByIdentifier } from '@airgap/coinlib-core'
+import { ProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { BigNumber } from 'bignumber.js'
 
 @Pipe({

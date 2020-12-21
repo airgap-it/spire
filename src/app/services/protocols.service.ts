@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { addSupportedProtocol, TezosProtocol } from 'airgap-coin-lib'
+import { addSupportedProtocol, TezosProtocol } from '@airgap/coinlib-core'
 
 @Injectable({
   providedIn: 'root'

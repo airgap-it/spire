@@ -9,7 +9,7 @@ import {
   OperationResponse,
   OperationResponseInput
 } from '@airgap/beacon-sdk'
-import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
+import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
 import { LedgerSigner, LocalSigner } from 'src/extension/AirGapSigner'
 
 import { WalletInfo, WalletType } from '../Actions'

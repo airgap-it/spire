@@ -1,6 +1,6 @@
 import { Network } from '@airgap/beacon-sdk'
 import { Injectable } from '@angular/core'
-import { TezosProtocol } from 'airgap-coin-lib'
+import { TezosProtocol } from '@airgap/coinlib-core'
 import * as bip39 from 'bip39'
 import { Observable, ReplaySubject } from 'rxjs'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'

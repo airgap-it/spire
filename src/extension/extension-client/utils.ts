@@ -5,9 +5,9 @@ import {
   TezosProtocolNetwork,
   TezosProtocolNetworkExtras,
   TezosProtocolOptions
-} from 'airgap-coin-lib'
-import { TezosNetwork } from 'airgap-coin-lib/dist/protocols/tezos/TezosProtocol'
-import { NetworkType as AirGapNetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
+} from '@airgap/coinlib-core'
+import { TezosNetwork } from '@airgap/coinlib-core/protocols/tezos/TezosProtocol'
+import { NetworkType as AirGapNetworkType } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 
 export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string; apiUrl: string }> = async (
   network: Network
@@ -56,9 +56,9 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
   }
   const tezosNetworks: { [key in NetworkType]: TezosNetwork } = {
     [NetworkType.MAINNET]: TezosNetwork.MAINNET,
-    [NetworkType.CARTHAGENET]: TezosNetwork.CARTHAGENET,
-    [NetworkType.DELPHINET]: TezosNetwork.CARTHAGENET,
-    [NetworkType.CUSTOM]: TezosNetwork.CARTHAGENET
+    [NetworkType.CARTHAGENET]: TezosNetwork.DELPHINET,
+    [NetworkType.DELPHINET]: TezosNetwork.DELPHINET,
+    [NetworkType.CUSTOM]: TezosNetwork.DELPHINET
   }
 
   const name: string = names[network.type]

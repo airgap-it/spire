@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core'
-import { IAirGapTransaction } from 'airgap-coin-lib'
+import { IAirGapTransaction } from '@airgap/coinlib-core'
 
 @Component({
   selector: 'beacon-from-to',

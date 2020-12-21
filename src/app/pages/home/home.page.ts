@@ -1,8 +1,8 @@
 import { Network } from '@airgap/beacon-sdk'
 import { ChangeDetectorRef, Component } from '@angular/core'
 import { ModalController } from '@ionic/angular'
-import { TezosProtocol } from 'airgap-coin-lib'
-import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { TezosProtocol } from '@airgap/coinlib-core'
+import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { SettingsService } from 'src/app/services/settings.service'
@@ -56,8 +56,8 @@ export class HomePage {
         wallet.type === WalletType.LOCAL_MNEMONIC
           ? 'Local Mnemonic'
           : wallet.type === WalletType.LEDGER
-          ? 'Ledger'
-          : 'Beacon P2P'
+            ? 'Ledger'
+            : 'Beacon P2P'
 
       if (wallet.type !== WalletType.P2P) {
         await this.updateBalanceAndLink()
@@ -106,7 +106,7 @@ export class HomePage {
       component: WalletSelectPage
     })
 
-    modal.onDidDismiss().then(() => {})
+    modal.onDidDismiss().then(() => { })
 
     return modal.present()
   }

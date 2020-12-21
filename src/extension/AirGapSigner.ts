@@ -1,8 +1,8 @@
 import { Network, TezosOperation } from '@airgap/beacon-sdk'
-import { TezosProtocol } from 'airgap-coin-lib'
-import * as bs58check from 'airgap-coin-lib/dist/dependencies/src/bs58check-2.1.2'
-import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
-import { RawTezosTransaction } from 'airgap-coin-lib/dist/serializer/types'
+import { TezosProtocol } from '@airgap/coinlib-core'
+import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.2'
+import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
+import { RawTezosTransaction } from '@airgap/coinlib-core/serializer/types'
 import Axios, { AxiosError, AxiosResponse } from 'axios'
 
 import { BeaconLedgerBridge } from './extension-client/ledger-bridge'
