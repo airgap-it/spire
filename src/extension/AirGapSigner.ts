@@ -1,5 +1,5 @@
 import { Network, TezosOperation } from '@airgap/beacon-sdk'
-import { TezosProtocol } from '@airgap/coinlib-core'
+import { TezosCryptoClient, TezosProtocol } from '@airgap/coinlib-core'
 import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.2'
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
 import { RawTezosTransaction } from '@airgap/coinlib-core/serializer/types'
@@ -98,9 +98,13 @@ export class LedgerSigner implements Signer {
   public async signMessage(message: string): Promise<string> {
     logger.log('Signing Message:', message)
 
-    const rawSignature: string = await bridge.signHash(Buffer.from(message).toString('hex'))
+    const tezosCryptoClient = new TezosCryptoClient()
 
-    const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
+    const hexMessage: string = (await tezosCryptoClient.toBuffer(message)).toString('hex')
+
+    const rawSignature: string = await bridge.signHash(hexMessage)
+
+    const edsigPrefix: Uint8Array = tezosCryptoClient.edsigPrefix
 
     const edSignature: string = bs58check.encode(
       Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(rawSignature, 'hex')])
