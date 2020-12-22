@@ -84,3 +84,13 @@ app-add-ledger-connection {
     max-width: 100% !important;
   }
 }
+
+.rawdata--container {
+  pre {
+    background-color: var(--ion-color-light);
+    padding: 8px;
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap;
+    word-wrap: break-word;
+  }
+}
