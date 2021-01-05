@@ -100,9 +100,10 @@ export class LedgerSigner implements Signer {
 
     const tezosCryptoClient = new TezosCryptoClient()
 
-    const hexMessage: string = (await tezosCryptoClient.toBuffer(message)).toString('hex')
+    const bufferMessage: Buffer = await tezosCryptoClient.toBuffer(message)
+    const hash: Uint8Array = await tezosCryptoClient.hash(bufferMessage)
 
-    const rawSignature: string = await bridge.signHash(hexMessage)
+    const rawSignature: string = await bridge.signHash(Buffer.from(hash).toString('hex'))
 
     const edsigPrefix: Uint8Array = tezosCryptoClient.edsigPrefix
 
