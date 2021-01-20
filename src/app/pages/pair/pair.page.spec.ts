@@ -7,16 +7,18 @@ describe('PairPage', () => {
   let component: PairPage
   let fixture: ComponentFixture<PairPage>
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [PairPage],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents()
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [PairPage],
+        imports: [IonicModule.forRoot()]
+      }).compileComponents()
 
-    fixture = TestBed.createComponent(PairPage)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  }))
+      fixture = TestBed.createComponent(PairPage)
+      component = fixture.componentInstance
+      fixture.detectChanges()
+    })
+  )
 
   it('should create', () => {
     expect(component).toBeTruthy()

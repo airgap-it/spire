@@ -7,16 +7,18 @@ describe('AddLedgerConnectionPage', () => {
   let component: AddLedgerConnectionPage
   let fixture: ComponentFixture<AddLedgerConnectionPage>
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [AddLedgerConnectionPage],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents()
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [AddLedgerConnectionPage],
+        imports: [IonicModule.forRoot()]
+      }).compileComponents()
 
-    fixture = TestBed.createComponent(AddLedgerConnectionPage)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  }))
+      fixture = TestBed.createComponent(AddLedgerConnectionPage)
+      component = fixture.componentInstance
+      fixture.detectChanges()
+    })
+  )
 
   it('should create', () => {
     expect(component).toBeTruthy()

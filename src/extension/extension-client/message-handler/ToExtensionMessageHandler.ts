@@ -79,7 +79,8 @@ export class ToExtensionMessageHandler extends MessageHandler {
         const responseInput = {
           id: deserialized.id,
           type: BeaconMessageType.OperationResponse,
-          errorType
+          errorType,
+          errorData: error
         } as any
 
         const response: OperationResponse = {
@@ -109,7 +110,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
-        ; (async (): Promise<void> => {
+        ;(async (): Promise<void> => {
           const operationRequest: OperationRequestOutput = enriched.res as OperationRequestOutput
 
           const wallet: WalletInfo | undefined = await this.client.getWalletByAddress(operationRequest.sourceAddress)

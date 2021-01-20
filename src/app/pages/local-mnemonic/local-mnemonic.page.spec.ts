@@ -8,16 +8,18 @@ describe('ListPage', () => {
   let fixture: ComponentFixture<LocalMnemonicPage>
   let listPage: HTMLElement
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [LocalMnemonicPage],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents()
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [LocalMnemonicPage],
+        imports: [IonicModule.forRoot()]
+      }).compileComponents()
 
-    fixture = TestBed.createComponent(LocalMnemonicPage)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  }))
+      fixture = TestBed.createComponent(LocalMnemonicPage)
+      component = fixture.componentInstance
+      fixture.detectChanges()
+    })
+  )
 
   it('should create', () => {
     expect(component).toBeTruthy()

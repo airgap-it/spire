@@ -7,16 +7,18 @@ describe('FromToComponent', () => {
   let component: FromToComponent
   let fixture: ComponentFixture<FromToComponent>
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [FromToComponent],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents()
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [FromToComponent],
+        imports: [IonicModule.forRoot()]
+      }).compileComponents()
 
-    fixture = TestBed.createComponent(FromToComponent)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  }))
+      fixture = TestBed.createComponent(FromToComponent)
+      component = fixture.componentInstance
+      fixture.detectChanges()
+    })
+  )
 
   it('should create', () => {
     expect(component).toBeTruthy()

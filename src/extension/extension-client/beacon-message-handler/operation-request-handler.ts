@@ -34,15 +34,17 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
 
     let responseInput: OperationResponseInput
 
-    const sendError: (error: Error, errorType: BeaconErrorType) => Promise<void> = async (
+    const sendError: (error: Error, errorType: BeaconErrorType, errorData?: any) => Promise<void> = async (
       error: Error,
-      errorType: BeaconErrorType
+      errorType: BeaconErrorType,
+      errorData?: any
     ): Promise<void> => {
       logger.log('error', error)
       responseInput = {
         id: operationRequest.id,
         type: BeaconMessageType.OperationResponse,
-        errorType
+        errorType,
+        errorData
       } as any
 
       const response: OperationResponse = {
@@ -96,7 +98,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
 
     const hash: To<string> = await to(client.operationProvider.broadcast(operationRequest.network, signedTx.res))
     if (hash.err) {
-      await sendError(hash.err, BeaconErrorType.TRANSACTION_INVALID_ERROR)
+      await sendError(hash.err, BeaconErrorType.TRANSACTION_INVALID_ERROR, forgedTx.err)
       throw forgedTx.err
     }
 

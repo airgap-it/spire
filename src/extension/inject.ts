@@ -8,6 +8,8 @@ enum ExtensionMessageTarget {
   EXTENSION = "toExtension"
 }
 
+(window as any).beaconSdkDebugEnabled = true // TODO: Set in settings
+
 // Handle message from page and redirect to background.js script
 window.addEventListener(
   'message',
@@ -24,13 +26,15 @@ window.addEventListener(
     if (data && data.target === ExtensionMessageTarget.EXTENSION) {
       if (typeof data.payload === 'string' && data.payload === 'ping') {
         // To detect if extension is installed or not, we answer pings immediately
-        window.postMessage({ target: ExtensionMessageTarget.PAGE, payload: 'pong', sender: {
-          id: chrome.runtime.id, // The ID of the extension
-          name: 'Beacon Extension', // The name of the extension, eg "Beacon Extension"
-          shortName: 'Beacon Extension'
-          // iconUrl: '' // URL to an icon
-          // color: '' // The main color of the extension
-        } }, '*')
+        window.postMessage({
+          target: ExtensionMessageTarget.PAGE, payload: 'pong', sender: {
+            id: chrome.runtime.id, // The ID of the extension
+            name: 'Beacon Extension', // The name of the extension, eg "Beacon Extension"
+            shortName: 'Beacon Extension'
+            // iconUrl: '' // URL to an icon
+            // color: '' // The main color of the extension
+          }
+        }, '*')
       } else {
         data.sender = event.origin
 
@@ -41,7 +45,7 @@ window.addEventListener(
           chrome.runtime.sendMessage(data, (responseData?: unknown) => {
             // tslint:disable-next-line:no-console
             console.log('sendMessage callback', responseData)
-          })  
+          })
         } else {
           // tslint:disable-next-line:no-console
           // console.log('BEACON EXTENSION (inject.ts): sending message from page to background (NOT addressed to us)', data)
