@@ -11,14 +11,14 @@
 
 <ion-content class="ion-padding">
   <h3>Scan the QR code with your wallet</h3>
-  <p>In your mobile wallet, open the QR scanner to pair with Beacon Extension.</p>
+  <p>In your mobile wallet, open the QR scanner to pair with Spire.</p>
 
-  <ion-row class="ion-justify-content-center ion-padding-vertical">
+  <ion-row class="ion-justify-content-center ion-padding-vertical" (click)="copyToClipboard()">
     <qr-code *ngIf="handshakeData" [value]="handshakeData" [size]="256" [level]="'M'"></qr-code>
   </ion-row>
 
   <h5 class="ion-padding-top">Do you have a wallet on the same device?</h5>
-  <p>If you have a wallet installed on this device like Galleon, you can also pair it with Beacon Extension.</p>
+  <p>If you have a wallet installed on this device like Galleon, you can also pair it with Spire.</p>
 
   <ion-button (click)="dismiss()" expand="block" disabled>Pair Same Device</ion-button>
 </ion-content>
