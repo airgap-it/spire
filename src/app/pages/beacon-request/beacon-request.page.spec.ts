@@ -7,16 +7,18 @@ describe('BeaconRequestPage', () => {
   let component: BeaconRequestPage
   let fixture: ComponentFixture<BeaconRequestPage>
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [BeaconRequestPage],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents()
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [BeaconRequestPage],
+        imports: [IonicModule.forRoot()]
+      }).compileComponents()
 
-    fixture = TestBed.createComponent(BeaconRequestPage)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  }))
+      fixture = TestBed.createComponent(BeaconRequestPage)
+      component = fixture.componentInstance
+      fixture.detectChanges()
+    })
+  )
 
   it('should create', () => {
     expect(component).toBeTruthy()

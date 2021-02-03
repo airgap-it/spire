@@ -56,8 +56,8 @@ export class HomePage {
         wallet.type === WalletType.LOCAL_MNEMONIC
           ? 'Local Mnemonic'
           : wallet.type === WalletType.LEDGER
-            ? 'Ledger'
-            : 'Beacon P2P'
+          ? 'Ledger'
+          : 'Beacon P2P'
 
       if (wallet.type !== WalletType.P2P) {
         await this.updateBalanceAndLink()
@@ -106,7 +106,7 @@ export class HomePage {
       component: WalletSelectPage
     })
 
-    modal.onDidDismiss().then(() => { })
+    modal.onDidDismiss().then(() => {})
 
     return modal.present()
   }

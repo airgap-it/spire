@@ -57,7 +57,6 @@ export class WalletService {
     this._selectedDerivationPath.next(derivationPath)
   }
 
-
   public async getWallets(): Promise<void> {
     this.chromeMessagingService
       .sendChromeMessage(Action.WALLETS_GET, undefined)
