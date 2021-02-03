@@ -11,7 +11,7 @@ import {
 } from '@airgap/beacon-sdk'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
-import { IAirGapTransaction, TezosProtocol } from 'airgap-coin-lib'
+import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
@@ -168,7 +168,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async operationRequest(request: OperationRequestOutput): Promise<void> {
-    this.transactions = this.protocol.getAirGapTxFromWrappedOperations({
+    this.transactions = await this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
     })

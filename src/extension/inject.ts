@@ -27,7 +27,9 @@ window.addEventListener(
         window.postMessage({ target: ExtensionMessageTarget.PAGE, payload: 'pong', sender: {
           id: chrome.runtime.id, // The ID of the extension
           name: 'Beacon Extension', // The name of the extension, eg "Beacon Extension"
-          // iconUrl: '' URL to an icon
+          shortName: 'Beacon Extension'
+          // iconUrl: '' // URL to an icon
+          // color: '' // The main color of the extension
         } }, '*')
       } else {
         data.sender = event.origin

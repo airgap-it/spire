@@ -1,5 +1,5 @@
 import { Network, TezosOperation } from '@airgap/beacon-sdk'
-import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
+import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
 
 export interface OperationProvider {
   prepareOperations(

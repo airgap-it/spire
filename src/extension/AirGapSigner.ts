@@ -1,8 +1,8 @@
 import { Network, TezosOperation } from '@airgap/beacon-sdk'
-import { TezosProtocol } from 'airgap-coin-lib'
-import * as bs58check from 'airgap-coin-lib/dist/dependencies/src/bs58check-2.1.2'
-import { TezosWrappedOperation } from 'airgap-coin-lib/dist/protocols/tezos/types/TezosWrappedOperation'
-import { RawTezosTransaction } from 'airgap-coin-lib/dist/serializer/types'
+import { TezosCryptoClient, TezosProtocol } from '@airgap/coinlib-core'
+import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.2'
+import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
+import { RawTezosTransaction } from '@airgap/coinlib-core/serializer/types'
 import Axios, { AxiosError, AxiosResponse } from 'axios'
 
 import { BeaconLedgerBridge } from './extension-client/ledger-bridge'
@@ -98,9 +98,14 @@ export class LedgerSigner implements Signer {
   public async signMessage(message: string): Promise<string> {
     logger.log('Signing Message:', message)
 
-    const rawSignature: string = await bridge.signHash(Buffer.from(message).toString('hex'))
+    const tezosCryptoClient = new TezosCryptoClient()
 
-    const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
+    const bufferMessage: Buffer = await tezosCryptoClient.toBuffer(message)
+    const hash: Uint8Array = await tezosCryptoClient.hash(bufferMessage)
+
+    const rawSignature: string = await bridge.signHash(Buffer.from(hash).toString('hex'))
+
+    const edsigPrefix: Uint8Array = tezosCryptoClient.edsigPrefix
 
     const edSignature: string = bs58check.encode(
       Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(rawSignature, 'hex')])
