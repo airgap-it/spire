@@ -19,7 +19,7 @@ chrome.runtime.onInstalled.addListener(({ reason }: chrome.runtime.InstalledDeta
   }
 })
 
-const client: ExtensionClient = new ExtensionClient({ name: 'Beacon Extension' })
+const client: ExtensionClient = new ExtensionClient({ name: 'Spire' })
 client
   .addListener((message: unknown) => {
     logger.log('received message', message)

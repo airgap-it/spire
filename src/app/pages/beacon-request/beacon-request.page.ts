@@ -47,7 +47,7 @@ export class BeaconRequestPage implements OnInit {
   public responseHandler: (() => Promise<void>) | undefined
 
   public transport: WalletChromeMessageTransport = new WalletChromeMessageTransport(
-    'Beacon Extension',
+    'Spire',
     undefined as any,
     new ChromeStorage()
   )

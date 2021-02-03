@@ -42,13 +42,13 @@ build_extension:
   script:
     - docker build -f build/extension/Dockerfile -t $GOOGLE_TAG_EXTENSION_CURRENT --build-arg VERSION="$VERSION"  --build-arg CI_PIPELINE_ID="$CI_PIPELINE_ID" .
     - docker run --name extension-$CI_PIPELINE_ID $GOOGLE_TAG_EXTENSION_CURRENT echo "container ran."
-    - docker cp extension-$CI_PIPELINE_ID:/app/www beacon-extension
+    - docker cp extension-$CI_PIPELINE_ID:/app/www spire
   after_script:
     - docker rm -f extension-$CI_PIPELINE_ID || true
   artifacts:
-    name: 'beacon-extension'
+    name: 'spire'
     paths:
-      - beacon-extension/
+      - spire/
   tags:
     - docker
 # qa:
