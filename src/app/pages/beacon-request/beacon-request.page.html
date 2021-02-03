@@ -91,11 +91,13 @@
 
     <div *ngIf="request.type === 'sign_payload_request'" class="request--container">
       <ng-container>
-        You are about to sign the following payload. Only sign payloads from a trusted source. Signing untrusted data
-        could mean you lose all your funds!
-        <br />
-        <br />
-        <pre>{{ request.payload }}</pre>
+        <p class="ion-padding-top">
+          You are about to sign the following payload. Only sign payloads from a trusted source. Signing untrusted data
+          could mean you lose all your funds!
+        </p>
+        <ion-row class="rawdata--container ion-margin-bottom">
+          <pre>{{ request.payload }}</pre>
+        </ion-row>
       </ng-container>
     </div>
 
@@ -107,7 +109,7 @@
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-button fill="outline" color="primary" (click)="cancel()">
-        Close
+        Reject
       </ion-button>
       <ion-button color="primary" (click)="done()">
         {{ confirmButtonText }}
