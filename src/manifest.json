@@ -3,9 +3,9 @@
   "version": "2.0.2",
   "description": "Spire allows you to interact with Tezos dApps that support the Beacon SDK.",
   "icons": {
-    "16": "assets/icon/beacon_logo-16px.png",
-    "48": "assets/icon/beacon_logo-48px.png",
-    "128": "assets/icon/beacon_logo-128px.png"
+    "16": "assets/icon/spire-logo-16px.png",
+    "48": "assets/icon/spire-logo-48px.png",
+    "128": "assets/icon/spire-logo-128px.png"
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "background": {
@@ -24,8 +24,8 @@
   "browser_action": {
     "default_popup": "index.html",
     "default_icon": {
-      "19": "assets/icon/beacon_logo-19px.png",
-      "38": "assets/icon/beacon_logo-38px.png"
+      "19": "assets/icon/spire-logo-19px.png",
+      "38": "assets/icon/spire-logo-38px.png"
     }
   },
   "manifest_version": 2
