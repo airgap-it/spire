@@ -172,7 +172,7 @@ export class ChromeMessagingService {
   private async showMissingAccountAlert(buttons: { text: string; handler(): void }[] = []): Promise<void> {
     const alert: HTMLIonAlertElement = await this.alertController.create({
       header: 'No account found!',
-      message: 'You first need to pair your wallet with Beacon Extension',
+      message: 'You first need to pair your wallet with Spire',
       buttons: [
         ...buttons,
         {

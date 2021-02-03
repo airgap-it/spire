@@ -1,5 +1,5 @@
 {
-  "name": "beacon-extension",
+  "name": "spire",
   "version": "2.0.2",
   "author": "AirGap",
   "homepage": "https://airgap.it/",
@@ -84,7 +84,7 @@
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~4.0.5"
   },
-  "description": "Beacon connects Tezos decentralized applications with wallets.",
+  "description": "Spire allows you to interact with Tezos dApps that support the Beacon SDK.",
   "browser": {
     "fs": false
   }

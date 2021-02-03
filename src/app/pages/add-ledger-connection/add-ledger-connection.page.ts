@@ -18,7 +18,7 @@ const enum DerivationPathTypes {
 })
 export class AddLedgerConnectionPage implements OnInit {
   public title: string = 'Pair Ledger'
-  public confirmText: string = 'Confirm Public Key Hash to share your Tezos address with Beacon Extension.'
+  public confirmText: string = 'Confirm Public Key Hash to share your Tezos address with Spire.'
 
   public targetMethod: Action = Action.LEDGER_INIT
   public request: unknown | undefined

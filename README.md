@@ -1,12 +1,8 @@
-# Beacon Extension
-
-> Connect Wallets with dApps on Tezos
-
-[Beacon](https://walletbeacon.io) is the implementation of the wallet interaction standard [tzip-10](https://gitlab.com/tzip/tzip/blob/master/proposals/tzip-10/tzip-10.md) which describes the connnection of a dApp with a wallet.
+# Spire
 
 ## Intro
 
-The Beacon Extension implements the [beacon-sdk](https://github.com/airgap-it/beacon-sdk) to interact with dApps that have implemented the beacon-sdk and use the various signing methods (Wallets, Ledger and local secret) to sign and broadcast various message types.
+Spire is a browser extension wallet that can interact with dApps using the [beacon-sdk](https://github.com/airgap-it/beacon-sdk). It supports various signing methods (Beacon-enabled wallets, Ledger and local secret) to sign and broadcast different message types.
 
 ## Requirements
 
@@ -20,8 +16,8 @@ NodeJS >= 10
 First follow the steps below to install the dependencies:
 
 ```bash
-$ git clone https://github.com/airgap-it/beacon-extension.git
-$ cd beacon-extension
+$ git clone https://github.com/airgap-it/spire.git
+$ cd spire
 $ npm install -g ionic
 $ npm install
 ```
