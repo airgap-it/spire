@@ -21,7 +21,7 @@ interface BeaconLedgerBridgeVersionResponse {
   bakingApp: boolean
 }
 
-export class BeaconLedgerBridge {
+class BeaconLedgerBridge {
   private static readonly TARGET: string = 'BEACON-SDK-LEDGER-BRIDGE'
 
   private readonly iframe: HTMLIFrameElement
@@ -114,3 +114,5 @@ export class BeaconLedgerBridge {
     return uint32.toString(16)
   }
 }
+
+export const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')

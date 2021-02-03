@@ -5,14 +5,12 @@ import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/type
 import { RawTezosTransaction } from '@airgap/coinlib-core/serializer/types'
 import Axios, { AxiosError, AxiosResponse } from 'axios'
 
-import { BeaconLedgerBridge } from './extension-client/ledger-bridge'
+import { bridge } from './extension-client/ledger-bridge'
 import { Logger } from './extension-client/Logger'
 import { OperationProvider, Signer } from './extension-client/Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from './extension-client/utils'
 
 const logger: Logger = new Logger('AirGap Signer')
-
-const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
 
 // tslint:disable:max-classes-per-file
 
