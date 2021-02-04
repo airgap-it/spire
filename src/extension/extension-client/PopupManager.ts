@@ -24,6 +24,8 @@ export class PopupManager {
 
   private readonly queue: unknown[] = []
 
+  private closeCallback?: () => Promise<void>
+
   constructor() {
     chrome.runtime.onMessage.addListener((_message: unknown, sender: chrome.runtime.MessageSender) => {
       if (sender.url === chrome.extension.getURL('index.html')) {
@@ -50,6 +52,10 @@ export class PopupManager {
       logger.log('constructor', 'popup removed!', removedPopupId)
       this.popupId = undefined
       this.popupState = PopupState.CLOSED
+      if (this.closeCallback) {
+        logger.log('constructor', 'close callback called', removedPopupId)
+        this.closeCallback()
+      }
     })
   }
 
@@ -103,7 +109,9 @@ export class PopupManager {
   /**
    * This method will start the popup if it's closed
    */
-  public async sendToPopup(message: ExtensionMessage<unknown>): Promise<void> {
+  public async sendToPopup(message: ExtensionMessage<unknown>, closeCallback: () => Promise<void>): Promise<void> {
+    this.closeCallback = closeCallback
+
     if (this.popupId) {
       chrome.windows.update(this.popupId, { focused: true })
     }

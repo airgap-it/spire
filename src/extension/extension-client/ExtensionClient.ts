@@ -3,18 +3,22 @@ import {
   AppMetadataManager,
   BeaconBaseMessage,
   BeaconClient,
+  BeaconErrorType,
   BeaconEvent,
   BeaconMessage,
   BeaconMessageType,
+  BEACON_VERSION,
   ChromeStorage,
   ConnectionContext,
   DappP2PTransport,
+  ErrorResponse,
   ExtendedP2PPairingResponse,
   ExtendedPostMessagePairingResponse,
   ExtensionMessage,
   ExtensionMessageTarget,
   getAccountIdentifier,
   getAddressFromPublicKey,
+  getSenderId,
   PermissionInfo,
   PermissionManager,
   PermissionRequest,
@@ -114,7 +118,9 @@ export class ExtensionClient extends BeaconClient {
   }
 
   public async sendToPopup(message: ExtensionMessage<unknown>): Promise<void> {
-    return this.popupManager.sendToPopup(message)
+    return this.popupManager.sendToPopup(message, async () => {
+      this.popupClosed(message)
+    })
   }
 
   public async sendToBeacon(message: string): Promise<void> {
@@ -138,41 +144,41 @@ export class ExtensionClient extends BeaconClient {
     data: ExtensionMessage<ExtensionMessageInputPayload<Action>>,
     connectionContext: ConnectionContext
   ): Promise<void> => {
-    logger.log('handleMessage', data, connectionContext)
-    const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
+      logger.log('handleMessage', data, connectionContext)
+      const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
 
-    const p2pConnectedCallback = async (newPeer: ExtendedP2PPairingResponse): Promise<void> => {
-      console.log('CONNECTED')
-      if (newPeer) {
-        const walletInfo: WalletInfo<WalletType.P2P> = {
-          address: '',
-          publicKey: '',
-          type: WalletType.P2P,
-          added: new Date().getTime(),
-          info: newPeer
+      const p2pConnectedCallback = async (newPeer: ExtendedP2PPairingResponse): Promise<void> => {
+        console.log('CONNECTED')
+        if (newPeer) {
+          const walletInfo: WalletInfo<WalletType.P2P> = {
+            address: '',
+            publicKey: '',
+            type: WalletType.P2P,
+            added: new Date().getTime(),
+            info: newPeer
+          }
+          await this.addWallet(walletInfo)
+          await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
         }
-        await this.addWallet(walletInfo)
-        await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
+
+        this.popupManager
+          .sendToActivePopup({
+            target: ExtensionMessageTarget.EXTENSION,
+            sender: 'background',
+            payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
+          })
+          .catch(console.error)
       }
 
-      this.popupManager
-        .sendToActivePopup({
-          target: ExtensionMessageTarget.EXTENSION,
-          sender: 'background',
-          payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
-        })
-        .catch(console.error)
+      await handler({
+        data: data.payload,
+        sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
+        client: this,
+        p2pTransport: this.p2pTransport,
+        p2pTransportConnectedCallback: p2pConnectedCallback,
+        storage: this.storage
+      })
     }
-
-    await handler({
-      data: data.payload,
-      sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
-      client: this,
-      p2pTransport: this.p2pTransport,
-      p2pTransportConnectedCallback: p2pConnectedCallback,
-      storage: this.storage
-    })
-  }
 
   public async addListener(listener: Function): Promise<any> {
     this.listeners.push(listener)
@@ -301,9 +307,9 @@ export class ExtensionClient extends BeaconClient {
     const request:
       | { message: BeaconMessage; connectionContext: ConnectionContext }
       | undefined = this.pendingRequests.find(
-      (requestElement: { message: BeaconMessage; connectionContext: ConnectionContext }) =>
-        requestElement.message.id === response.id
-    )
+        (requestElement: { message: BeaconMessage; connectionContext: ConnectionContext }) =>
+          requestElement.message.id === response.id
+      )
     if (!request) {
       throw new Error('Matching request not found')
     }
@@ -315,7 +321,7 @@ export class ExtensionClient extends BeaconClient {
     }
 
     // TODO: Remove v1 compatibility in later version
-    ;(beaconMessage as any).beaconId = beaconMessage.senderId
+    ; (beaconMessage as any).beaconId = beaconMessage.senderId
 
     const serialized = await new Serializer().serialize(beaconMessage)
 
@@ -328,6 +334,27 @@ export class ExtensionClient extends BeaconClient {
       const peer = peers.find(peerEl => peerEl.senderId === senderId)
 
       await this.transport.sendToTabs(peer ? peer.publicKey : undefined, serialized)
+    }
+  }
+
+  private async popupClosed(message: ExtensionMessage<unknown>): Promise<void> {
+    try {
+      const payload = message.payload
+      if (typeof payload === 'string') {
+        const serialized = await new Serializer().deserialize(payload)
+        const id = (serialized as any).id
+        const response: ErrorResponse = {
+          id,
+          senderId: await getSenderId(await this.beaconId),
+          version: BEACON_VERSION,
+          type: BeaconMessageType.Error,
+          errorType: BeaconErrorType.ABORTED_ERROR
+        }
+
+        this.sendToPage(response, false)
+      }
+    } catch (e) {
+      logger.log('popupClosed', e)
     }
   }
 }
