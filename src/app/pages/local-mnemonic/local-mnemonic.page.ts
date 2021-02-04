@@ -36,8 +36,9 @@ export class LocalMnemonicPage {
     })
   }
 
-  public async mnemonicFocused(): Promise<void> {
+  public async keyDown(): Promise<void> {
     this.saveButtonDisabled = false
+    this.ref.detectChanges()
   }
 
   public async generateMnemonic(): Promise<void> {

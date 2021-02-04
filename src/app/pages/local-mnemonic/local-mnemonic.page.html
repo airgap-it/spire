@@ -15,12 +15,7 @@
       <ion-label>Mnemonic</ion-label>
     </ion-list-header>
     <ion-item class="ion-no-padding">
-      <ion-textarea
-        (ionFocus)="mnemonicFocused()"
-        placeholder="Mnemonic"
-        wrap="soft"
-        [(ngModel)]="mnemonic"
-      ></ion-textarea>
+      <ion-textarea (keydown)="keyDown()" placeholder="Mnemonic" wrap="soft" [(ngModel)]="mnemonic"></ion-textarea>
     </ion-item>
     <ion-button [disabled]="saveButtonDisabled" (click)="saveMnemonic(mnemonic)">Save</ion-button>
     <ion-button (click)="generateMnemonic()">Generate</ion-button>
