@@ -32,7 +32,7 @@
 
 #### Features
 
-- `operationRequests`, `signPayloadRequest`, `broadcastRequest` are now supported with the local mnemonic signing method, which allows direct singing in the extension
+- `operationRequests`, `signPayloadRequest`, `broadcastRequest` are now supported with the local mnemonic signing method, which allows direct signing in the extension
 - UI changes
 - Various improvements
 
