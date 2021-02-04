@@ -95,7 +95,7 @@ export class PairPage {
     await this.router.navigate(['local-mnemonic'])
   }
 
-  public async dismiss(): Promise<void> {
-    await this.modalController.dismiss()
+  public async dismiss(): Promise<boolean> {
+    return this.modalController.dismiss()
   }
 }
