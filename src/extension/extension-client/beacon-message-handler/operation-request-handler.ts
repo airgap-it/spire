@@ -10,6 +10,7 @@ import {
   OperationResponseInput
 } from '@airgap/beacon-sdk'
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
+import { AxiosResponse } from 'axios'
 import { LedgerSigner, LocalSigner } from 'src/extension/AirGapSigner'
 
 import { WalletInfo, WalletType } from '../Actions'
@@ -34,17 +35,16 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
 
     let responseInput: OperationResponseInput
 
-    const sendError: (error: Error, errorType: BeaconErrorType, errorData?: any) => Promise<void> = async (
+    const sendError: (error: Error, errorType: BeaconErrorType) => Promise<void> = async (
       error: Error,
       errorType: BeaconErrorType,
-      errorData?: any
     ): Promise<void> => {
-      logger.log('error', error)
+      logger.log('operationRequestHandler', 'error ', error)
       responseInput = {
         id: operationRequest.id,
         type: BeaconMessageType.OperationResponse,
         errorType,
-        errorData
+        errorData: (error as any as AxiosResponse).data
       } as any
 
       const response: OperationResponse = {
@@ -98,7 +98,7 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
 
     const hash: To<string> = await to(client.operationProvider.broadcast(operationRequest.network, signedTx.res))
     if (hash.err) {
-      await sendError(hash.err, BeaconErrorType.TRANSACTION_INVALID_ERROR, forgedTx.err)
+      await sendError(hash.err, BeaconErrorType.TRANSACTION_INVALID_ERROR)
       throw forgedTx.err
     }
 

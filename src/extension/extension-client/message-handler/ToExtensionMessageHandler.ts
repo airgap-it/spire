@@ -18,6 +18,7 @@ import {
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
+import { AxiosResponse } from 'axios'
 
 import { WalletInfo } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
@@ -75,12 +76,15 @@ export class ToExtensionMessageHandler extends MessageHandler {
         error: Error,
         errorType: BeaconErrorType
       ): Promise<void> => {
-        logger.log('error', error)
+        logger.log('handle', 'error', error)
+
+        const errorData = (error as any as AxiosResponse).data.data || (error as any as AxiosResponse).data
+
         const responseInput = {
           id: deserialized.id,
           type: BeaconMessageType.OperationResponse,
           errorType,
-          errorData: error
+          errorData
         } as any
 
         const response: OperationResponse = {
@@ -90,7 +94,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
         }
         await this.client.sendToPage(response)
 
-        const errorObject = { title: (error as any).name, message: (error as any).message, data: (error as any).data }
+        const errorObject = { title: (error as any).name, message: (error as any).message, data: errorData }
 
         return this.client.sendToPopup({ ...data, payload: { error: errorObject } })
       }
@@ -110,7 +114,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
-        ;(async (): Promise<void> => {
+        ; (async (): Promise<void> => {
           const operationRequest: OperationRequestOutput = enriched.res as OperationRequestOutput
 
           const wallet: WalletInfo | undefined = await this.client.getWalletByAddress(operationRequest.sourceAddress)
@@ -134,13 +138,8 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
           return this.client.sendToPopup({ ...data, payload: serialized })
         })().catch(async (operationPrepareError: Error) => {
-          if ((operationPrepareError as any).data) {
-            await sendError((operationPrepareError as any).data, BeaconErrorType.TRANSACTION_INVALID_ERROR)
-            logger.error('operationPrepareError', (operationPrepareError as any).data)
-          } else {
-            await sendError(operationPrepareError, BeaconErrorType.TRANSACTION_INVALID_ERROR)
-            logger.error('operationPrepareError', operationPrepareError)
-          }
+          await sendError(operationPrepareError, BeaconErrorType.TRANSACTION_INVALID_ERROR)
+          logger.error('operationPrepareError', operationPrepareError)
         })
       } else {
         const serialized: string = await new Serializer().serialize(enriched.res)

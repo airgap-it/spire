@@ -320,6 +320,20 @@ export class ExtensionClient extends BeaconClient {
       await this.processMessage(beaconMessage, request)
     }
 
+    const errorData = (beaconMessage as any).errorData as unknown
+    if (
+      errorData &&
+      (
+        !Array.isArray(errorData) ||
+        !errorData.every((item) => Boolean(item.kind) && Boolean(item.id))
+      )
+    ) {
+      logger.warn(
+        'ErrorData provided is not in correct format. It needs to be an array of RPC errors. It will not be included in the message sent to the dApp'
+      )
+      delete (beaconMessage as any).errorData
+    }
+
     // TODO: Remove v1 compatibility in later version
     ; (beaconMessage as any).beaconId = beaconMessage.senderId
 
