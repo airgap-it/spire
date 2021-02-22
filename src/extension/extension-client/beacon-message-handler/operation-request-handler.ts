@@ -37,14 +37,14 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
 
     const sendError: (error: Error, errorType: BeaconErrorType) => Promise<void> = async (
       error: Error,
-      errorType: BeaconErrorType,
+      errorType: BeaconErrorType
     ): Promise<void> => {
       logger.log('operationRequestHandler', 'error ', error)
       responseInput = {
         id: operationRequest.id,
         type: BeaconMessageType.OperationResponse,
         errorType,
-        errorData: (error as any as AxiosResponse).data
+        errorData: ((error as any) as AxiosResponse).data
       } as any
 
       const response: OperationResponse = {
