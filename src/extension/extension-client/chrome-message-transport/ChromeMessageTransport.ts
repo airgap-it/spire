@@ -32,7 +32,7 @@ export class ChromeMessageTransport<
   public readonly type: TransportType = TransportType.CHROME_MESSAGE
 
   constructor(name: string, keyPair: sodium.KeyPair, storage: Storage, storageKey: K) {
-    super(name, new ChromeMessageClient(name, keyPair, false), new PeerManager(storage, storageKey))
+    super(name, new ChromeMessageClient(name, keyPair), new PeerManager(storage, storageKey))
     this.init().catch(error => console.error(error))
     this.connect().catch(error => console.error(error))
   }

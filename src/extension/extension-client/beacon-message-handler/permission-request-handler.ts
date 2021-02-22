@@ -43,6 +43,10 @@ export const permissionRequestHandler: (client: ExtensionClient, logger: Logger)
 
     const response: PermissionResponse = {
       senderId: await getSenderId(await client.beaconId),
+      appMetadata: {
+        senderId: await getSenderId(await client.beaconId),
+        name: await client.name
+      },
       version: BEACON_VERSION,
       ...responseInput
     }

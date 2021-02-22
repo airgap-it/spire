@@ -144,41 +144,41 @@ export class ExtensionClient extends BeaconClient {
     data: ExtensionMessage<ExtensionMessageInputPayload<Action>>,
     connectionContext: ConnectionContext
   ): Promise<void> => {
-      logger.log('handleMessage', data, connectionContext)
-      const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
+    logger.log('handleMessage', data, connectionContext)
+    const handler: ActionHandlerFunction<Action> = await new ActionMessageHandler().getHandler(data.payload.action)
 
-      const p2pConnectedCallback = async (newPeer: ExtendedP2PPairingResponse): Promise<void> => {
-        console.log('CONNECTED')
-        if (newPeer) {
-          const walletInfo: WalletInfo<WalletType.P2P> = {
-            address: '',
-            publicKey: '',
-            type: WalletType.P2P,
-            added: new Date().getTime(),
-            info: newPeer
-          }
-          await this.addWallet(walletInfo)
-          await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
+    const p2pConnectedCallback = async (newPeer: ExtendedP2PPairingResponse): Promise<void> => {
+      console.log('CONNECTED')
+      if (newPeer) {
+        const walletInfo: WalletInfo<WalletType.P2P> = {
+          address: '',
+          publicKey: '',
+          type: WalletType.P2P,
+          added: new Date().getTime(),
+          info: newPeer
         }
-
-        this.popupManager
-          .sendToActivePopup({
-            target: ExtensionMessageTarget.EXTENSION,
-            sender: 'background',
-            payload: { beaconEvent: BeaconEvent.P2P_CHANNEL_CONNECT_SUCCESS }
-          })
-          .catch(console.error)
+        await this.addWallet(walletInfo)
+        await this.storage.set('ACTIVE_WALLET' as any, walletInfo)
       }
 
-      await handler({
-        data: data.payload,
-        sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
-        client: this,
-        p2pTransport: this.p2pTransport,
-        p2pTransportConnectedCallback: p2pConnectedCallback,
-        storage: this.storage
-      })
+      this.popupManager
+        .sendToActivePopup({
+          target: ExtensionMessageTarget.EXTENSION,
+          sender: 'background',
+          payload: { beaconEvent: BeaconEvent.PAIR_SUCCESS }
+        })
+        .catch(console.error)
     }
+
+    await handler({
+      data: data.payload,
+      sendResponse: connectionContext.extras ? connectionContext.extras.sendResponse : () => undefined,
+      client: this,
+      p2pTransport: this.p2pTransport,
+      p2pTransportConnectedCallback: p2pConnectedCallback,
+      storage: this.storage
+    })
+  }
 
   public async addListener(listener: Function): Promise<any> {
     this.listeners.push(listener)
@@ -307,9 +307,9 @@ export class ExtensionClient extends BeaconClient {
     const request:
       | { message: BeaconMessage; connectionContext: ConnectionContext }
       | undefined = this.pendingRequests.find(
-        (requestElement: { message: BeaconMessage; connectionContext: ConnectionContext }) =>
-          requestElement.message.id === response.id
-      )
+      (requestElement: { message: BeaconMessage; connectionContext: ConnectionContext }) =>
+        requestElement.message.id === response.id
+    )
     if (!request) {
       throw new Error('Matching request not found')
     }
@@ -321,13 +321,7 @@ export class ExtensionClient extends BeaconClient {
     }
 
     const errorData = (beaconMessage as any).errorData as unknown
-    if (
-      errorData &&
-      (
-        !Array.isArray(errorData) ||
-        !errorData.every((item) => Boolean(item.kind) && Boolean(item.id))
-      )
-    ) {
+    if (errorData && (!Array.isArray(errorData) || !errorData.every(item => Boolean(item.kind) && Boolean(item.id)))) {
       logger.warn(
         'ErrorData provided is not in correct format. It needs to be an array of RPC errors. It will not be included in the message sent to the dApp'
       )
@@ -335,7 +329,7 @@ export class ExtensionClient extends BeaconClient {
     }
 
     // TODO: Remove v1 compatibility in later version
-    ; (beaconMessage as any).beaconId = beaconMessage.senderId
+    ;(beaconMessage as any).beaconId = beaconMessage.senderId
 
     const serialized = await new Serializer().serialize(beaconMessage)
 

@@ -9,7 +9,7 @@ import { ModalController, ToastController } from '@ionic/angular'
 export class AddWalletConnectionPage {
   public handshakeData: string | undefined
 
-  constructor(private readonly modalController: ModalController, private readonly toastController: ToastController) { }
+  constructor(private readonly modalController: ModalController, private readonly toastController: ToastController) {}
 
   public async dismiss(): Promise<void> {
     await this.modalController.dismiss()

@@ -78,7 +78,9 @@ export class ToExtensionMessageHandler extends MessageHandler {
       ): Promise<void> => {
         logger.log('handle', 'error', error)
 
-        const errorData = (error as any as AxiosResponse).data.data || (error as any as AxiosResponse).data
+        const errorData = ((error as any) as AxiosResponse).data
+          ? ((error as any) as AxiosResponse).data.data || ((error as any) as AxiosResponse).data
+          : ((error as any) as AxiosResponse).data
 
         const responseInput = {
           id: deserialized.id,
@@ -114,7 +116,7 @@ export class ToExtensionMessageHandler extends MessageHandler {
 
       if (deserialized.type === BeaconMessageType.OperationRequest) {
         // Intercept Operation request and enrich it with information
-        ; (async (): Promise<void> => {
+        ;(async (): Promise<void> => {
           const operationRequest: OperationRequestOutput = enriched.res as OperationRequestOutput
 
           const wallet: WalletInfo | undefined = await this.client.getWalletByAddress(operationRequest.sourceAddress)
