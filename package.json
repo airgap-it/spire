@@ -1,6 +1,6 @@
 {
   "name": "spire",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "author": "AirGap",
   "homepage": "https://airgap.it/",
   "scripts": {
@@ -25,7 +25,7 @@
   },
   "private": true,
   "dependencies": {
-    "@airgap/beacon-sdk": "2.2.1",
+    "@airgap/beacon-sdk": "2.2.5",
     "@airgap/coinlib-core": "0.10.6",
     "@angular/common": "^11.0.3",
     "@angular/core": "^11.0.3",
