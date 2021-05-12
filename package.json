@@ -26,7 +26,7 @@
   "private": true,
   "dependencies": {
     "@airgap/beacon-sdk": "2.2.5",
-    "@airgap/coinlib-core": "0.11.1-beta.4",
+    "@airgap/coinlib-core": "0.11.1-beta.7",
     "@angular/common": "^11.0.3",
     "@angular/core": "^11.0.3",
     "@angular/forms": "^11.0.3",
