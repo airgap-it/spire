@@ -58,10 +58,9 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.EDONET]: 'https://edonet.tezblock.io',
     [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io',
     [NetworkType.CUSTOM]: 'https://florencenet.tezblock.io'
-}
-  const tezosNetworks: { [key in NetworkType]: TezosNetwork } = {
+  }
+  const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
     [NetworkType.MAINNET]: TezosNetwork.MAINNET,
-    [NetworkType.DELPHINET]: TezosNetwork.DELPHINET,
     [NetworkType.EDONET]: TezosNetwork.EDONET,
     [NetworkType.FLORENCENET]: TezosNetwork.EDONET, // TODO: UPDATE IN COINLIB
     [NetworkType.CUSTOM]: TezosNetwork.EDONET
