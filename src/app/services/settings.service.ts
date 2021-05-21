@@ -67,16 +67,14 @@ export class SettingsService {
       [NetworkType.FLORENCENET]: AirGapNetworkType.TESTNET,
       [NetworkType.CUSTOM]: AirGapNetworkType.CUSTOM
     }
-    const blockExplorers: { [key in NetworkType]: string } = {
+    const blockExplorers: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: string } = {
       [NetworkType.MAINNET]: 'https://tezblock.io',
-      [NetworkType.DELPHINET]: 'https://delphinet.tezblock.io',
       [NetworkType.EDONET]: 'https://edonet.tezblock.io',
       [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io',
       [NetworkType.CUSTOM]: 'https://florencenet.tezblock.io'
     }
-    const tezosNetworks: { [key in NetworkType]: TezosNetwork } = {
+    const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
       [NetworkType.MAINNET]: TezosNetwork.MAINNET,
-      [NetworkType.DELPHINET]: TezosNetwork.DELPHINET,
       [NetworkType.EDONET]: TezosNetwork.EDONET,
       [NetworkType.FLORENCENET]: TezosNetwork.EDONET, // TODO: UPDATE IN COINLIB
       [NetworkType.CUSTOM]: TezosNetwork.EDONET

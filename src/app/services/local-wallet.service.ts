@@ -136,7 +136,7 @@ export class WalletService {
 
     const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
 
-    const address: string = await protocol.getAddressFromPublicKey(publicKey)
+    const address: string = (await protocol.getAddressFromPublicKey(publicKey)).getValue()
 
     return {
       privateKey,

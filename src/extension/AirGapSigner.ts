@@ -22,7 +22,7 @@ export class AirGapOperationProvider implements OperationProvider {
   ): Promise<TezosWrappedOperation> {
     const protocol: TezosProtocol = await getProtocolForNetwork(network)
 
-    return protocol.prepareOperations(publicKey, operations as any) // TODO: Fix type
+    return protocol.prepareOperations(publicKey, operations as any, false) // don't override parameters // TODO: Fix type
   }
 
   public async forgeWrappedOperation(wrappedOperation: TezosWrappedOperation, network: Network): Promise<string> {
