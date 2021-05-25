@@ -101,6 +101,17 @@
       </ng-container>
     </div>
 
+    <div *ngIf="request.type === 'encrypt_payload_request'" class="request--container">
+      <ng-container>
+        <p class="ion-padding-top">
+          You are about to encrypt/decrypt the following payload.
+        </p>
+        <ion-row class="rawdata--container ion-margin-bottom">
+          <pre>{{ request.payload }}</pre>
+        </ion-row>
+      </ng-container>
+    </div>
+
     <div *ngIf="request.type === 'operation_request'" class="request--container">
       <ng-container *ngFor="let transaction of transactions">
         <beacon-from-to [transaction]="transaction"></beacon-from-to>

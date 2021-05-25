@@ -4,6 +4,7 @@ import { ExtensionClient } from '../ExtensionClient'
 import { Logger } from '../Logger'
 
 import { broadcastRequestHandler } from './broadcast-request-handler'
+import { encryptDecryptRequestHandler } from './encrypt-decrypt-request-handler'
 import { errorResponseHandler } from './error-response-handler'
 import { operationRequestHandler } from './operation-request-handler'
 import { permissionRequestHandler } from './permission-request-handler'
@@ -28,10 +29,12 @@ export class BeaconMessageHandler {
     [BeaconMessageType.PermissionRequest]: permissionRequestHandler(this.client, logger),
     [BeaconMessageType.OperationRequest]: operationRequestHandler(this.client, logger),
     [BeaconMessageType.SignPayloadRequest]: signPayloadRequestHandler(this.client, logger),
+    [BeaconMessageType.EncryptPayloadRequest]: encryptDecryptRequestHandler(this.client, logger),
     [BeaconMessageType.BroadcastRequest]: broadcastRequestHandler(this.client, logger),
     [BeaconMessageType.PermissionResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.OperationResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.SignPayloadResponse]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.EncryptPayloadResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.Acknowledge]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.Error]: errorResponseHandler(this.client, logger),

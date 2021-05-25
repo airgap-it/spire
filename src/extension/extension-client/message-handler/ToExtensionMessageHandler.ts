@@ -15,7 +15,8 @@ import {
   OperationResponse,
   PermissionRequestOutput,
   Serializer,
-  SignPayloadRequestOutput
+  SignPayloadRequestOutput,
+  EncryptPayloadRequestOutput
 } from '@airgap/beacon-sdk'
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
 import { AxiosResponse } from 'axios'
@@ -185,6 +186,18 @@ export class ToExtensionMessageHandler extends MessageHandler {
           throw new Error('AppMetadata not available')
         }
         const request: SignPayloadRequestOutput = {
+          appMetadata: result,
+          ...message
+        }
+
+        return request
+      }
+      case BeaconMessageType.EncryptPayloadRequest: {
+        const result: AppMetadata | undefined = await this.client.getAppMetadata(message.senderId)
+        if (!result) {
+          throw new Error('AppMetadata not available')
+        }
+        const request: EncryptPayloadRequestOutput = {
           appMetadata: result,
           ...message
         }

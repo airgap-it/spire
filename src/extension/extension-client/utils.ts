@@ -17,6 +17,7 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
     [NetworkType.DELPHINET]: 'https://tezos-delphinet-node.prod.gke.papers.tech',
     [NetworkType.EDONET]: 'https://tezos-edonet-node.prod.gke.papers.tech',
     [NetworkType.FLORENCENET]: 'https://florence-tezos.giganode.io',
+    [NetworkType.GRANADANET]: 'https://granada-tezos.giganode.io',
     [NetworkType.CUSTOM]: ''
   }
   const apiUrls: { [key in NetworkType]: string } = {
@@ -24,6 +25,7 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
     [NetworkType.DELPHINET]: 'https://tezos-delphinet-conseil.prod.gke.papers.tech',
     [NetworkType.EDONET]: 'https://tezos-edonet-conseil.prod.gke.papers.tech',
     [NetworkType.FLORENCENET]: '',
+    [NetworkType.GRANADANET]: '',
     [NetworkType.CUSTOM]: ''
   }
 
@@ -43,6 +45,7 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.DELPHINET]: 'Delphinet',
     [NetworkType.EDONET]: 'Edonet',
     [NetworkType.FLORENCENET]: 'Florencenet',
+    [NetworkType.GRANADANET]: 'Granadanet',
     [NetworkType.CUSTOM]: 'Custom'
   }
   const airgapNetworks: { [key in NetworkType]: AirGapNetworkType } = {
@@ -50,6 +53,7 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.DELPHINET]: AirGapNetworkType.TESTNET,
     [NetworkType.EDONET]: AirGapNetworkType.TESTNET,
     [NetworkType.FLORENCENET]: AirGapNetworkType.TESTNET,
+    [NetworkType.GRANADANET]: AirGapNetworkType.TESTNET,
     [NetworkType.CUSTOM]: AirGapNetworkType.CUSTOM
   }
   const blockExplorers: { [key in NetworkType]: string } = {
@@ -57,12 +61,14 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.DELPHINET]: 'https://delphinet.tezblock.io',
     [NetworkType.EDONET]: 'https://edonet.tezblock.io',
     [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io',
-    [NetworkType.CUSTOM]: 'https://florencenet.tezblock.io'
+    [NetworkType.GRANADANET]: 'https://granadanet.tezblock.io',
+    [NetworkType.CUSTOM]: 'https://granadanet.tezblock.io'
   }
   const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
     [NetworkType.MAINNET]: TezosNetwork.MAINNET,
     [NetworkType.EDONET]: TezosNetwork.EDONET,
     [NetworkType.FLORENCENET]: TezosNetwork.EDONET, // TODO: UPDATE IN COINLIB
+    [NetworkType.GRANADANET]: TezosNetwork.EDONET, // TODO: UPDATE IN COINLIB
     [NetworkType.CUSTOM]: TezosNetwork.EDONET
   }
 
@@ -94,6 +100,7 @@ export const getTezblockLinkForNetwork: (network: Network | undefined) => Promis
     [NetworkType.DELPHINET]: 'https://delphinet.tezblock.io/account/',
     [NetworkType.EDONET]: 'https://edonet.tezblock.io/account/',
     [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io/account/',
+    [NetworkType.GRANADANET]: 'https://granadanet.tezblock.io/account/',
     [NetworkType.CUSTOM]: 'http://localhost:8100/account/'
   }
   const url: string = urls[network ? network.type : NetworkType.MAINNET]

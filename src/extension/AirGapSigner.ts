@@ -84,6 +84,25 @@ export class LocalSigner implements Signer {
 
     return protocol.signMessage(message, { privateKey })
   }
+
+  public async encryptAsync(message: string, mnemonic: string): Promise<string> {
+    logger.log('Encrypting Message:', message)
+
+    const protocol: TezosProtocol = new TezosProtocol()
+    const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
+
+    return protocol.encryptAsymmetric(message, publicKey)
+  }
+
+  public async decryptAsync(message: string, mnemonic: string): Promise<string> {
+    logger.log('Decrypting Message:', message)
+
+    const protocol: TezosProtocol = new TezosProtocol()
+    const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
+    const privateKey: Buffer = await protocol.getPrivateKeyFromMnemonic(mnemonic, protocol.standardDerivationPath)
+
+    return protocol.decryptAsymmetric(message, { publicKey, privateKey })
+  }
 }
 
 export class LedgerSigner implements Signer {
