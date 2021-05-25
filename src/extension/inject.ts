@@ -17,7 +17,7 @@ window.addEventListener(
     // tslint:disable-next-line: strict-comparisons
     if (event.source !== window) {
       // tslint:disable-next-line:no-console
-      console.log('message ignored because source was not us', event)
+      // console.log('message ignored because source was not us', event)
 
       return
     }
