@@ -8,7 +8,8 @@ import {
   EncryptPayloadRequestOutput,
   EncryptPayloadResponse,
   EncryptPayloadResponseInput,
-  EncryptionType
+  EncryptionType,
+  EncryptionOperation
 } from '@airgap/beacon-sdk'
 import { LocalSigner } from 'src/extension/AirGapSigner'
 
@@ -67,10 +68,14 @@ export const encryptDecryptRequestHandler: (client: ExtensionClient, logger: Log
     if (wallet.type === WalletType.LOCAL_MNEMONIC) {
       const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> = wallet as WalletInfo<WalletType.LOCAL_MNEMONIC>
       const signer: LocalSigner = new LocalSigner()
-      if (encryptRequest.encryptionType === EncryptionType.ENCRYPT_ASYMMETRIC) {
-        encrypted = await to(signer.encryptAsync(encryptRequest.payload, localWallet.info.mnemonic))
-      } else if (encryptRequest.encryptionType === EncryptionType.DECRYPT_ASYMMETRIC) {
-        encrypted = await to(signer.decryptAsync(encryptRequest.payload, localWallet.info.mnemonic))
+      if (encryptRequest.encryptionType === EncryptionType.ASYMMETRIC) {
+        if (encryptRequest.cryptoOperation === EncryptionOperation.ENCRYPT) {
+          encrypted = await to(signer.encryptAsync(encryptRequest.payload, localWallet.info.mnemonic))
+        } else if (encryptRequest.cryptoOperation === EncryptionOperation.DECRYPT) {
+          encrypted = await to(signer.decryptAsync(encryptRequest.payload, localWallet.info.mnemonic))
+        } else {
+          throw new Error('INVALID ENCRYPTION OPERATION TYPE')
+        }
       } else {
         throw new Error('CANNOT HANDLE SYMMETRIC ENCRYPTION')
       }
@@ -91,6 +96,7 @@ export const encryptDecryptRequestHandler: (client: ExtensionClient, logger: Log
     const responseInput: EncryptPayloadResponseInput = {
       id: encryptRequest.id,
       type: BeaconMessageType.EncryptPayloadResponse,
+      cryptoOperation: encryptRequest.cryptoOperation,
       encryptionType: encryptRequest.encryptionType,
       payload: encrypted.res
     }
