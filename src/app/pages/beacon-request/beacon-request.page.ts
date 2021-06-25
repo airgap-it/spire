@@ -3,6 +3,7 @@ import {
   BeaconMessageType,
   BroadcastRequestOutput,
   ChromeStorage,
+  EncryptPayloadRequestOutput,
   Network,
   OperationRequestOutput,
   PermissionRequestOutput,
@@ -35,6 +36,7 @@ export class BeaconRequestPage implements OnInit {
   public request:
     | PermissionRequestOutput
     | OperationRequestOutput
+    | EncryptPayloadRequestOutput
     | SignPayloadRequestOutput
     | BroadcastRequestOutput
     | undefined
@@ -83,6 +85,12 @@ export class BeaconRequestPage implements OnInit {
       await this.signRequest(this.request)
     }
 
+    if (this.request && this.request.type === BeaconMessageType.EncryptPayloadRequest) {
+      this.title = 'Encrypt/Decrypt Request'
+      this.requesterName = this.request.appMetadata.name
+      await this.encryptRequest(this.request)
+    }
+
     if (this.request && this.request.type === BeaconMessageType.OperationRequest) {
       this.title = 'Operation Request'
       this.requesterName = this.request.appMetadata.name
@@ -123,7 +131,7 @@ export class BeaconRequestPage implements OnInit {
           name: 'sign',
           type: 'checkbox',
           label: 'Sign transactions',
-          value: 'sign',
+          value: PermissionScope.SIGN,
           icon: 'create',
           checked: request.scopes.indexOf(PermissionScope.SIGN) >= 0
         },
@@ -132,16 +140,25 @@ export class BeaconRequestPage implements OnInit {
           name: 'operation_request',
           type: 'checkbox',
           label: 'Operation request',
-          value: 'operation_request',
+          value: PermissionScope.OPERATION_REQUEST,
           icon: 'color-wand',
           checked: request.scopes.indexOf(PermissionScope.OPERATION_REQUEST) >= 0
+        },
+
+        {
+          name: 'encrypt_request',
+          type: 'checkbox',
+          label: 'Encrypt request',
+          value: PermissionScope.ENCRYPT,
+          icon: 'create',
+          checked: request.scopes.indexOf(PermissionScope.ENCRYPT) >= 0
         },
 
         {
           name: 'threshold',
           type: 'checkbox',
           label: 'Threshold',
-          value: 'threshold',
+          value: PermissionScope.THRESHOLD,
           icon: 'code-working',
           checked: request.scopes.indexOf(PermissionScope.THRESHOLD) >= 0
         }
@@ -158,6 +175,17 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async signRequest(request: SignPayloadRequestOutput): Promise<void> {
+    this.responseHandler = async (): Promise<void> => {
+      if (this.walletType === WalletType.LOCAL_MNEMONIC) {
+        await this.sendResponse(request, {})
+      } else {
+        await this.openLedgerModal(request)
+      }
+    }
+  }
+
+
+  private async encryptRequest(request: EncryptPayloadRequestOutput): Promise<void> {
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
@@ -184,7 +212,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async openLedgerModal(
-    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | EncryptPayloadRequestOutput | BroadcastRequestOutput
   ): Promise<void> {
     const modal = await this.modalController.create({
       component: AddLedgerConnectionPage,
@@ -220,7 +248,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async sendResponse(
-    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput,
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | EncryptPayloadRequestOutput | BroadcastRequestOutput,
     extras: unknown
   ): Promise<void> {
     const response: ExtensionMessageOutputPayload<Action.RESPONSE> = await this.chromeMessagingService.sendChromeMessage(
@@ -294,7 +322,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async sendAbortedError(
-    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
+    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | EncryptPayloadRequestOutput | BroadcastRequestOutput
   ): Promise<void> {
     await this.sendResponse(request, {
       errorType: BeaconErrorType.ABORTED_ERROR

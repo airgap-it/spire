@@ -43,6 +43,7 @@ export class SettingsService {
       [NetworkType.DELPHINET]: 'https://tezos-delphinet-node.prod.gke.papers.tech',
       [NetworkType.EDONET]: 'https://tezos-edonet-node.prod.gke.papers.tech',
       [NetworkType.FLORENCENET]: 'https://florence-tezos.giganode.io', // TODO: UPDATE TO PAPERS URL
+      [NetworkType.GRANADANET]: 'https://granada-tezos.giganode.io', // TODO: UPDATE TO PAPERS URL
       [NetworkType.CUSTOM]: ''
     }
     const apiUrls: { [key in NetworkType]: string } = {
@@ -50,6 +51,7 @@ export class SettingsService {
       [NetworkType.DELPHINET]: 'https://tezos-delphinet-conseil.prod.gke.papers.tech',
       [NetworkType.EDONET]: 'https://tezos-edonet-conseil.prod.gke.papers.tech',
       [NetworkType.FLORENCENET]: '', // TODO: ADD CONSEIL URL
+      [NetworkType.GRANADANET]: '', // TODO: ADD CONSEIL URL
       [NetworkType.CUSTOM]: ''
     }
 
@@ -58,6 +60,7 @@ export class SettingsService {
       [NetworkType.DELPHINET]: 'Delphinet',
       [NetworkType.EDONET]: 'Edonet',
       [NetworkType.FLORENCENET]: 'Florencenet',
+      [NetworkType.GRANADANET]: 'Granadanet',
       [NetworkType.CUSTOM]: 'Custom'
     }
     const airgapNetworks: { [key in NetworkType]: AirGapNetworkType } = {
@@ -65,18 +68,21 @@ export class SettingsService {
       [NetworkType.DELPHINET]: AirGapNetworkType.TESTNET,
       [NetworkType.EDONET]: AirGapNetworkType.TESTNET,
       [NetworkType.FLORENCENET]: AirGapNetworkType.TESTNET,
+      [NetworkType.GRANADANET]: AirGapNetworkType.TESTNET,
       [NetworkType.CUSTOM]: AirGapNetworkType.CUSTOM
     }
     const blockExplorers: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: string } = {
       [NetworkType.MAINNET]: 'https://tezblock.io',
       [NetworkType.EDONET]: 'https://edonet.tezblock.io',
       [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io',
-      [NetworkType.CUSTOM]: 'https://florencenet.tezblock.io'
+      [NetworkType.GRANADANET]: 'https://granadanet.tezblock.io',
+      [NetworkType.CUSTOM]: 'https://granadanet.tezblock.io'
     }
     const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
       [NetworkType.MAINNET]: TezosNetwork.MAINNET,
       [NetworkType.EDONET]: TezosNetwork.EDONET,
       [NetworkType.FLORENCENET]: TezosNetwork.EDONET, // TODO: UPDATE IN COINLIB
+      [NetworkType.GRANADANET]: TezosNetwork.EDONET, // TODO: UPDATE IN COINLIB
       [NetworkType.CUSTOM]: TezosNetwork.EDONET
     }
 
