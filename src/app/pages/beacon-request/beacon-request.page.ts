@@ -174,8 +174,6 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async operationRequest(request: OperationRequestOutput): Promise<void> {
-    console.log('operationRequest', request)
-
     const rawTransactions = await this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
@@ -195,7 +193,6 @@ export class BeaconRequestPage implements OnInit {
         return { ...transaction, transactionDetails: operationGroupFromWrappedOperation }
       })
     )
-    console.log('transactions', this.transactionsPromise)
 
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
