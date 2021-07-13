@@ -13,7 +13,7 @@ import {
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
-import { take } from 'rxjs/operators'
+import { take, takeUntil } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { PopupService } from 'src/app/services/popup.service'
@@ -22,6 +22,7 @@ import { WalletChromeMessageTransport } from 'src/extension/extension-client/chr
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
 import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
+import { Subject } from 'rxjs'
 
 @Component({
   selector: 'beacon-request',
@@ -55,6 +56,7 @@ export class BeaconRequestPage implements OnInit {
   )
 
   public confirmButtonText: string = 'Confirm'
+  private unsubscribe = new Subject()
 
   constructor(
     private readonly popupService: PopupService,
@@ -63,11 +65,11 @@ export class BeaconRequestPage implements OnInit {
     private readonly walletService: WalletService,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
-    this.walletService.activeNetwork$.subscribe(async (network: Network) => {
+    this.walletService.activeNetwork$.pipe(takeUntil(this.unsubscribe)).subscribe(async (network: Network) => {
       this.network = network
     })
 
-    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
+    this.walletService.activeWallet$.pipe(take(1), takeUntil(this.unsubscribe)).subscribe((wallet: WalletInfo) => {
       this.address = wallet.address
     })
     if (this.walletType === WalletType.LEDGER) {
@@ -319,5 +321,10 @@ export class BeaconRequestPage implements OnInit {
     await this.sendResponse(request, {
       errorType: BeaconErrorType.ABORTED_ERROR
     })
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next()
+    this.unsubscribe.complete()
   }
 }
