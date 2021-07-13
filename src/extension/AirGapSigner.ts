@@ -33,6 +33,13 @@ export class AirGapOperationProvider implements OperationProvider {
     return forgedTx.binaryTransaction
   }
 
+  public async operationGroupFromWrappedOperation(tezosWrappedOperation: TezosWrappedOperation, network: Network) {
+    const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
+    const { data: block }: AxiosResponse<{ chain_id: string }> = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
+    const { data: branch } = await Axios.get(`${rpcUrl}/chains/main/blocks/head/hash`)
+    return { chain_id: block.chain_id, ...tezosWrappedOperation, branch: branch }
+  }
+
   public async broadcast(network: Network, signedTx: string): Promise<string> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
 

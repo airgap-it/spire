@@ -52,7 +52,8 @@
         <ion-label>Display extra transaction details</ion-label>
         <ion-toggle [(ngModel)]="displayRawData" slot="end"></ion-toggle>
       </ion-item>
-      <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.transactionDetails | json }}</pre>
+
+      <ngx-json-viewer *ngIf="displayRawData" [json]="transaction.transactionDetails"></ngx-json-viewer>
     </ion-col>
   </ion-row>
 </ng-container>
