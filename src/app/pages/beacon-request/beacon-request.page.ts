@@ -4,6 +4,7 @@ import {
   BroadcastRequestOutput,
   ChromeStorage,
   Network,
+  NetworkType,
   OperationRequestOutput,
   PermissionRequestOutput,
   PermissionScope,
@@ -18,9 +19,9 @@ import { WalletService } from 'src/app/services/local-wallet.service'
 import { PopupService } from 'src/app/services/popup.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
-
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
+import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
 
 @Component({
   selector: 'beacon-request',
@@ -30,7 +31,8 @@ import { ErrorPage } from '../error/error.page'
 export class BeaconRequestPage implements OnInit {
   public title: string = ''
   public protocol: TezosProtocol = new TezosProtocol()
-
+  public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
+  public network: Network | undefined
   public walletType: WalletType | undefined
   public request:
     | PermissionRequestOutput
@@ -42,7 +44,7 @@ export class BeaconRequestPage implements OnInit {
   public address: string = ''
   public requestedNetwork: Network | undefined
   public inputs?: any
-  public transactions: IAirGapTransaction[] | undefined
+  public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -61,6 +63,10 @@ export class BeaconRequestPage implements OnInit {
     private readonly walletService: WalletService,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
+    this.walletService.activeNetwork$.subscribe(async (network: Network) => {
+      this.network = network
+    })
+
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.address = wallet.address
     })
@@ -168,11 +174,28 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async operationRequest(request: OperationRequestOutput): Promise<void> {
-    this.transactions = await this.protocol.getAirGapTxFromWrappedOperations({
+    console.log('operationRequest', request)
+
+    const rawTransactions = await this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
     })
-    console.log('transactions', this.transactions)
+
+    const wrappedOperation = {
+      branch: '',
+      contents: request.operationDetails
+    }
+
+    this.transactionsPromise = Promise.all(
+      rawTransactions.map(async transaction => {
+        const operationGroupFromWrappedOperation = await this.operationProvider.operationGroupFromWrappedOperation(
+          wrappedOperation,
+          this.network ? this.network : { type: NetworkType.MAINNET }
+        )
+        return { ...transaction, transactionDetails: operationGroupFromWrappedOperation }
+      })
+    )
+    console.log('transactions', this.transactionsPromise)
 
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
@@ -209,7 +232,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
-    this.transactions = await this.protocol.getTransactionDetailsFromSigned({
+    this.transactionsPromise = this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
       transaction: request.signedTransaction
     })

@@ -84,7 +84,7 @@
     </ng-container>
 
     <ion-row *ngIf="request.type === 'broadcast_request'">
-      <ng-container *ngFor="let transaction of transactions">
+      <ng-container *ngFor="let transaction of transactionsPromise | async">
         <beacon-from-to [transaction]="transaction"></beacon-from-to>
       </ng-container>
     </ion-row>
@@ -102,7 +102,7 @@
     </div>
 
     <div *ngIf="request.type === 'operation_request'" class="request--container">
-      <ng-container *ngFor="let transaction of transactions">
+      <ng-container *ngFor="let transaction of transactionsPromise | async">
         <beacon-from-to [transaction]="transaction"></beacon-from-to>
       </ng-container>
     </div>
