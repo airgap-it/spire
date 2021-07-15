@@ -21,7 +21,7 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 's
 import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
-import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
+import { AirGapOperationProvider, FullOperationGroup } from 'src/extension/AirGapSigner'
 import { Subject } from 'rxjs'
 
 @Component({
@@ -46,6 +46,7 @@ export class BeaconRequestPage implements OnInit {
   public requestedNetwork: Network | undefined
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
+  public operationGroupPromise: Promise<FullOperationGroup> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -176,7 +177,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async operationRequest(request: OperationRequestOutput): Promise<void> {
-    const rawTransactions = await this.protocol.getAirGapTxFromWrappedOperations({
+    this.transactionsPromise = this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
     })
@@ -186,14 +187,9 @@ export class BeaconRequestPage implements OnInit {
       contents: request.operationDetails
     }
 
-    this.transactionsPromise = Promise.all(
-      rawTransactions.map(async transaction => {
-        const operationGroupFromWrappedOperation = await this.operationProvider.operationGroupFromWrappedOperation(
-          wrappedOperation,
-          this.network ? this.network : { type: NetworkType.MAINNET }
-        )
-        return { ...transaction, transactionDetails: operationGroupFromWrappedOperation }
-      })
+    this.operationGroupPromise = this.operationProvider.operationGroupFromWrappedOperation(
+      wrappedOperation,
+      this.network ? this.network : { type: NetworkType.MAINNET }
     )
 
     this.responseHandler = async (): Promise<void> => {
