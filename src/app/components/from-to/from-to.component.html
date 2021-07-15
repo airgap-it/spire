@@ -53,7 +53,7 @@
         <ion-toggle [(ngModel)]="displayRawData" slot="end"></ion-toggle>
       </ion-item>
 
-      <ngx-json-viewer *ngIf="displayRawData" [json]="transaction.transactionDetails"></ngx-json-viewer>
+      <json-formatter *ngIf="displayRawData" [json]="transaction.transactionDetails"></json-formatter>
     </ion-col>
   </ion-row>
 </ng-container>

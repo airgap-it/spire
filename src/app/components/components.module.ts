@@ -4,9 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { IonicModule } from '@ionic/angular'
 import { NgxJsonViewerModule } from 'ngx-json-viewer'
 import { MomentModule } from 'ngx-moment'
-
+import { DirectivesModule } from '../directives/directives.module'
 import { PipesModule } from '../pipes/pipes.module'
-
 import { AddressRowComponent } from './address-row/address-row.component'
 import { FromToComponent } from './from-to/from-to.component'
 import { IdenticonComponent } from './identicon/identicon.component'
@@ -20,7 +19,8 @@ import { IdenticonComponent } from './identicon/identicon.component'
     ReactiveFormsModule,
     PipesModule,
     MomentModule,
-    NgxJsonViewerModule
+    NgxJsonViewerModule,
+    DirectivesModule
   ],
   exports: [IdenticonComponent, FromToComponent, AddressRowComponent]
 })

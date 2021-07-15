@@ -21,8 +21,9 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 's
 import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
-import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
+import { AirGapOperationProvider, FullOperationGroup } from 'src/extension/AirGapSigner'
 import { Subject } from 'rxjs'
+import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
 
 @Component({
   selector: 'beacon-request',
@@ -46,6 +47,7 @@ export class BeaconRequestPage implements OnInit {
   public requestedNetwork: Network | undefined
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
+  public transactionDetailsPromise: Promise<FullOperationGroup> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -123,6 +125,48 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
+  public async performDryRun(fail = false) {
+    const operationDetails = (this.request as OperationRequestOutput).operationDetails
+    const wrappedOperation = {
+      branch: '',
+      contents: operationDetails
+    }
+    const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
+    const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
+    const wallet = wallets.find(wallet => wallet.address === sourceAddress)
+    try {
+      const dryRunPreview = await this.operationProvider.performDryRun(
+        wrappedOperation,
+        this.network ? this.network : { type: NetworkType.MAINNET },
+        wallet,
+        fail
+      )
+      this.openPreviewModal(dryRunPreview)
+    } catch (error) {}
+  }
+
+  private async openPreviewModal(dryRunPreview: string): Promise<void> {
+    const modal = await this.modalController.create({
+      component: DryRunPreviewPage,
+      componentProps: {
+        dryRunPreview: dryRunPreview
+      }
+    })
+
+    modal
+      .onDidDismiss()
+      .then(({ data: closeParent }) => {
+        if (closeParent) {
+          setTimeout(() => {
+            this.dismiss()
+          }, 500)
+        }
+      })
+      .catch(error => console.error(error))
+
+    return modal.present()
+  }
+
   private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
     this.requestedNetwork = request.network
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
@@ -176,7 +220,7 @@ export class BeaconRequestPage implements OnInit {
   }
 
   private async operationRequest(request: OperationRequestOutput): Promise<void> {
-    const rawTransactions = await this.protocol.getAirGapTxFromWrappedOperations({
+    this.transactionsPromise = this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
     })
@@ -186,14 +230,9 @@ export class BeaconRequestPage implements OnInit {
       contents: request.operationDetails
     }
 
-    this.transactionsPromise = Promise.all(
-      rawTransactions.map(async transaction => {
-        const operationGroupFromWrappedOperation = await this.operationProvider.operationGroupFromWrappedOperation(
-          wrappedOperation,
-          this.network ? this.network : { type: NetworkType.MAINNET }
-        )
-        return { ...transaction, transactionDetails: operationGroupFromWrappedOperation }
-      })
+    this.transactionDetailsPromise = this.operationProvider.operationGroupFromWrappedOperation(
+      wrappedOperation,
+      this.network ? this.network : { type: NetworkType.MAINNET }
     )
 
     this.responseHandler = async (): Promise<void> => {

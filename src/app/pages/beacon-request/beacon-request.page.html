@@ -114,6 +114,13 @@
       <ion-button color="primary" (click)="done()">
         {{ confirmButtonText }}
       </ion-button>
+
+      <ion-button color="primary" (click)="performDryRun()">
+        DRY RUN
+      </ion-button>
+      <ion-button color="primary" (click)="performDryRun(true)">
+        FAIL RUN
+      </ion-button>
     </ion-fab>
   </ng-container>
 </ion-content>
