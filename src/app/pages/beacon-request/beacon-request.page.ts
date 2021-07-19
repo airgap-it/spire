@@ -142,12 +142,15 @@ export class BeaconRequestPage implements OnInit {
         wallet
       )
 
-      this.openModal({
-        component: DryRunPreviewPage,
-        componentProps: {
-          dryRunPreview: dryRunPreview
-        }
-      })
+      this.openModal(
+        {
+          component: DryRunPreviewPage,
+          componentProps: {
+            dryRunPreview: dryRunPreview
+          }
+        },
+        false
+      )
     } catch (error) {
       this.openModal({
         component: ErrorPage,
@@ -156,16 +159,16 @@ export class BeaconRequestPage implements OnInit {
           message: error.message,
           data: error.stack
         }
-      } as ModalOptions)
+      })
     }
   }
-  private async openModal(modalOptions: ModalOptions): Promise<void> {
+  private async openModal(modalOptions: ModalOptions, dismissParent = true): Promise<void> {
     const modal = await this.modalController.create(modalOptions)
 
     modal
       .onDidDismiss()
       .then(({ data: closeParent }) => {
-        if (closeParent) {
+        if (closeParent && dismissParent) {
           setTimeout(() => {
             this.dismiss()
           }, 500)
