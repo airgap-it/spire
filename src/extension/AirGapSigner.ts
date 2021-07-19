@@ -31,7 +31,6 @@ export class AirGapOperationProvider implements OperationProvider {
   }
 
   public async forgeWrappedOperation(wrappedOperation: TezosWrappedOperation, network: Network): Promise<string> {
-    console.log('forgeWrappedOperation', JSON.stringify(wrappedOperation))
     const protocol: TezosProtocol = await getProtocolForNetwork(network)
 
     const forgedTx: RawTezosTransaction = await protocol.forgeAndWrapOperations(wrappedOperation)
@@ -76,68 +75,42 @@ export class AirGapOperationProvider implements OperationProvider {
       ? 'edsigtobbKMzzyFHSTjvZTrCpahRVwENpmJMJPmUfzScjapMDs6a6yB177FbRNGEHcKoBqjSDDN6urjzA9CXfULpjbFmcwXDcGx'
       : signature
     const body = [{ protocol: block.protocol, ...tezosWrappedOperation, branch: block.hash, signature }]
-    try {
-      const { data: dryRunResponse }: { data: string } = await Axios.post(
-        `${rpcUrl}/chains/main/blocks/head/helpers/preapply/operations`,
-        JSON.stringify(body),
-        {
-          headers: { 'content-type': 'application/json' }
-        }
-      )
-
-      // returns hash if successful
-      return dryRunResponse
-    } catch (err) {
-      const axiosResponse: AxiosResponse = (err as AxiosError).response as AxiosResponse
-      if (axiosResponse.status === 404) {
-        throw {
-          name: 'Node Unreachable',
-          message: 'The node is not reachable, please try again later or make sure the URL is correct.',
-          stack: axiosResponse.data
-        }
-      } else if (axiosResponse.status === 500) {
-        throw {
-          name: 'Node Error',
-          message: 'The operation could not be processed by the node.',
-          stack: axiosResponse.data
-        }
-      } else {
-        throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse.data }
-      }
-    }
+    return this.send(network, body, '/chains/main/blocks/head/helpers/preapply/operations')
   }
 
   public async broadcast(network: Network, signedTx: string): Promise<string> {
+    return this.send(network, signedTx, '/injection/operation?chain=main')
+  }
+
+  private async send(network: Network, payload: any, endpoint: string): Promise<string> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
 
     try {
-      const { data: injectionResponse }: { data: string } = await Axios.post(
-        `${rpcUrl}/injection/operation?chain=main`,
-        JSON.stringify(signedTx),
-        {
-          headers: { 'content-type': 'application/json' }
-        }
-      )
-
-      // returns hash if successful
-      return injectionResponse
+      const { data: response }: { data: string } = await Axios.post(`${rpcUrl}${endpoint}`, JSON.stringify(payload), {
+        headers: { 'content-type': 'application/json' }
+      })
+      return response
     } catch (err) {
-      const axiosResponse: AxiosResponse = (err as AxiosError).response as AxiosResponse
-      if (axiosResponse.status === 404) {
-        throw {
-          name: 'Node Unreachable',
-          message: 'The node is not reachable, please try again later or make sure the URL is correct.',
-          stack: axiosResponse.data
-        }
-      } else if (axiosResponse.status === 500) {
-        throw {
-          name: 'Node Error',
-          message: 'The operation could not be processed by the node.',
-          stack: axiosResponse.data
-        }
-      } else {
-        throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse.data }
+      throw this.handleAxiosError(err)
+    }
+  }
+
+  private handleAxiosError(err: AxiosError) {
+    const axiosResponse: AxiosResponse = err.response as AxiosResponse
+    if (axiosResponse.status === 404) {
+      throw {
+        name: 'Node Unreachable',
+        message: 'The node is not reachable, please try again later or make sure the URL is correct.',
+        stack: axiosResponse.data
       }
+    } else if (axiosResponse.status === 500) {
+      throw {
+        name: 'Node Error',
+        message: 'The operation could not be processed by the node.',
+        stack: axiosResponse.data
+      }
+    } else {
+      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse.data }
     }
   }
 }
