@@ -117,7 +117,7 @@
         {{ confirmButtonText }}
       </ion-button>
 
-      <ion-button color="primary" (click)="performDryRun()">
+      <ion-button color="primary" (click)="performDryRun()" *ngIf="request.type === 'operation_request'">
         DRY RUN
       </ion-button>
     </ion-fab>
