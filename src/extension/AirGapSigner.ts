@@ -72,7 +72,9 @@ export class AirGapOperationProvider implements OperationProvider {
       signature = await signer.signOperation({ binaryTransaction: forgedTx }, wallet.derivationPath)
     }
 
-    signature = fail ? 'invalid_signature' : signature
+    signature = fail
+      ? 'edsigtobbKMzzyFHSTjvZTrCpahRVwENpmJMJPmUfzScjapMDs6a6yB177FbRNGEHcKoBqjSDDN6urjzA9CXfULpjbFmcwXDcGx'
+      : signature
     const body = [{ protocol: block.protocol, ...tezosWrappedOperation, branch: block.hash, signature }]
     try {
       const { data: dryRunResponse }: { data: string } = await Axios.post(
@@ -171,8 +173,8 @@ export class LocalSigner implements Signer {
     const tezosCryptoClient = new TezosCryptoClient()
 
     const opSignature: Buffer = await tezosCryptoClient.opSignature(privateKey, transaction)
-    const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
 
+    const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
     return bs58check.encode(Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(opSignature)]))
   }
 }
@@ -185,9 +187,9 @@ export class LedgerSigner implements Signer {
   }
 
   public async signOperation(transaction: RawTezosTransaction, derivationPath: string): Promise<string> {
-    const opSignature: string = await this.sign(transaction.binaryTransaction, derivationPath)
-    const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
+    const opSignature: string = await bridge.signOperation(transaction.binaryTransaction, derivationPath)
 
+    const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
     return bs58check.encode(Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(opSignature)]))
   }
 

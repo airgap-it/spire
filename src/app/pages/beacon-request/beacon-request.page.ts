@@ -142,9 +142,34 @@ export class BeaconRequestPage implements OnInit {
         fail
       )
       this.openPreviewModal(dryRunPreview)
-    } catch (error) {}
+    } catch (error) {
+      this.openErrorModal(error)
+    }
   }
 
+  private async openErrorModal(error: Error) {
+    const modal = await this.modalController.create({
+      component: ErrorPage,
+      componentProps: {
+        title: error.name,
+        message: error.message,
+        data: error.stack
+      }
+    })
+
+    modal
+      .onDidDismiss()
+      .then(({ data: closeParent }) => {
+        if (closeParent) {
+          setTimeout(() => {
+            this.dismiss()
+          }, 500)
+        }
+      })
+      .catch(error => console.error(error))
+
+    return modal.present()
+  }
   private async openPreviewModal(dryRunPreview: string): Promise<void> {
     const modal = await this.modalController.create({
       component: DryRunPreviewPage,
