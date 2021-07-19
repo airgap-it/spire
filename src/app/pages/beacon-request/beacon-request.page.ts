@@ -125,7 +125,7 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  public async performDryRun(fail = false) {
+  public async performDryRun() {
     const operationDetails = (this.request as OperationRequestOutput).operationDetails
     const wrappedOperation = {
       branch: '',
@@ -138,8 +138,7 @@ export class BeaconRequestPage implements OnInit {
       const dryRunPreview = await this.operationProvider.performDryRun(
         wrappedOperation,
         this.network ? this.network : { type: NetworkType.MAINNET },
-        wallet,
-        fail
+        wallet
       )
       this.openPreviewModal(dryRunPreview)
     } catch (error) {

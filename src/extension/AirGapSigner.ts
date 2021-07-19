@@ -51,8 +51,7 @@ export class AirGapOperationProvider implements OperationProvider {
   public async performDryRun(
     tezosWrappedOperation: TezosWrappedOperation,
     network: Network,
-    wallet: WalletInfo | undefined,
-    fail = false
+    wallet: WalletInfo | undefined
   ): Promise<string> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
     const { data: block } = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
@@ -71,9 +70,6 @@ export class AirGapOperationProvider implements OperationProvider {
       signature = await signer.signOperation({ binaryTransaction: forgedTx }, wallet.derivationPath)
     }
 
-    signature = fail
-      ? 'edsigtobbKMzzyFHSTjvZTrCpahRVwENpmJMJPmUfzScjapMDs6a6yB177FbRNGEHcKoBqjSDDN6urjzA9CXfULpjbFmcwXDcGx'
-      : signature
     const body = [{ protocol: block.protocol, ...tezosWrappedOperation, branch: block.hash, signature }]
     return this.send(network, body, '/chains/main/blocks/head/helpers/preapply/operations')
   }
