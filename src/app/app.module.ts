@@ -3,7 +3,6 @@ import { ErrorHandler, NgModule } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 import { RouteReuseStrategy } from '@angular/router'
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular'
-import { NgxJsonViewerModule } from 'ngx-json-viewer'
 import { MomentModule } from 'ngx-moment'
 
 import { AppRoutingModule } from './app-routing.module'
@@ -16,15 +15,7 @@ import { ProtocolsService } from './services/protocols.service'
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [
-    BrowserModule,
-    IonicModule.forRoot(),
-    AppRoutingModule,
-    ComponentsModule,
-    PipesModule,
-    MomentModule,
-    NgxJsonViewerModule
-  ],
+  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, ComponentsModule, PipesModule, MomentModule],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: LocationStrategy, useClass: HashLocationStrategy },

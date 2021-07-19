@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common'
 import { NgModule } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { IonicModule } from '@ionic/angular'
-import { NgxJsonViewerModule } from 'ngx-json-viewer'
 import { MomentModule } from 'ngx-moment'
 import { DirectivesModule } from '../directives/directives.module'
 import { PipesModule } from '../pipes/pipes.module'
@@ -12,16 +11,7 @@ import { IdenticonComponent } from './identicon/identicon.component'
 
 @NgModule({
   declarations: [IdenticonComponent, FromToComponent, AddressRowComponent],
-  imports: [
-    IonicModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    PipesModule,
-    MomentModule,
-    NgxJsonViewerModule,
-    DirectivesModule
-  ],
+  imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule, PipesModule, MomentModule, DirectivesModule],
   exports: [IdenticonComponent, FromToComponent, AddressRowComponent]
 })
 export class ComponentsModule {}
