@@ -47,7 +47,7 @@ export class BeaconRequestPage implements OnInit {
   public requestedNetwork: Network | undefined
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
-  public transactionDetailsPromise: Promise<FullOperationGroup> | undefined
+  public operationGroupPromise: Promise<FullOperationGroup> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -255,7 +255,7 @@ export class BeaconRequestPage implements OnInit {
       contents: request.operationDetails
     }
 
-    this.transactionDetailsPromise = this.operationProvider.operationGroupFromWrappedOperation(
+    this.operationGroupPromise = this.operationProvider.operationGroupFromWrappedOperation(
       wrappedOperation,
       this.network ? this.network : { type: NetworkType.MAINNET }
     )
