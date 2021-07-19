@@ -10,6 +10,7 @@ import {
   PermissionScope,
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
+import { ModalOptions } from '@ionic/core'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
@@ -140,42 +141,26 @@ export class BeaconRequestPage implements OnInit {
         this.network ? this.network : { type: NetworkType.MAINNET },
         wallet
       )
-      this.openPreviewModal(dryRunPreview)
-    } catch (error) {
-      this.openErrorModal(error)
-    }
-  }
 
-  private async openErrorModal(error: Error) {
-    const modal = await this.modalController.create({
-      component: ErrorPage,
-      componentProps: {
-        title: error.name,
-        message: error.message,
-        data: error.stack
-      }
-    })
-
-    modal
-      .onDidDismiss()
-      .then(({ data: closeParent }) => {
-        if (closeParent) {
-          setTimeout(() => {
-            this.dismiss()
-          }, 500)
+      this.openModal({
+        component: DryRunPreviewPage,
+        componentProps: {
+          dryRunPreview: dryRunPreview
         }
       })
-      .catch(error => console.error(error))
-
-    return modal.present()
+    } catch (error) {
+      this.openModal({
+        component: ErrorPage,
+        componentProps: {
+          title: error.name,
+          message: error.message,
+          data: error.stack
+        }
+      } as ModalOptions)
+    }
   }
-  private async openPreviewModal(dryRunPreview: string): Promise<void> {
-    const modal = await this.modalController.create({
-      component: DryRunPreviewPage,
-      componentProps: {
-        dryRunPreview: dryRunPreview
-      }
-    })
+  private async openModal(modalOptions: ModalOptions): Promise<void> {
+    const modal = await this.modalController.create(modalOptions)
 
     modal
       .onDidDismiss()
@@ -238,7 +223,13 @@ export class BeaconRequestPage implements OnInit {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
-        await this.openLedgerModal(request)
+        await this.openModal({
+          component: AddLedgerConnectionPage,
+          componentProps: {
+            request,
+            targetMethod: Action.RESPONSE
+          }
+        })
       }
     }
   }
@@ -263,34 +254,15 @@ export class BeaconRequestPage implements OnInit {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
-        await this.openLedgerModal(request)
+        await this.openModal({
+          component: AddLedgerConnectionPage,
+          componentProps: {
+            request,
+            targetMethod: Action.RESPONSE
+          }
+        })
       }
     }
-  }
-
-  private async openLedgerModal(
-    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
-  ): Promise<void> {
-    const modal = await this.modalController.create({
-      component: AddLedgerConnectionPage,
-      componentProps: {
-        request,
-        targetMethod: Action.RESPONSE
-      }
-    })
-
-    modal
-      .onDidDismiss()
-      .then(({ data: closeParent }) => {
-        if (closeParent) {
-          setTimeout(() => {
-            this.dismiss()
-          }, 500)
-        }
-      })
-      .catch(error => console.error(error))
-
-    return modal.present()
   }
 
   private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
