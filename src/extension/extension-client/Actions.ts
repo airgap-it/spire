@@ -23,6 +23,7 @@ export interface WalletInfo<T extends WalletType = WalletType> {
 
 export enum Action {
   HANDSHAKE = 'HANDSHAKE',
+  OPEN_FULLSCREEN = 'OPEN_FULLSCREEN',
   WALLET_ADD = 'WALLET_ADD',
   WALLET_DELETE = 'WALLET_DELETE',
   WALLETS_GET = 'WALLETS_GET',
@@ -43,6 +44,7 @@ export enum Action {
 
 export interface ActionInputTypesMap {
   [Action.HANDSHAKE]: undefined
+  [Action.OPEN_FULLSCREEN]: { url: string }
   [Action.WALLET_ADD]: { wallet: WalletInfo }
   [Action.WALLET_DELETE]: { wallet: WalletInfo }
   [Action.WALLETS_GET]: undefined
@@ -63,6 +65,7 @@ export interface ActionInputTypesMap {
 
 export interface ActionOutputTypesMap {
   [Action.HANDSHAKE]: undefined
+  [Action.OPEN_FULLSCREEN]: undefined
   [Action.WALLET_ADD]: undefined
   [Action.WALLET_DELETE]: undefined
   [Action.WALLETS_GET]: { wallets: WalletInfo[] }

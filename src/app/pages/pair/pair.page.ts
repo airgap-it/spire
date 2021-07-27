@@ -6,7 +6,6 @@ import { ChromeMessagingService } from 'src/app/services/chrome-messaging.servic
 import { SettingsService } from 'src/app/services/settings.service'
 import { Action, ExtensionMessageOutputPayload } from 'src/extension/extension-client/Actions'
 
-import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { AddWalletConnectionPage } from '../add-wallet-connection/add-wallet-connection.page'
 
 @Component({
@@ -65,25 +64,7 @@ export class PairPage {
   }
 
   public async pairHardwareWallet(): Promise<void> {
-    const modal: HTMLIonModalElement = await this.modalController.create({
-      component: AddLedgerConnectionPage,
-      componentProps: {
-        targetMethod: Action.LEDGER_INIT
-      }
-    })
-
-    modal
-      .onWillDismiss()
-      .then(({ data: closeParent }) => {
-        if (closeParent) {
-          setTimeout(() => {
-            this.dismiss()
-          }, 500)
-        }
-      })
-      .catch(error => console.error(error))
-
-    return modal.present()
+    this.chromeMessagingService.sendChromeMessage(Action.OPEN_FULLSCREEN, { url: '/index.html#/home#pair-ledger' })
   }
 
   public async toggleDeveloperMode(event: CustomEvent): Promise<void> {
