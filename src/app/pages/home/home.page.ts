@@ -101,7 +101,7 @@ export class HomePage {
         return response.data ? response.data.wallets.length > 0 : false
       })
 
-    if (!hasWallet) {
+    if (!hasWallet && !location.href.includes('pair-ledger')) {
       await this.showPairPage()
     }
   }
