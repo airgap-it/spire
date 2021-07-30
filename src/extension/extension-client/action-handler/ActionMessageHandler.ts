@@ -18,6 +18,7 @@ import { permissionDeleteAction } from './permission-delete-action'
 import { permissionsGetAction } from './permissions-get-action'
 import { responseAction } from './response-action'
 import { walletAddAction } from './wallet-add-action'
+import { openFullscreen } from './open-fullscreen'
 import { walletDeleteAction } from './wallet-delete-action'
 import { walletsGetAction } from './wallets-get-action'
 
@@ -42,6 +43,7 @@ export const actionNotSupported: ActionHandlerFunction<any> = async (context: Ac
 export class ActionMessageHandler {
   public actionHandler: { [key in Action]: ActionHandlerFunction<any> } = {
     [Action.HANDSHAKE]: actionNotSupported,
+    [Action.OPEN_FULLSCREEN]: openFullscreen(logger),
     [Action.WALLET_ADD]: walletAddAction(logger),
     [Action.WALLET_DELETE]: walletDeleteAction(logger),
     [Action.WALLETS_GET]: walletsGetAction(logger),

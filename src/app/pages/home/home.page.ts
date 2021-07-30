@@ -11,6 +11,7 @@ import { getTezblockLinkForNetwork } from 'src/extension/extension-client/utils'
 
 import { PairPage } from '../pair/pair.page'
 import { WalletSelectPage } from '../wallet-select/wallet-select.page'
+import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 
 enum SigningMethods {
   WALLET = 'WALLET',
@@ -63,6 +64,10 @@ export class HomePage {
         await this.updateBalanceAndLink()
       }
     })
+
+    if (location.href.includes('pair-ledger')) {
+      this.openLedger()
+    }
   }
 
   public async updateBalanceAndLink(): Promise<void> {
@@ -96,7 +101,7 @@ export class HomePage {
         return response.data ? response.data.wallets.length > 0 : false
       })
 
-    if (!hasWallet) {
+    if (!hasWallet && !location.href.includes('pair-ledger')) {
       await this.showPairPage()
     }
   }
@@ -133,5 +138,21 @@ export class HomePage {
 
   public async openBlockexplorer(): Promise<void> {
     window.open(this.tezblockLink)
+  }
+
+  public async openLedger() {
+    const modal: HTMLIonModalElement = await this.modalController.create({
+      component: AddLedgerConnectionPage,
+      componentProps: {
+        targetMethod: Action.LEDGER_INIT
+      }
+    })
+
+    modal
+      .onWillDismiss()
+      .then(() => {})
+      .catch(error => console.error(error))
+
+    return modal.present()
   }
 }

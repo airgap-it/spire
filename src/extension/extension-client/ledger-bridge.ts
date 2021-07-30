@@ -115,4 +115,6 @@ class BeaconLedgerBridge {
   }
 }
 
-export const bridge: BeaconLedgerBridge = new BeaconLedgerBridge('https://airgap-it.github.io/beacon-ledger-bridge/')
+export const bridge: BeaconLedgerBridge = new BeaconLedgerBridge(
+  'https://airgap-it.github.io/beacon-ledger-bridge/index.v3.html'
+)
