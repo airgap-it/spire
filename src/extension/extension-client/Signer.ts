@@ -1,6 +1,7 @@
 import { Network, TezosOperation } from '@airgap/beacon-sdk'
 import { RawTezosTransaction } from '@airgap/coinlib-core'
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
+import { DryRunSignatures } from '../AirGapSigner'
 
 export interface OperationProvider {
   prepareOperations(
@@ -14,6 +15,6 @@ export interface OperationProvider {
 
 export interface Signer {
   sign(forgedTx: string, mnemonic?: string): Promise<string>
-  signOperation(transaction: RawTezosTransaction, mnemonic?: string): Promise<string>
+  generateDryRunSignatures(transaction: RawTezosTransaction, mnemonic?: string): Promise<DryRunSignatures>
   signMessage(message: string, mnemonic?: string): Promise<string>
 }

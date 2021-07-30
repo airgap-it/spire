@@ -39,7 +39,8 @@ export enum Action {
   P2P_PEER_REMOVE = 'P2P_REMOVE_PEERS',
   LEDGER_INIT = 'LEDGER_INIT',
   BEACON_ID_GET = 'BEACON_ID_GET',
-  RESPONSE = 'REQUEST'
+  RESPONSE = 'REQUEST',
+  DRY_RUN = 'DRY_RUN'
 }
 
 export interface ActionInputTypesMap {
@@ -61,6 +62,7 @@ export interface ActionInputTypesMap {
   [Action.LEDGER_INIT]: undefined
   [Action.BEACON_ID_GET]: undefined
   [Action.RESPONSE]: { request: unknown; extras: unknown }
+  [Action.DRY_RUN]: undefined
 }
 
 export interface ActionOutputTypesMap {
@@ -82,6 +84,7 @@ export interface ActionOutputTypesMap {
   [Action.LEDGER_INIT]: { publicKey: string; address: string }
   [Action.BEACON_ID_GET]: { id: string }
   [Action.RESPONSE]: { error?: unknown }
+  [Action.DRY_RUN]: { dryRunPreview: string }
 }
 
 export interface ExtensionMessageInputPayload<T extends Action> {

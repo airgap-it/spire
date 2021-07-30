@@ -60,6 +60,8 @@ export class BeaconRequestPage implements OnInit {
 
   public confirmButtonText: string = 'Confirm'
   private unsubscribe = new Subject()
+  private broadcastRequestOutput: BroadcastRequestOutput | undefined
+  private dryRunPreviewSucceeded: boolean = false
 
   constructor(
     private readonly popupService: PopupService,
@@ -81,7 +83,6 @@ export class BeaconRequestPage implements OnInit {
   }
 
   public async ngOnInit(): Promise<void> {
-    console.log('new request', this.request)
     if (this.request && this.request.type === BeaconMessageType.PermissionRequest) {
       this.title = 'Permission Request'
       this.requesterName = this.request.appMetadata.name
@@ -126,42 +127,6 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  public async performDryRun() {
-    const operationDetails = (this.request as OperationRequestOutput).operationDetails
-    const wrappedOperation = {
-      branch: '',
-      contents: operationDetails
-    }
-    const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
-    const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
-    const wallet = wallets.find(wallet => wallet.address === sourceAddress)
-    try {
-      const dryRunPreview = await this.operationProvider.performDryRun(
-        wrappedOperation,
-        this.network ? this.network : { type: NetworkType.MAINNET },
-        wallet
-      )
-
-      this.openModal(
-        {
-          component: DryRunPreviewPage,
-          componentProps: {
-            dryRunPreview: dryRunPreview
-          }
-        },
-        false
-      )
-    } catch (error) {
-      this.openModal({
-        component: ErrorPage,
-        componentProps: {
-          title: error.name,
-          message: error.message,
-          data: error.stack
-        }
-      })
-    }
-  }
   private async openModal(modalOptions: ModalOptions, dismissParent = true): Promise<void> {
     const modal = await this.modalController.create(modalOptions)
 
@@ -173,6 +138,7 @@ export class BeaconRequestPage implements OnInit {
             this.dismiss()
           }, 500)
         }
+        this.ngOnInit()
       })
       .catch(error => console.error(error))
 
@@ -254,7 +220,9 @@ export class BeaconRequestPage implements OnInit {
     )
 
     this.responseHandler = async (): Promise<void> => {
-      if (this.walletType === WalletType.LOCAL_MNEMONIC) {
+      if (this.dryRunPreviewSucceeded) {
+        await this.sendResponse(this.broadcastRequestOutput!, {})
+      } else if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
         await this.openModal({
@@ -265,6 +233,53 @@ export class BeaconRequestPage implements OnInit {
           }
         })
       }
+    }
+  }
+
+  public async performDryRun() {
+    const operationDetails = (this.request as OperationRequestOutput).operationDetails
+    const wrappedOperation = {
+      branch: '',
+      contents: operationDetails
+    }
+    const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
+    const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
+    const wallet = wallets.find(wallet => wallet.address === sourceAddress)
+
+    try {
+      const dryRunPreview = await this.operationProvider.performDryRun(
+        wrappedOperation,
+        this.network ? this.network : { type: NetworkType.MAINNET },
+        wallet
+      )
+
+      this.dryRunPreviewSucceeded = true
+      this.broadcastRequestOutput = {
+        ...this.request,
+        type: BeaconMessageType.BroadcastRequest,
+        network: this.network ? this.network : { type: NetworkType.MAINNET },
+        signedTransaction: dryRunPreview.signatures.signedTransaction
+      } as BroadcastRequestOutput
+
+      this.openModal(
+        {
+          component: DryRunPreviewPage,
+          componentProps: {
+            dryRunPreview: dryRunPreview.preapplyResponse
+          }
+        },
+        false
+      )
+    } catch (error) {
+      console.error(error)
+      this.openModal({
+        component: ErrorPage,
+        componentProps: {
+          title: error.name,
+          message: error.message,
+          data: error.stack
+        }
+      })
     }
   }
 

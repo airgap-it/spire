@@ -16,6 +16,15 @@ const logger: Logger = new Logger('AirGap Signer')
 export interface FullOperationGroup extends TezosWrappedOperation {
   chain_id: string
 }
+export interface DryRunSignatures {
+  preapplySignature: string
+  signedTransaction: string
+}
+
+export interface DryRunResponse {
+  preapplyResponse: string
+  signatures: DryRunSignatures
+}
 
 // tslint:disable:max-classes-per-file
 
@@ -52,11 +61,11 @@ export class AirGapOperationProvider implements OperationProvider {
     tezosWrappedOperation: TezosWrappedOperation,
     network: Network,
     wallet: WalletInfo | undefined
-  ): Promise<string> {
+  ): Promise<DryRunResponse> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
     const { data: block } = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
     const forgedTx = await this.forgeWrappedOperation({ ...tezosWrappedOperation, branch: block.hash }, network)
-    let signature
+    let signatures: DryRunSignatures
     if (!wallet) {
       throw new Error('NO WALLET FOUND')
     }
@@ -64,14 +73,22 @@ export class AirGapOperationProvider implements OperationProvider {
     if (wallet.type === WalletType.LOCAL_MNEMONIC) {
       const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> = wallet as WalletInfo<WalletType.LOCAL_MNEMONIC>
       const signer: Signer = new LocalSigner()
-      signature = await signer.signOperation({ binaryTransaction: forgedTx }, localWallet.info.mnemonic)
+      signatures = await signer.generateDryRunSignatures({ binaryTransaction: forgedTx }, localWallet.info.mnemonic)
     } else {
       const signer: Signer = new LedgerSigner()
-      signature = await signer.signOperation({ binaryTransaction: forgedTx }, wallet.derivationPath)
+      signatures = await signer.generateDryRunSignatures({ binaryTransaction: forgedTx }, wallet.derivationPath)
     }
 
-    const body = [{ protocol: block.protocol, ...tezosWrappedOperation, branch: block.hash, signature }]
-    return this.send(network, body, '/chains/main/blocks/head/helpers/preapply/operations')
+    const body = [
+      {
+        protocol: block.protocol,
+        ...tezosWrappedOperation,
+        branch: block.hash,
+        signature: signatures.preapplySignature
+      }
+    ]
+    const preapplyResponse = await this.send(network, body, '/chains/main/blocks/head/helpers/preapply/operations')
+    return { preapplyResponse, signatures }
   }
 
   public async broadcast(network: Network, signedTx: string): Promise<string> {
@@ -133,18 +150,23 @@ export class LocalSigner implements Signer {
     return this.protocol.signMessage(message, { privateKey })
   }
 
-  public async signOperation(transaction: RawTezosTransaction, mnemonic: string): Promise<string> {
+  public async generateDryRunSignatures(transaction: RawTezosTransaction, mnemonic: string): Promise<DryRunSignatures> {
     const privateKey: Buffer = await this.protocol.getPrivateKeyFromMnemonic(
       mnemonic,
       this.protocol.standardDerivationPath
     )
 
+    const signedTransaction = await this.sign(transaction.binaryTransaction, mnemonic)
     const tezosCryptoClient = new TezosCryptoClient()
 
     const opSignature: Buffer = await tezosCryptoClient.opSignature(privateKey, transaction)
 
     const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
-    return bs58check.encode(Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(opSignature)]))
+
+    return {
+      preapplySignature: bs58check.encode(Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(opSignature)])),
+      signedTransaction
+    }
   }
 }
 
@@ -155,11 +177,16 @@ export class LedgerSigner implements Signer {
     return forgedTx + signature
   }
 
-  public async signOperation(transaction: RawTezosTransaction, derivationPath: string): Promise<string> {
-    const opSignature: string = await bridge.signOperation(transaction.binaryTransaction, derivationPath)
-
+  public async generateDryRunSignatures(
+    transaction: RawTezosTransaction,
+    derivationPath: string
+  ): Promise<DryRunSignatures> {
+    const txSignature: string = await bridge.signOperation(transaction.binaryTransaction, derivationPath)
     const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
-    return bs58check.encode(Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(opSignature)]))
+    return {
+      preapplySignature: bs58check.encode(Buffer.concat([Buffer.from(edsigPrefix), Buffer.from(txSignature, 'hex')])),
+      signedTransaction: `${transaction.binaryTransaction}${txSignature}`
+    }
   }
 
   public async signMessage(message: string): Promise<string> {
