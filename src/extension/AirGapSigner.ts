@@ -123,7 +123,7 @@ export class AirGapOperationProvider implements OperationProvider {
         stack: axiosResponse.data
       }
     } else {
-      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse?.data }
+      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse ? axiosResponse.data : '' }
     }
   }
 }
