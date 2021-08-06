@@ -245,7 +245,6 @@ export class BeaconRequestPage implements OnInit {
         operationDetails: (this.request as OperationRequestOutput).operationDetails
       }
     }
-    false
 
     const modal = await this.modalController.create(modalOptions)
 
