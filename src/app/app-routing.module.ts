@@ -35,6 +35,13 @@ const routes: Routes = [
   {
     path: 'dry-run-preview',
     loadChildren: () => import('./pages/dry-run-preview/dry-run-preview.module').then(m => m.DryRunPreviewPageModule)
+  },
+  {
+    path: 'customize-operation-parameters',
+    loadChildren: () =>
+      import('./pages/customize-operation-parameters/customize-operation-parameters.module').then(
+        m => m.CustomizeOperationParametersPageModule
+      )
   }
 ]
 

@@ -113,12 +113,19 @@
       <ion-button fill="outline" color="primary" (click)="cancel()">
         Reject
       </ion-button>
+      <ion-button
+        fill="outline"
+        color="primary"
+        (click)="customizeOperationParameters()"
+        *ngIf="request.type === 'operation_request'"
+      >
+        Edit Params
+      </ion-button>
+      <ion-button fill="outline" color="primary" (click)="performDryRun()" *ngIf="request.type === 'operation_request'">
+        Dry Run
+      </ion-button>
       <ion-button color="primary" (click)="done()">
         {{ confirmButtonText }}
-      </ion-button>
-
-      <ion-button color="primary" (click)="performDryRun()" *ngIf="request.type === 'operation_request'">
-        DRY RUN
       </ion-button>
     </ion-fab>
   </ng-container>

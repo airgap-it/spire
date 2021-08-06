@@ -1,0 +1,26 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Customize Operation Parameters</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding-horizontal ion-padding-bottom">
+  <div contenteditable="true">
+    <p class="bigger ion-padding-top ion-no-margin">
+      Edit fee, gas limit and storage limit values directly in the JSON
+    </p>
+
+    <pre class="ion-padding-top" id="json">{{operationDetails | json}}</pre>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-button fill="outline" color="primary" (click)="dismiss()">
+      Dismiss
+    </ion-button>
+    <ion-button color="primary" (click)="confirm()">
+      Confirm
+    </ion-button>
+  </ion-fab>
+</ion-content>

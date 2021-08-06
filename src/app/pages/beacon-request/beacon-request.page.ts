@@ -12,7 +12,7 @@ import {
 } from '@airgap/beacon-sdk'
 import { ModalOptions } from '@ionic/core'
 import { Component, OnInit } from '@angular/core'
-import { AlertController, ModalController } from '@ionic/angular'
+import { AlertController, ModalController, ToastController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
 import { take, takeUntil } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
@@ -25,6 +25,7 @@ import { ErrorPage } from '../error/error.page'
 import { AirGapOperationProvider, FullOperationGroup } from 'src/extension/AirGapSigner'
 import { Subject } from 'rxjs'
 import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
+import { CustomizeOperationParametersPage } from '../customize-operation-parameters/customize-operation-parameters.page'
 
 @Component({
   selector: 'beacon-request',
@@ -68,6 +69,7 @@ export class BeaconRequestPage implements OnInit {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly walletService: WalletService,
+    private readonly toastController: ToastController,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
     this.walletService.activeNetwork$.pipe(takeUntil(this.unsubscribe)).subscribe(async (network: Network) => {
@@ -236,6 +238,34 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
+  public async customizeOperationParameters() {
+    const modalOptions = {
+      component: CustomizeOperationParametersPage,
+      componentProps: {
+        operationDetails: (this.request as OperationRequestOutput).operationDetails
+      }
+    }
+    false
+
+    const modal = await this.modalController.create(modalOptions)
+
+    modal
+      .onDidDismiss()
+      .then(async ({ data: operationDetails }) => {
+        if (operationDetails) {
+          this.request = { ...this.request, operationDetails } as OperationRequestOutput
+          const toast = await this.toastController.create({
+            message: `Updated Operation Details`,
+            duration: 2000
+          })
+          toast.present()
+          this.ngOnInit()
+        }
+      })
+      .catch(error => console.error(error))
+
+    return modal.present()
+  }
   public async performDryRun() {
     const operationDetails = (this.request as OperationRequestOutput).operationDetails
     const wrappedOperation = {
