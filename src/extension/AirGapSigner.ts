@@ -109,21 +109,21 @@ export class AirGapOperationProvider implements OperationProvider {
   }
 
   private handleAxiosError(err: AxiosError) {
-    const axiosResponse: AxiosResponse = err.response as AxiosResponse
-    if (axiosResponse.status === 404) {
+    const axiosResponse: AxiosResponse | undefined = err.response
+    if (axiosResponse?.status === 404) {
       throw {
         name: 'Node Unreachable',
         message: 'The node is not reachable, please try again later or make sure the URL is correct.',
         stack: axiosResponse.data
       }
-    } else if (axiosResponse.status === 500) {
+    } else if (axiosResponse?.status === 500) {
       throw {
         name: 'Node Error',
         message: 'The operation could not be processed by the node.',
         stack: axiosResponse.data
       }
     } else {
-      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse.data }
+      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse?.data }
     }
   }
 }

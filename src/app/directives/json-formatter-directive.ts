@@ -1,5 +1,4 @@
-import { ElementRef, OnChanges } from '@angular/core'
-import { Directive, Input } from '@angular/core'
+import { ElementRef, OnChanges, Directive, Input } from '@angular/core'
 import JSONFormatter from 'json-formatter-js'
 
 @Directive({

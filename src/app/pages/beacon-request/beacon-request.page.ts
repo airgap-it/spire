@@ -220,8 +220,8 @@ export class BeaconRequestPage implements OnInit {
     )
 
     this.responseHandler = async (): Promise<void> => {
-      if (this.dryRunPreviewSucceeded) {
-        await this.sendResponse(this.broadcastRequestOutput!, {})
+      if (this.dryRunPreviewSucceeded && this.broadcastRequestOutput) {
+        await this.sendResponse(this.broadcastRequestOutput, {})
       } else if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
@@ -244,7 +244,7 @@ export class BeaconRequestPage implements OnInit {
     }
     const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
     const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
-    const wallet = wallets.find(wallet => wallet.address === sourceAddress)
+    const wallet = wallets.find(w => w.address === sourceAddress)
 
     try {
       const dryRunPreview = await this.operationProvider.performDryRun(
