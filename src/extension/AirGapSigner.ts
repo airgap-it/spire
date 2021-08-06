@@ -122,8 +122,10 @@ export class AirGapOperationProvider implements OperationProvider {
         message: 'The operation could not be processed by the node.',
         stack: axiosResponse.data
       }
+    } else if (axiosResponse?.status) {
+      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse.data }
     } else {
-      throw { name: 'Node Error', message: 'Unknown error', stack: axiosResponse }
+      throw { name: 'Node Error', message: 'Unknown error' }
     }
   }
 }
