@@ -8,6 +8,5 @@ export const injectionDryRunAction: (logger: Logger) => ActionHandlerFunction<Ac
 ): ActionHandlerFunction<Action.DRY_RUN> => async (context: ActionContext<Action.DRY_RUN>): Promise<void> => {
   logger.log('activeWalletGetAction')
   // const activeWallet: WalletInfo = await context.storage.get('ACTIVE_WALLET' as any)
-  console.log('##### HARIBOL injectionDryRunAction #####')
   context.sendResponse({ data: { dryRunPreview: 'JGD' } })
 }
