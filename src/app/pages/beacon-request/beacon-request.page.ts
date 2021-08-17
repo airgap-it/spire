@@ -25,7 +25,6 @@ import { ErrorPage } from '../error/error.page'
 import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
 import { Subject } from 'rxjs'
 import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
-import { CustomizeOperationParametersPage } from '../customize-operation-parameters/customize-operation-parameters.page'
 import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
@@ -148,6 +147,16 @@ export class BeaconRequestPage implements OnInit {
     return modal.present()
   }
 
+  public async setOperationGroup(operationGroup: FullOperationGroup) {
+    this.request = { ...this.request, operationDetails: operationGroup.contents } as OperationRequestOutput
+    this.ngOnInit()
+    const toast = await this.toastController.create({
+      message: `Updated Operation Details`,
+      duration: 3000
+    })
+    toast.present()
+  }
+
   private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
     this.requestedNetwork = request.network
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
@@ -239,33 +248,6 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
-  public async customizeOperationParameters() {
-    const modalOptions = {
-      component: CustomizeOperationParametersPage,
-      componentProps: {
-        operationDetails: (this.request as OperationRequestOutput).operationDetails
-      }
-    }
-
-    const modal = await this.modalController.create(modalOptions)
-
-    modal
-      .onDidDismiss()
-      .then(async ({ data: operationDetails }) => {
-        if (operationDetails) {
-          this.request = { ...this.request, operationDetails } as OperationRequestOutput
-          const toast = await this.toastController.create({
-            message: `Updated Operation Details`,
-            duration: 2000
-          })
-          toast.present()
-          this.ngOnInit()
-        }
-      })
-      .catch(error => console.error(error))
-
-    return modal.present()
-  }
   public async performDryRun() {
     const operationDetails = (this.request as OperationRequestOutput).operationDetails
     const wrappedOperation = {

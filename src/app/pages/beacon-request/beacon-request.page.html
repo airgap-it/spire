@@ -106,6 +106,7 @@
       <beacon-from-to
         [transactionsPromise]="transactionsPromise"
         [operationGroupPromise]="operationGroupPromise"
+        (operationGroupEmitter)="setOperationGroup($event)"
       ></beacon-from-to>
     </div>
 
@@ -113,14 +114,7 @@
       <ion-button fill="outline" color="primary" (click)="cancel()">
         Reject
       </ion-button>
-      <ion-button
-        fill="outline"
-        color="primary"
-        (click)="customizeOperationParameters()"
-        *ngIf="request.type === 'operation_request'"
-      >
-        Edit Params
-      </ion-button>
+
       <ion-button fill="outline" color="primary" (click)="performDryRun()" *ngIf="request.type === 'operation_request'">
         Simulate
       </ion-button>

@@ -11,6 +11,8 @@ export class CollapsableJSONComponent {
   @Input()
   public json: any | undefined
 
+  public displayRawData: boolean = false
+
   constructor(private readonly copyService: CopyService, private readonly toastController: ToastController) {}
 
   copyToClipboard() {
