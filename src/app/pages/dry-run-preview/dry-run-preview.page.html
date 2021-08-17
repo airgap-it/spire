@@ -1,3 +1,5 @@
+<error [errors]="errors"></error>
+
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -6,10 +8,10 @@
     <ion-title>Injection Preview</ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content class="ion-padding-horizontal ion-padding-bottom">
   This is a preview obtained by simulating the validation of your operation.
-
-  <json-formatter [json]="dryRunPreview"></json-formatter>
+  <collapsable-json [json]="preapplyResponse"></collapsable-json>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-button color="primary" (click)="dismiss()">

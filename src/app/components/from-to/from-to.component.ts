@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core'
 import { IAirGapTransaction } from '@airgap/coinlib-core'
-import { FullOperationGroup } from 'src/extension/AirGapSigner'
+import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
   selector: 'beacon-from-to',

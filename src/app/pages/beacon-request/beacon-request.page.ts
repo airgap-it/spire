@@ -22,10 +22,11 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 's
 import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
-import { AirGapOperationProvider, FullOperationGroup } from 'src/extension/AirGapSigner'
+import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
 import { Subject } from 'rxjs'
 import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
 import { CustomizeOperationParametersPage } from '../customize-operation-parameters/customize-operation-parameters.page'
+import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
   selector: 'beacon-request',
@@ -294,7 +295,7 @@ export class BeaconRequestPage implements OnInit {
         {
           component: DryRunPreviewPage,
           componentProps: {
-            dryRunPreview: dryRunPreview.preapplyResponse
+            preapplyResponse: dryRunPreview.preapplyResponse
           }
         },
         false

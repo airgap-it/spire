@@ -63,7 +63,9 @@
         <ion-toggle [(ngModel)]="displayRawData" slot="end"></ion-toggle>
       </ion-item>
 
-      <json-formatter *ngIf="displayRawData" [json]="operationGroup"></json-formatter>
+      <ng-container *ngIf="displayRawData">
+        <collapsable-json [json]="operationGroup"></collapsable-json>
+      </ng-container>
     </ion-col>
   </ion-row>
 </ng-container>
