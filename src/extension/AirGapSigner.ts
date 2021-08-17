@@ -159,7 +159,7 @@ export class LocalSigner implements Signer {
     const signedTransaction = await this.sign(transaction.binaryTransaction, mnemonic)
     const tezosCryptoClient = new TezosCryptoClient()
 
-    const opSignature: Buffer = await tezosCryptoClient.opSignature(privateKey, transaction)
+    const opSignature: Buffer = await tezosCryptoClient.operationSignature(privateKey, transaction)
 
     const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
 
