@@ -5,9 +5,8 @@ import { TezosProtocol } from '@airgap/coinlib-core'
 import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
-import { SettingsService } from 'src/app/services/settings.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
-import { getTezblockLinkForNetwork } from 'src/extension/extension-client/utils'
+import { getProtocolForNetwork, getTezblockLinkForNetwork } from 'src/extension/extension-client/utils'
 
 import { PairPage } from '../pair/pair.page'
 import { WalletSelectPage } from '../wallet-select/wallet-select.page'
@@ -38,7 +37,6 @@ export class HomePage {
   constructor(
     public readonly walletService: WalletService,
     private readonly modalController: ModalController,
-    private readonly settingsService: SettingsService,
     private readonly chromeMessagingService: ChromeMessagingService,
     private readonly ref: ChangeDetectorRef
   ) {
@@ -122,7 +120,7 @@ export class HomePage {
       return ''
     }
 
-    const protocol: TezosProtocol = await this.settingsService.getProtocolForNetwork(network)
+    const protocol: TezosProtocol = await getProtocolForNetwork(network)
 
     const amount: string = await protocol.getBalanceOfAddresses([address])
     console.log('getBalance', amount)
