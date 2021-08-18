@@ -16,10 +16,8 @@ export class DryRunPreviewPage implements OnInit {
   constructor(private readonly modalController: ModalController) {}
 
   ngOnInit(): void {
-    console.log('this.preapplyResponse', this.preapplyResponse)
     if (this.preapplyResponse) {
       this.jsonString = JSON.stringify(this.preapplyResponse)
-      console.log('jsonString', this.jsonString)
       const operationResultErrors = this.preapplyResponse[0].contents.map(operation => {
         return operation.metadata.operation_result.errors as TezosGenericOperationError[]
       })
