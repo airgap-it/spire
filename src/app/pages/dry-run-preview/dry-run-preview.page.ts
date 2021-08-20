@@ -7,7 +7,7 @@ import { PreapplyResponse, TezosGenericOperationError } from 'src/extension/tezo
   styleUrls: ['./dry-run-preview.page.scss']
 })
 export class DryRunPreviewPage implements OnInit {
-  public errors: TezosGenericOperationError[] | undefined
+  public errors: TezosGenericOperationError[] = []
 
   public jsonString: string | undefined
   @Input()

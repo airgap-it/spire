@@ -1,5 +1,3 @@
-<error [errors]="errors"></error>
-
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -10,7 +8,23 @@
 </ion-header>
 
 <ion-content class="ion-padding-horizontal ion-padding-bottom">
-  This is a preview obtained by simulating the validation of your operation.
+  
+  <ion-text color="danger" *ngFor="let error of errors">
+    <h6>
+      <strong>Error</strong>
+    </h6>
+    <p>Kind:  {{ error.kind }}</p>
+    <p>ID:  {{ error.id }}</p>
+    <p *ngIf="error.message !== undefined">Message: {{ error.message }}</p>
+  </ion-text>
+
+  <ion-text color="success" *ngIf="errors.length === 0">
+    <h6>
+      <strong>Simulation successful</strong>
+    </h6>
+  </ion-text>
+
+  <h6>This is a preview obtained by simulating the validation of your operation.</h6>
   <collapsable-json [json]="preapplyResponse"></collapsable-json>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">

@@ -70,6 +70,7 @@ export enum OpKind {
 export interface TezosGenericOperationError {
   kind: string
   id: string
+  message: string | undefined
 }
 export interface OperationResultTransaction {
   status: OperationResultStatusEnum
