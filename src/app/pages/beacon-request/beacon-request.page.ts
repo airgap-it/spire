@@ -56,7 +56,11 @@ export class BeaconRequestPage implements OnInit {
       return undefined
     }
     type RequestOutputWithNetwork = PermissionRequestOutput | OperationRequestOutput | BroadcastRequestOutput
-    const types = [BeaconMessageType.PermissionRequest, BeaconMessageType.OperationRequest, BeaconMessageType.BroadcastRequest]
+    const types = [
+      BeaconMessageType.PermissionRequest,
+      BeaconMessageType.OperationRequest,
+      BeaconMessageType.BroadcastRequest
+    ]
     if (!types.includes(this.request.type)) {
       return undefined
     }
@@ -156,7 +160,8 @@ export class BeaconRequestPage implements OnInit {
     this.ngOnInit()
     const toast = await this.toastController.create({
       message: `Updated Operation Details`,
-      duration: 3000
+      duration: 2000,
+      position: 'top'
     })
     toast.present()
   }

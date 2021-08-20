@@ -1,22 +1,29 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+    <ion-title>Transaction Preview</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Injection Preview</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding-horizontal ion-padding-bottom">
-  
-  <ion-text color="danger" *ngFor="let error of errors">
-    <h6>
-      <strong>Error</strong>
-    </h6>
-    <p>Kind:  {{ error.kind }}</p>
-    <p>ID:  {{ error.id }}</p>
-    <p *ngIf="error.message !== undefined">Message: {{ error.message }}</p>
-  </ion-text>
+  <p class="ion-padding-bottom">This is a preview obtained by simulating the validation of your operation.</p>
+
+  <ion-card color="danger" class="ion-margin-vertical" *ngFor="let error of errors">
+    <ion-card-content>
+      <ion-text>
+        <h6>
+          <strong>Error</strong>
+        </h6>
+        <p>{{ error.kind }}</p>
+        <p><strong>{{ error.id }}</strong></p>
+        <p *ngIf="error.message !== undefined">Message: {{ error.message }}</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
 
   <ion-text color="success" *ngIf="errors.length === 0">
     <h6>
@@ -24,12 +31,11 @@
     </h6>
   </ion-text>
 
-  <h6>This is a preview obtained by simulating the validation of your operation.</h6>
-  <collapsable-json [json]="preapplyResponse"></collapsable-json>
+  <collapsable-json [json]="preapplyResponse" [displayRawData]="true"></collapsable-json>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-button color="primary" (click)="dismiss()">
-      Dismiss
+      Close
     </ion-button>
   </ion-fab>
 </ion-content>
