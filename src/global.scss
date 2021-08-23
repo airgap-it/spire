@@ -94,3 +94,28 @@ app-add-ledger-connection {
     word-wrap: break-word;
   }
 }
+
+.button-outline {
+  background-color: #fff;
+}
+json-formatter > div:first-child {
+  padding: 8px;
+}
+.json-formatter-row {
+  background-color: var(--ion-color-light);
+  font-size: 0.7rem;
+}
+.json-formatter-row .json-formatter-toggler:after {
+  content: '+' !important;
+}
+.json-formatter-row .json-formatter-toggler {
+  vertical-align: initial !important;
+}
+.json-formatter-row .json-formatter-key {
+  color: #000 !important;
+}
+.json-formatter-row .json-formatter-string,
+.json-formatter-row .json-formatter-stringifiable {
+  color: #3880ff !important;
+  font-weight: bold;
+}

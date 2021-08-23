@@ -9,6 +9,7 @@ import { AppRoutingModule } from './app-routing.module'
 import { AppComponent } from './app.component'
 import { SentryErrorHandler } from './classes/sentry-error-handler'
 import { ComponentsModule } from './components/components.module'
+import { FeeConverterPipe } from './pipes/fee-converter/fee-converter.pipe'
 import { PipesModule } from './pipes/pipes.module'
 import { ProtocolsService } from './services/protocols.service'
 
@@ -20,7 +21,8 @@ import { ProtocolsService } from './services/protocols.service'
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: LocationStrategy, useClass: HashLocationStrategy },
     { provide: ErrorHandler, useClass: SentryErrorHandler },
-    ProtocolsService
+    ProtocolsService,
+    FeeConverterPipe,
   ],
   bootstrap: [AppComponent]
 })

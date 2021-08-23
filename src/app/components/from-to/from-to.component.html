@@ -59,41 +59,41 @@
   >
     <ion-col class="ion-no-padding">
       <ion-item class="ion-no-padding" lines="none">
-        <ion-label>Advanced</ion-label>
+        <ion-label>Change Fees</ion-label>
         <ion-toggle [(ngModel)]="advanced" slot="end" (ngModelChange)="initForms()"></ion-toggle>
       </ion-item>
 
       <ng-container *ngIf="advanced">
         <ng-container *ngFor="let formGroup of formGroups; let i = index">
-          <h3 *ngIf="formGroups && formGroups.length > 1">
+          <h6 *ngIf="formGroups && formGroups.length > 1">
             <span class="style__strong color__primary">Operation #{{ i + 1 }}</span>
-          </h3>
+          </h6>
           <form [formGroup]="formGroup" class="ion-padding-bottom">
-            <ion-row class="ion-padding-horizontal padding-top ion-align-items-center amount__container">
+            <ion-row class="padding-top">
               <ion-col>
-                <ion-item clasS="ion-no-padding" lines="none">
-                  <ion-label color="blackLight" class="ion-no-margin" position="stacked">Fee</ion-label>
+                <ion-item mode="md" color="light">
+                  <ion-label class="ion-no-margin" position="stacked">Fee</ion-label>
                   <ion-input type="string" formControlName="fee" id="fee"></ion-input>
                 </ion-item>
               </ion-col>
               <ion-col>
-                <ion-item clasS="ion-no-padding" lines="none">
-                  <ion-label color="blackLight" class="ion-no-margin" position="stacked">Gas Limit</ion-label>
-                  <ion-input type="string" formControlName="gas_limit" id="gas_limit"></ion-input>
+                <ion-item mode="md" color="light">
+                  <ion-label class="ion-no-margin" position="stacked">Gas Limit</ion-label>
+                  <ion-input mode="md" type="string" formControlName="gas_limit" id="gas_limit"></ion-input>
                 </ion-item>
               </ion-col>
               <ion-col>
-                <ion-item clasS="ion-no-padding" lines="none">
-                  <ion-label color="blackLight" class="ion-no-margin" position="stacked">Storage Limit</ion-label>
-                  <ion-input type="string" formControlName="storage_limit" id="storage_limit"></ion-input>
+                <ion-item mode="md" color="light">
+                  <ion-label class="ion-no-margin" position="stacked">Storage Limit</ion-label>
+                  <ion-input mode="md" type="string" formControlName="storage_limit" id="storage_limit"></ion-input>
                 </ion-item>
               </ion-col>
             </ion-row>
           </form>
         </ng-container>
 
-        <ion-button fill="outline" color="primary" (click)="confirmParams()">
-          Confirm Params
+        <ion-button color="primary" (click)="confirmParams()">
+          Update
         </ion-button>
       </ng-container>
 

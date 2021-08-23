@@ -1,13 +1,11 @@
 <ion-item class="ion-no-padding" lines="none">
-  <ion-label>Display Raw Data</ion-label>
+  <ion-label>Raw Data</ion-label>
   <ion-toggle [(ngModel)]="displayRawData" slot="end"></ion-toggle>
 </ion-item>
 
-<ion-item button class="ion-no-padding" lines="none" detail="false" (click)="copyToClipboard()">
-  <ion-icon name="clipboard-outline" color="dark" slot="start"></ion-icon>
-  Copy
-</ion-item>
-
 <ng-container *ngIf="displayRawData">
+  <ion-item button class="ion-no-padding" lines="none" detail="false" (click)="copyToClipboard()">
+    <ion-icon name="copy-outline" color="dark" slot="end"></ion-icon>
+  </ion-item>
   <json-formatter [json]="json"></json-formatter>
 </ng-container>

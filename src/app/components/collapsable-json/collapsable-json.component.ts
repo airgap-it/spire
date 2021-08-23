@@ -11,6 +11,7 @@ export class CollapsableJSONComponent {
   @Input()
   public json: any | undefined
 
+  @Input()
   public displayRawData: boolean = false
 
   constructor(private readonly copyService: CopyService, private readonly toastController: ToastController) {}
@@ -23,7 +24,8 @@ export class CollapsableJSONComponent {
   async showToast() {
     const toast = await this.toastController.create({
       message: 'Copied to clipboard',
-      duration: 2000
+      duration: 2000,
+      position: 'top'
     })
     return toast.present()
   }

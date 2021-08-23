@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core'
-import { getProtocolByIdentifier } from '@airgap/coinlib-core'
+import { getProtocolByIdentifier, ICoinProtocol } from '@airgap/coinlib-core'
 import { ProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { BigNumber } from 'bignumber.js'
 
@@ -7,7 +7,9 @@ import { BigNumber } from 'bignumber.js'
   name: 'feeConverter'
 })
 export class FeeConverterPipe implements PipeTransform {
-  public transform(value: BigNumber | string | number, args: { protocolIdentifier: ProtocolSymbols }): string {
+  public transform(value: BigNumber | string | number, args: { protocolIdentifier: ProtocolSymbols, reverse?: boolean, appendSymbol?: boolean }): string {
+    const reverse = args.reverse !== undefined && args.reverse
+    const appendSymbol = args.appendSymbol === undefined || args.appendSymbol
     if (BigNumber.isBigNumber(value)) {
       value = value.toNumber()
     }
@@ -15,7 +17,7 @@ export class FeeConverterPipe implements PipeTransform {
       // console.warn(`FeeConverterPipe: necessary properties missing!\n` + `Protocol: ${args.protocolIdentifier}\n` + `Value: ${value}`)
       return ''
     }
-    let protocol
+    let protocol: ICoinProtocol
 
     try {
       protocol = getProtocolByIdentifier(args.protocolIdentifier)
@@ -24,8 +26,9 @@ export class FeeConverterPipe implements PipeTransform {
     }
 
     const amount = new BigNumber(value)
-    const fee = amount.shiftedBy(-1 * protocol.feeDecimals)
-
-    return fee.toFixed() + ' ' + protocol.feeSymbol.toUpperCase()
+    const shiftDirection: number = !reverse ? -1 : 1
+    const fee = amount.shiftedBy(shiftDirection * protocol.feeDecimals)
+    
+    return fee.toFixed() + (appendSymbol ? ' ' + protocol.feeSymbol.toUpperCase() : '')
   }
 }
