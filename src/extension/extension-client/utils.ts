@@ -16,7 +16,7 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
     [NetworkType.MAINNET]: 'https://tezos-node.prod.gke.papers.tech',
     [NetworkType.DELPHINET]: 'https://tezos-delphinet-node.prod.gke.papers.tech',
     [NetworkType.EDONET]: 'https://tezos-edonet-node.prod.gke.papers.tech',
-    [NetworkType.FLORENCENET]: 'https://tezos-florencenet-node.prod.gke.papers.tech', // TODO: UPDATE TO PAPERS URL
+    [NetworkType.FLORENCENET]: 'https://tezos-florencenet-node.prod.gke.papers.tech',
     [NetworkType.GRANADANET]: 'https://tezos-granadanet-node.prod.gke.papers.tech',
     [NetworkType.CUSTOM]: ''
   }
@@ -24,8 +24,8 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
     [NetworkType.MAINNET]: 'https://tezos-mainnet-conseil.prod.gke.papers.tech',
     [NetworkType.DELPHINET]: 'https://tezos-delphinet-conseil.prod.gke.papers.tech',
     [NetworkType.EDONET]: 'https://tezos-edonet-conseil.prod.gke.papers.tech',
-    [NetworkType.FLORENCENET]: 'https://tezos-granadanet-conseil.prod.gke.papers.tech',
-    [NetworkType.GRANADANET]: '', // TODO: ADD CONSEIL URL
+    [NetworkType.FLORENCENET]: 'https://tezos-florencenet-conseil.prod.gke.papers.tech',
+    [NetworkType.GRANADANET]: 'https://tezos-granadanet-conseil.prod.gke.papers.tech',
     [NetworkType.CUSTOM]: ''
   }
 
@@ -61,20 +61,29 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.EDONET]: 'https://edonet.tezblock.io',
     [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io',
     [NetworkType.GRANADANET]: 'https://granadanet.tezblock.io',
-    [NetworkType.CUSTOM]: 'https://florencenet.tezblock.io'
+    [NetworkType.CUSTOM]: 'https://granadanet.tezblock.io'
   }
   const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
     [NetworkType.MAINNET]: TezosNetwork.MAINNET,
     [NetworkType.EDONET]: TezosNetwork.EDONET,
-    [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET, // TODO: UPDATE IN COINLIB
-    [NetworkType.GRANADANET]: TezosNetwork.GRANADANET, // TODO: UPDATE IN COINLIB
-    [NetworkType.CUSTOM]: TezosNetwork.EDONET
+    [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET,
+    [NetworkType.GRANADANET]: TezosNetwork.GRANADANET,
+    [NetworkType.CUSTOM]: TezosNetwork.GRANADANET
+  }
+
+  const conseilNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
+    [NetworkType.MAINNET]: TezosNetwork.MAINNET,
+    [NetworkType.EDONET]: TezosNetwork.EDONET,
+    [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET,
+    [NetworkType.GRANADANET]: TezosNetwork.MAINNET,
+    [NetworkType.CUSTOM]: TezosNetwork.MAINNET
   }
 
   const name: string = names[network.type]
   const airgapNetwork: AirGapNetworkType = airgapNetworks[network.type]
   const blockExplorer: string = blockExplorers[network.type]
   const tezosNetwork: TezosNetwork = tezosNetworks[network.type]
+  const conseilNetwork: TezosNetwork = conseilNetworks[network.type]
 
   return new TezosProtocol(
     new TezosProtocolOptions(
@@ -83,7 +92,7 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
         airgapNetwork,
         rpcUrl,
         new TezblockBlockExplorer(blockExplorer),
-        new TezosProtocolNetworkExtras(tezosNetwork, apiUrl, tezosNetwork, 'airgap00391')
+        new TezosProtocolNetworkExtras(tezosNetwork, apiUrl, conseilNetwork, 'airgap00391')
       )
     )
   )
