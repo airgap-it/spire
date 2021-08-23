@@ -101,8 +101,6 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
 export const getTezblockLinkForNetwork: (network: Network | undefined) => Promise<string> = async (
   network: Network | undefined
 ): Promise<string> => {
-  console.log('network', network)
-
   const urls: { [key in NetworkType]: string } = {
     [NetworkType.MAINNET]: 'https://tezblock.io/account/',
     [NetworkType.DELPHINET]: 'https://delphinet.tezblock.io/account/',
