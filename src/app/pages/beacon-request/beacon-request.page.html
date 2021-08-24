@@ -85,8 +85,7 @@
 
     <ion-row *ngIf="request.type === 'broadcast_request'">
       <beacon-from-to
-        [transactionsPromise]="transactionsPromise"
-        [operationGroupPromise]="operationGroupPromise"
+        [transactions]="transactionsPromise | async"
       ></beacon-from-to>
     </ion-row>
 
@@ -104,8 +103,9 @@
 
     <div *ngIf="request.type === 'operation_request'" class="request--container">
       <beacon-from-to
-        [transactionsPromise]="transactionsPromise"
-        [operationGroupPromise]="operationGroupPromise"
+        [transactions]="transactionsPromise | async"
+        [operationGroup]="operationGroupPromise | async"
+        (onOperationGroupUpdate)="onOperationGroupUpdate($event)"
       ></beacon-from-to>
     </div>
 
@@ -113,12 +113,12 @@
       <ion-button fill="outline" color="primary" (click)="cancel()">
         Reject
       </ion-button>
+
+      <ion-button fill="outline" color="primary" (click)="performDryRun()" *ngIf="request.type === 'operation_request'">
+        Preview
+      </ion-button>
       <ion-button color="primary" (click)="done()">
         {{ confirmButtonText }}
-      </ion-button>
-
-      <ion-button color="primary" (click)="performDryRun()" *ngIf="request.type === 'operation_request'">
-        DRY RUN
       </ion-button>
     </ion-fab>
   </ng-container>

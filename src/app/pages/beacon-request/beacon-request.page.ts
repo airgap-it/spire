@@ -12,9 +12,9 @@ import {
 } from '@airgap/beacon-sdk'
 import { ModalOptions } from '@ionic/core'
 import { Component, OnInit } from '@angular/core'
-import { AlertController, ModalController } from '@ionic/angular'
+import { AlertController, ModalController, ToastController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
-import { take, takeUntil } from 'rxjs/operators'
+import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
 import { PopupService } from 'src/app/services/popup.service'
@@ -22,9 +22,9 @@ import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 's
 import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
-import { AirGapOperationProvider, FullOperationGroup } from 'src/extension/AirGapSigner'
-import { Subject } from 'rxjs'
+import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
 import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
+import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
   selector: 'beacon-request',
@@ -35,22 +35,32 @@ export class BeaconRequestPage implements OnInit {
   public title: string = ''
   public protocol: TezosProtocol = new TezosProtocol()
   public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
-  public network: Network | undefined
   public walletType: WalletType | undefined
-  public request:
-    | PermissionRequestOutput
-    | OperationRequestOutput
-    | SignPayloadRequestOutput
-    | BroadcastRequestOutput
-    | undefined
+  public request: RequestOutput
   public requesterName: string = ''
   public address: string = ''
-  public requestedNetwork: Network | undefined
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
   public operationGroupPromise: Promise<FullOperationGroup> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
+
+  public get requestedNetwork(): Network | undefined {
+    if (this.request === undefined) {
+      return undefined
+    }
+    type RequestOutputWithNetwork = PermissionRequestOutput | OperationRequestOutput | BroadcastRequestOutput
+    const types = [
+      BeaconMessageType.PermissionRequest,
+      BeaconMessageType.OperationRequest,
+      BeaconMessageType.BroadcastRequest
+    ]
+    if (!types.includes(this.request.type)) {
+      return undefined
+    }
+    const request = this.request as RequestOutputWithNetwork
+    return request.network
+  }
 
   public transport: WalletChromeMessageTransport = new WalletChromeMessageTransport(
     'Spire',
@@ -59,22 +69,16 @@ export class BeaconRequestPage implements OnInit {
   )
 
   public confirmButtonText: string = 'Confirm'
-  private unsubscribe = new Subject()
-  private broadcastRequestOutput: BroadcastRequestOutput | undefined
-  private dryRunPreviewSucceeded: boolean = false
 
   constructor(
     private readonly popupService: PopupService,
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly walletService: WalletService,
+    private readonly toastController: ToastController,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
-    this.walletService.activeNetwork$.pipe(takeUntil(this.unsubscribe)).subscribe(async (network: Network) => {
-      this.network = network
-    })
-
-    this.walletService.activeWallet$.pipe(take(1), takeUntil(this.unsubscribe)).subscribe((wallet: WalletInfo) => {
+    this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.address = wallet.address
     })
     if (this.walletType === WalletType.LEDGER) {
@@ -145,8 +149,21 @@ export class BeaconRequestPage implements OnInit {
     return modal.present()
   }
 
+  public async onOperationGroupUpdate(operationGroup: FullOperationGroup) {
+    if (!isOperationRequestOutput(this.request)) {
+      return
+    }
+    this.request = { ...this.request, operationDetails: operationGroup.contents } as OperationRequestOutput
+    await this.operationRequest(this.request)
+    const toast = await this.toastController.create({
+      message: `Updated Operation Details`,
+      duration: 2000,
+      position: 'top'
+    })
+    toast.present()
+  }
+
   private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
-    this.requestedNetwork = request.network
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.inputs = [
         {
@@ -216,13 +233,11 @@ export class BeaconRequestPage implements OnInit {
 
     this.operationGroupPromise = this.operationProvider.operationGroupFromWrappedOperation(
       wrappedOperation,
-      this.network ? this.network : { type: NetworkType.MAINNET }
+      this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
     )
 
     this.responseHandler = async (): Promise<void> => {
-      if (this.dryRunPreviewSucceeded && this.broadcastRequestOutput) {
-        await this.sendResponse(this.broadcastRequestOutput, {})
-      } else if (this.walletType === WalletType.LOCAL_MNEMONIC) {
+      if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
         await this.openModal({
@@ -237,7 +252,10 @@ export class BeaconRequestPage implements OnInit {
   }
 
   public async performDryRun() {
-    const operationDetails = (this.request as OperationRequestOutput).operationDetails
+    if (!isOperationRequestOutput(this.request)) {
+      return
+    }
+    const operationDetails = this.request.operationDetails
     const wrappedOperation = {
       branch: '',
       contents: operationDetails
@@ -249,23 +267,15 @@ export class BeaconRequestPage implements OnInit {
     try {
       const dryRunPreview = await this.operationProvider.performDryRun(
         wrappedOperation,
-        this.network ? this.network : { type: NetworkType.MAINNET },
+        this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET },
         wallet
       )
-
-      this.dryRunPreviewSucceeded = true
-      this.broadcastRequestOutput = {
-        ...this.request,
-        type: BeaconMessageType.BroadcastRequest,
-        network: this.network ? this.network : { type: NetworkType.MAINNET },
-        signedTransaction: dryRunPreview.signatures.signedTransaction
-      } as BroadcastRequestOutput
 
       this.openModal(
         {
           component: DryRunPreviewPage,
           componentProps: {
-            dryRunPreview: dryRunPreview.preapplyResponse
+            preapplyResponse: dryRunPreview.preapplyResponse
           }
         },
         false
@@ -375,9 +385,17 @@ export class BeaconRequestPage implements OnInit {
       errorType: BeaconErrorType.ABORTED_ERROR
     })
   }
+}
 
-  ngOnDestroy() {
-    this.unsubscribe.next()
-    this.unsubscribe.complete()
+type RequestOutput = | PermissionRequestOutput
+    | OperationRequestOutput
+    | SignPayloadRequestOutput
+    | BroadcastRequestOutput
+    | undefined
+
+function isOperationRequestOutput(request: RequestOutput): request is OperationRequestOutput {
+  if (request === undefined) {
+    return false
   }
+  return request.type === BeaconMessageType.OperationRequest
 }

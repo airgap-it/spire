@@ -1,19 +1,41 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+    <ion-title>Transaction Preview</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Injection Preview</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding-horizontal ion-padding-bottom">
-  This is a preview obtained by simulating the validation of your operation.
 
-  <json-formatter [json]="dryRunPreview"></json-formatter>
+<ion-content class="ion-padding-horizontal ion-padding-bottom">
+  <p class="ion-padding-bottom">This is a preview obtained by simulating the validation of your operation.</p>
+
+  <ion-card color="danger" class="ion-margin-vertical" *ngFor="let error of errors">
+    <ion-card-content>
+      <ion-text>
+        <h6>
+          <strong>Error</strong>
+        </h6>
+        <p>{{ error.kind }}</p>
+        <p><strong>{{ error.id }}</strong></p>
+        <p *ngIf="error.message !== undefined">Message: {{ error.message }}</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-text color="success" *ngIf="errors.length === 0">
+    <h6>
+      <strong>Simulation successful</strong>
+    </h6>
+  </ion-text>
+
+  <collapsable-json [json]="preapplyResponse" [displayRawData]="true"></collapsable-json>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-button color="primary" (click)="dismiss()">
-      Dismiss
+      Close
     </ion-button>
   </ion-fab>
 </ion-content>

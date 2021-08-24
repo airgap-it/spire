@@ -30,7 +30,6 @@ export const operationRequestHandler: (client: ExtensionClient, logger: Logger) 
     sendToPage: (message: BeaconMessage) => void,
     sendResponseToPopup: (error?: unknown) => void
   ): Promise<void> => {
-    console.log('HARIBOL operationRequestHandler', data.request)
     const operationRequest: OperationRequestOutput = (data.request as any) as OperationRequestOutput
     logger.log('beaconMessageHandler operation-request', data)
 

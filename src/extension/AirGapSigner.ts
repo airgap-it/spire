@@ -10,21 +10,9 @@ import { bridge } from './extension-client/ledger-bridge'
 import { Logger } from './extension-client/Logger'
 import { OperationProvider, Signer } from './extension-client/Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from './extension-client/utils'
+import { DryRunResponse, DryRunSignatures, FullOperationGroup } from './tezos-types'
 
 const logger: Logger = new Logger('AirGap Signer')
-
-export interface FullOperationGroup extends TezosWrappedOperation {
-  chain_id: string
-}
-export interface DryRunSignatures {
-  preapplySignature: string
-  signedTransaction: string
-}
-
-export interface DryRunResponse {
-  preapplyResponse: string
-  signatures: DryRunSignatures
-}
 
 // tslint:disable:max-classes-per-file
 
@@ -95,7 +83,7 @@ export class AirGapOperationProvider implements OperationProvider {
     return this.send(network, signedTx, '/injection/operation?chain=main')
   }
 
-  private async send(network: Network, payload: any, endpoint: string): Promise<string> {
+  private async send(network: Network, payload: any, endpoint: string): Promise<any> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
 
     try {
@@ -161,7 +149,7 @@ export class LocalSigner implements Signer {
     const signedTransaction = await this.sign(transaction.binaryTransaction, mnemonic)
     const tezosCryptoClient = new TezosCryptoClient()
 
-    const opSignature: Buffer = await tezosCryptoClient.opSignature(privateKey, transaction)
+    const opSignature: Buffer = await tezosCryptoClient.operationSignature(privateKey, transaction)
 
     const edsigPrefix: Uint8Array = new Uint8Array([9, 245, 205, 134, 18])
 

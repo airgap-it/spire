@@ -1,7 +1,7 @@
 import { Network, TezosOperation } from '@airgap/beacon-sdk'
 import { RawTezosTransaction } from '@airgap/coinlib-core'
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
-import { DryRunSignatures } from '../AirGapSigner'
+import { DryRunSignatures } from '../tezos-types'
 
 export interface OperationProvider {
   prepareOperations(
