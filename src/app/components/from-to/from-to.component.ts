@@ -1,9 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core'
-import { IAirGapTransaction, MainProtocolSymbols } from '@airgap/coinlib-core'
+import { getProtocolByIdentifier, IAirGapTransaction, MainProtocolSymbols } from '@airgap/coinlib-core'
 import { FullOperationGroup } from 'src/extension/tezos-types'
-import { FormBuilder, FormGroup } from '@angular/forms'
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { FeeConverterPipe } from 'src/app/pipes/fee-converter/fee-converter.pipe'
-import { isInjectableOperation, TezosInjectableOperation } from 'src/app/types/tezos-operation'
+import { isInjectableOperation } from 'src/app/types/tezos-operation'
 
 @Component({
   selector: 'beacon-from-to',
@@ -11,50 +11,80 @@ import { isInjectableOperation, TezosInjectableOperation } from 'src/app/types/t
   styleUrls: ['./from-to.component.scss']
 })
 export class FromToComponent {
-  public formGroups: FormGroup[] | undefined
-
-  private operationGroup: FullOperationGroup | undefined
+  public formGroup: FormGroup | undefined
 
   @Input()
-  public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
+  public transactions: IAirGapTransaction[] | undefined
 
   @Input()
-  public operationGroupPromise: Promise<FullOperationGroup> | undefined
+  public operationGroup: FullOperationGroup | undefined
 
   @Output()
-  public readonly operationGroupEmitter: EventEmitter<FullOperationGroup> = new EventEmitter<FullOperationGroup>()
+  public readonly onOperationGroupUpdate: EventEmitter<FullOperationGroup> = new EventEmitter<FullOperationGroup>()
 
   constructor(private readonly formBuilder: FormBuilder, private readonly feeConverter: FeeConverterPipe) {}
 
   public advanced: boolean = false
 
-  public async initForms() {
-    this.operationGroup = await this.operationGroupPromise
-    if (this.operationGroup) {
-      this.formGroups = this.operationGroup.contents.filter(operation => isInjectableOperation(operation)).map(operation => {
-        const injectableOperation = operation as TezosInjectableOperation
-        return this.formBuilder.group({
-          fee: [this.feeConverter.transform(injectableOperation.fee, { protocolIdentifier: MainProtocolSymbols.XTZ, appendSymbol: false })],
-          gas_limit: [injectableOperation.gas_limit],
-          storage_limit: [injectableOperation.storage_limit]
-        })
-      })
+  public get operationControls(): FormArray | undefined {
+    if (this.formGroup === undefined) {
+      return undefined
     }
+    return this.formGroup.controls.operations as FormArray
   }
 
-  public confirmParams() {
-    if (this.operationGroup) {
-      this.operationGroup.contents = this.operationGroup.contents.filter(operation => isInjectableOperation(operation)).map((op, idx) => {
-        const operation = op as TezosInjectableOperation
-        return {
-          ...op,
-          fee: this.formGroups ? this.feeConverter.transform(this.formGroups[idx].controls.fee.value, { protocolIdentifier: MainProtocolSymbols.XTZ, reverse: true, appendSymbol: false }) : operation.fee,
-          gas_limit: this.formGroups ? this.formGroups[idx].controls.gas_limit.value : operation.fee,
-          storage_limit: this.formGroups ? this.formGroups[idx].controls.storage_limit.value : operation.fee
-        }
-      })
-      this.operationGroupEmitter.emit(this.operationGroup)
+  public async initForms() {
+    if (this.operationGroup === undefined) {
+      return
     }
+    const protocol = getProtocolByIdentifier(MainProtocolSymbols.XTZ)
+    this.formGroup = this.formBuilder.group({
+      operations: this.formBuilder.array(
+        this.operationGroup.contents.map(operation => {
+          if (!isInjectableOperation(operation)) {
+            return this.formBuilder.group({})
+          }
+          const feeValue = this.feeConverter.transform(operation.fee, { protocolIdentifier: MainProtocolSymbols.XTZ, appendSymbol: false })
+          const feeControl = this.formBuilder.control(feeValue, [
+            Validators.required,
+            Validators.pattern(`^[0-9]+(\.[0-9]{1,${protocol.feeDecimals}})*$`)
+          ])
+          const gasLimitControl = this.formBuilder.control(operation.gas_limit, [
+            Validators.required,
+            Validators.min(0)
+          ])
+          const storageLimitControl = this.formBuilder.control(operation.storage_limit, [
+            Validators.required,
+            Validators.min(0)
+          ])
+          return this.formBuilder.group({
+            fee: feeControl,
+            gasLimit: gasLimitControl,
+            storageLimit: storageLimitControl
+          })
+        })
+      )
+    })
+  }
+
+  public updateOperationGroup() {
+    if (this.operationGroup === undefined) {
+      return
+    }
+    this.operationGroup.contents = this.operationGroup.contents.map((operation, index) => {
+      if (!isInjectableOperation(operation) || this.formGroup === undefined) {
+        return operation
+      }
+      const group = (this.formGroup.controls.operations as FormArray).controls[index] as FormGroup
+      const fee = this.feeConverter.transform(group.controls.fee.value, { protocolIdentifier: MainProtocolSymbols.XTZ, reverse: true, appendSymbol: false })
+      return {
+        ...operation,
+        fee,
+        gas_limit: String(group.controls.gasLimit.value),
+        storage_limit: String(group.controls.storageLimit.value),
+      }
+    })
+    this.onOperationGroupUpdate.emit(this.operationGroup)
     this.advanced = false
   }
 }
