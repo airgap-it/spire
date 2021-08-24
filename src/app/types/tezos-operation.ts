@@ -9,5 +9,5 @@ export type TezosInjectableOperation = TezosRevealOperation | TezosTransactionOp
 const INJECTABLE_TYPES = [TezosOperationType.REVEAL, TezosOperationType.TRANSACTION, TezosOperationType.DELEGATION, TezosOperationType.ORIGINATION]
 
 export function isInjectableOperation(operation: TezosOperation): operation is TezosInjectableOperation {
-    return INJECTABLE_TYPES.includes(operation.kind)
+  return INJECTABLE_TYPES.includes(operation.kind)
 }

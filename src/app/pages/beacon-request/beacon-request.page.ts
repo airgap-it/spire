@@ -36,15 +36,9 @@ export class BeaconRequestPage implements OnInit {
   public protocol: TezosProtocol = new TezosProtocol()
   public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
   public walletType: WalletType | undefined
-  public request:
-    | PermissionRequestOutput
-    | OperationRequestOutput
-    | SignPayloadRequestOutput
-    | BroadcastRequestOutput
-    | undefined
+  public request: RequestOutput
   public requesterName: string = ''
   public address: string = ''
-  // public requestedNetwork: Network | undefined
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
   public operationGroupPromise: Promise<FullOperationGroup> | undefined
@@ -155,9 +149,12 @@ export class BeaconRequestPage implements OnInit {
     return modal.present()
   }
 
-  public async setOperationGroup(operationGroup: FullOperationGroup) {
+  public async onOperationGroupUpdate(operationGroup: FullOperationGroup) {
+    if (!isOperationRequestOutput(this.request)) {
+      return
+    }
     this.request = { ...this.request, operationDetails: operationGroup.contents } as OperationRequestOutput
-    this.ngOnInit()
+    await this.operationRequest(this.request)
     const toast = await this.toastController.create({
       message: `Updated Operation Details`,
       duration: 2000,
@@ -255,7 +252,10 @@ export class BeaconRequestPage implements OnInit {
   }
 
   public async performDryRun() {
-    const operationDetails = (this.request as OperationRequestOutput).operationDetails
+    if (!isOperationRequestOutput(this.request)) {
+      return
+    }
+    const operationDetails = this.request.operationDetails
     const wrappedOperation = {
       branch: '',
       contents: operationDetails
@@ -385,4 +385,17 @@ export class BeaconRequestPage implements OnInit {
       errorType: BeaconErrorType.ABORTED_ERROR
     })
   }
+}
+
+type RequestOutput = | PermissionRequestOutput
+    | OperationRequestOutput
+    | SignPayloadRequestOutput
+    | BroadcastRequestOutput
+    | undefined
+
+function isOperationRequestOutput(request: RequestOutput): request is OperationRequestOutput {
+  if (request === undefined) {
+    return false
+  }
+  return request.type === BeaconMessageType.OperationRequest
 }
