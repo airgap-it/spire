@@ -142,7 +142,6 @@ export class BeaconRequestPage implements OnInit {
             this.dismiss()
           }, 500)
         }
-        this.ngOnInit()
       })
       .catch(error => console.error(error))
 
