@@ -1,6 +1,6 @@
 {
   "name": "Spire",
-  "version": "2.2.5",
+  "version": "2.3.0",
   "description": "Spire allows you to interact with Tezos dApps that support the Beacon SDK.",
   "icons": {
     "16": "assets/icon/spire-logo-16px.png",
