@@ -4,13 +4,15 @@ import {
   BroadcastRequestOutput,
   ChromeStorage,
   Network,
+  NetworkType,
   OperationRequestOutput,
   PermissionRequestOutput,
   PermissionScope,
   SignPayloadRequestOutput
 } from '@airgap/beacon-sdk'
+import { ModalOptions } from '@ionic/core'
 import { Component, OnInit } from '@angular/core'
-import { AlertController, ModalController } from '@ionic/angular'
+import { AlertController, ModalController, ToastController } from '@ionic/angular'
 import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
@@ -18,9 +20,11 @@ import { WalletService } from 'src/app/services/local-wallet.service'
 import { PopupService } from 'src/app/services/popup.service'
 import { Action, ExtensionMessageOutputPayload, WalletInfo, WalletType } from 'src/extension/extension-client/Actions'
 import { WalletChromeMessageTransport } from 'src/extension/extension-client/chrome-message-transport/WalletChromeMessageTransport'
-
 import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-connection.page'
 import { ErrorPage } from '../error/error.page'
+import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
+import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
+import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
   selector: 'beacon-request',
@@ -30,21 +34,33 @@ import { ErrorPage } from '../error/error.page'
 export class BeaconRequestPage implements OnInit {
   public title: string = ''
   public protocol: TezosProtocol = new TezosProtocol()
-
+  public readonly operationProvider: AirGapOperationProvider = new AirGapOperationProvider()
   public walletType: WalletType | undefined
-  public request:
-    | PermissionRequestOutput
-    | OperationRequestOutput
-    | SignPayloadRequestOutput
-    | BroadcastRequestOutput
-    | undefined
+  public request: RequestOutput
   public requesterName: string = ''
   public address: string = ''
-  public requestedNetwork: Network | undefined
   public inputs?: any
-  public transactions: IAirGapTransaction[] | undefined
+  public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
+  public operationGroupPromise: Promise<FullOperationGroup> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
+
+  public get requestedNetwork(): Network | undefined {
+    if (this.request === undefined) {
+      return undefined
+    }
+    type RequestOutputWithNetwork = PermissionRequestOutput | OperationRequestOutput | BroadcastRequestOutput
+    const types = [
+      BeaconMessageType.PermissionRequest,
+      BeaconMessageType.OperationRequest,
+      BeaconMessageType.BroadcastRequest
+    ]
+    if (!types.includes(this.request.type)) {
+      return undefined
+    }
+    const request = this.request as RequestOutputWithNetwork
+    return request.network
+  }
 
   public transport: WalletChromeMessageTransport = new WalletChromeMessageTransport(
     'Spire',
@@ -59,6 +75,7 @@ export class BeaconRequestPage implements OnInit {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly walletService: WalletService,
+    private readonly toastController: ToastController,
     private readonly chromeMessagingService: ChromeMessagingService
   ) {
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
@@ -70,7 +87,6 @@ export class BeaconRequestPage implements OnInit {
   }
 
   public async ngOnInit(): Promise<void> {
-    console.log('new request', this.request)
     if (this.request && this.request.type === BeaconMessageType.PermissionRequest) {
       this.title = 'Permission Request'
       this.requesterName = this.request.appMetadata.name
@@ -115,8 +131,38 @@ export class BeaconRequestPage implements OnInit {
     }
   }
 
+  private async openModal(modalOptions: ModalOptions, dismissParent = true): Promise<void> {
+    const modal = await this.modalController.create(modalOptions)
+
+    modal
+      .onDidDismiss()
+      .then(({ data: closeParent }) => {
+        if (closeParent && dismissParent) {
+          setTimeout(() => {
+            this.dismiss()
+          }, 500)
+        }
+      })
+      .catch(error => console.error(error))
+
+    return modal.present()
+  }
+
+  public async onOperationGroupUpdate(operationGroup: FullOperationGroup) {
+    if (!isOperationRequestOutput(this.request)) {
+      return
+    }
+    this.request = { ...this.request, operationDetails: operationGroup.contents } as OperationRequestOutput
+    await this.operationRequest(this.request)
+    const toast = await this.toastController.create({
+      message: `Updated Operation Details`,
+      duration: 2000,
+      position: 'top'
+    })
+    toast.present()
+  }
+
   private async permissionRequest(request: PermissionRequestOutput): Promise<void> {
-    this.requestedNetwork = request.network
     this.walletService.activeWallet$.pipe(take(1)).subscribe((wallet: WalletInfo) => {
       this.inputs = [
         {
@@ -162,54 +208,92 @@ export class BeaconRequestPage implements OnInit {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
-        await this.openLedgerModal(request)
+        await this.openModal({
+          component: AddLedgerConnectionPage,
+          componentProps: {
+            request,
+            targetMethod: Action.RESPONSE
+          }
+        })
       }
     }
   }
 
   private async operationRequest(request: OperationRequestOutput): Promise<void> {
-    this.transactions = await this.protocol.getAirGapTxFromWrappedOperations({
+    this.transactionsPromise = this.protocol.getAirGapTxFromWrappedOperations({
       branch: '',
       contents: request.operationDetails as any // TODO Fix conflicting types from coinlib and beacon-sdk
     })
-    console.log('transactions', this.transactions)
+
+    const wrappedOperation = {
+      branch: '',
+      contents: request.operationDetails
+    }
+
+    this.operationGroupPromise = this.operationProvider.operationGroupFromWrappedOperation(
+      wrappedOperation,
+      this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
+    )
 
     this.responseHandler = async (): Promise<void> => {
       if (this.walletType === WalletType.LOCAL_MNEMONIC) {
         await this.sendResponse(request, {})
       } else {
-        await this.openLedgerModal(request)
+        await this.openModal({
+          component: AddLedgerConnectionPage,
+          componentProps: {
+            request,
+            targetMethod: Action.RESPONSE
+          }
+        })
       }
     }
   }
 
-  private async openLedgerModal(
-    request: PermissionRequestOutput | OperationRequestOutput | SignPayloadRequestOutput | BroadcastRequestOutput
-  ): Promise<void> {
-    const modal = await this.modalController.create({
-      component: AddLedgerConnectionPage,
-      componentProps: {
-        request,
-        targetMethod: Action.RESPONSE
-      }
-    })
+  public async performDryRun() {
+    if (!isOperationRequestOutput(this.request)) {
+      return
+    }
+    const operationDetails = this.request.operationDetails
+    const wrappedOperation = {
+      branch: '',
+      contents: operationDetails
+    }
+    const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
+    const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
+    const wallet = wallets.find(w => w.address === sourceAddress)
 
-    modal
-      .onDidDismiss()
-      .then(({ data: closeParent }) => {
-        if (closeParent) {
-          setTimeout(() => {
-            this.dismiss()
-          }, 500)
+    try {
+      const dryRunPreview = await this.operationProvider.performDryRun(
+        wrappedOperation,
+        this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET },
+        wallet
+      )
+
+      this.openModal(
+        {
+          component: DryRunPreviewPage,
+          componentProps: {
+            preapplyResponse: dryRunPreview.preapplyResponse
+          }
+        },
+        false
+      )
+    } catch (error) {
+      console.error(error)
+      this.openModal({
+        component: ErrorPage,
+        componentProps: {
+          title: error.name,
+          message: error.message,
+          data: error.stack
         }
       })
-      .catch(error => console.error(error))
-
-    return modal.present()
+    }
   }
 
   private async broadcastRequest(request: BroadcastRequestOutput): Promise<void> {
-    this.transactions = await this.protocol.getTransactionDetailsFromSigned({
+    this.transactionsPromise = this.protocol.getTransactionDetailsFromSigned({
       accountIdentifier: '',
       transaction: request.signedTransaction
     })
@@ -300,4 +384,17 @@ export class BeaconRequestPage implements OnInit {
       errorType: BeaconErrorType.ABORTED_ERROR
     })
   }
+}
+
+type RequestOutput = | PermissionRequestOutput
+    | OperationRequestOutput
+    | SignPayloadRequestOutput
+    | BroadcastRequestOutput
+    | undefined
+
+function isOperationRequestOutput(request: RequestOutput): request is OperationRequestOutput {
+  if (request === undefined) {
+    return false
+  }
+  return request.type === BeaconMessageType.OperationRequest
 }

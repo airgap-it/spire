@@ -59,7 +59,8 @@ export class ActionMessageHandler {
     [Action.P2P_PEER_REMOVE]: p2pPeerRemoveAction(logger),
     [Action.LEDGER_INIT]: ledgerInitAction(logger),
     [Action.BEACON_ID_GET]: beaconIdGetAction(logger),
-    [Action.RESPONSE]: responseAction(logger)
+    [Action.RESPONSE]: responseAction(logger),
+    [Action.DRY_RUN]: responseAction(logger)
   }
 
   public async getHandler(action: Action): Promise<ActionHandlerFunction<any>> {
