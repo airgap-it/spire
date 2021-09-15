@@ -10,7 +10,7 @@ import { bridge } from './extension-client/ledger-bridge'
 import { Logger } from './extension-client/Logger'
 import { OperationProvider, Signer } from './extension-client/Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from './extension-client/utils'
-import { DryRunResponse, DryRunSignatures, FullOperationGroup } from './tezos-types'
+import { DryRunResponse, DryRunSignatures, FullOperationGroup, PreapplyResponse } from './tezos-types'
 
 const logger: Logger = new Logger('AirGap Signer')
 
@@ -45,38 +45,9 @@ export class AirGapOperationProvider implements OperationProvider {
     return { chain_id: block.chain_id, ...tezosWrappedOperation, branch: branch }
   }
 
-  public async performDryRun(
-    tezosWrappedOperation: TezosWrappedOperation,
-    network: Network,
-    wallet: WalletInfo | undefined
-  ): Promise<DryRunResponse> {
-    const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
-    const { data: block } = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
-    const forgedTx = await this.forgeWrappedOperation({ ...tezosWrappedOperation, branch: block.hash }, network)
-    let signatures: DryRunSignatures
-    if (!wallet) {
-      throw new Error('NO WALLET FOUND')
-    }
-
-    if (wallet.type === WalletType.LOCAL_MNEMONIC) {
-      const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> = wallet as WalletInfo<WalletType.LOCAL_MNEMONIC>
-      const signer: Signer = new LocalSigner()
-      signatures = await signer.generateDryRunSignatures({ binaryTransaction: forgedTx }, localWallet.info.mnemonic)
-    } else {
-      const signer: Signer = new LedgerSigner()
-      signatures = await signer.generateDryRunSignatures({ binaryTransaction: forgedTx }, wallet.derivationPath)
-    }
-
-    const body = [
-      {
-        protocol: block.protocol,
-        ...tezosWrappedOperation,
-        branch: block.hash,
-        signature: signatures.preapplySignature
-      }
-    ]
-    const preapplyResponse = await this.send(network, body, '/chains/main/blocks/head/helpers/preapply/operations')
-    return { preapplyResponse, signatures }
+  public async performDryRun(body: any, network: Network): Promise<PreapplyResponse[]> {
+    const preapplyResponse = await this.send(network, [body], '/chains/main/blocks/head/helpers/preapply/operations')
+    return preapplyResponse
   }
 
   public async broadcast(network: Network, signedTx: string): Promise<string> {

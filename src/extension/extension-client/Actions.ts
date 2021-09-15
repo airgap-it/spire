@@ -1,4 +1,6 @@
 import { ExtendedP2PPairingResponse, Network, P2PPairingRequest, PermissionInfo } from '@airgap/beacon-sdk'
+import { TezosWrappedOperation } from '@airgap/coinlib-core'
+import { TezosOperation } from '@airgap/coinlib-core/protocols/tezos/types/operations/TezosOperation'
 
 export enum WalletType {
   P2P = 'P2P',
@@ -62,7 +64,7 @@ export interface ActionInputTypesMap {
   [Action.LEDGER_INIT]: undefined
   [Action.BEACON_ID_GET]: undefined
   [Action.RESPONSE]: { request: unknown; extras: unknown }
-  [Action.DRY_RUN]: undefined
+  [Action.DRY_RUN]: { tezosWrappedOperation: TezosWrappedOperation; network: Network; wallet: WalletInfo | undefined }
 }
 
 export interface ActionOutputTypesMap {
@@ -84,7 +86,14 @@ export interface ActionOutputTypesMap {
   [Action.LEDGER_INIT]: { publicKey: string; address: string }
   [Action.BEACON_ID_GET]: { id: string }
   [Action.RESPONSE]: { error?: unknown }
-  [Action.DRY_RUN]: { dryRunPreview: string }
+  [Action.DRY_RUN]: {
+    body: {
+      protocol: string
+      contents: TezosOperation[]
+      branch: string
+      signature: string
+    }
+  }
 }
 
 export interface ExtensionMessageInputPayload<T extends Action> {

@@ -262,19 +262,28 @@ export class BeaconRequestPage implements OnInit {
     const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
     const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
     const wallet = wallets.find(w => w.address === sourceAddress)
+    const network = this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
 
     try {
-      const dryRunPreview = await this.operationProvider.performDryRun(
-        wrappedOperation,
-        this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET },
-        wallet
+      const response: ExtensionMessageOutputPayload<Action> = await this.chromeMessagingService.sendChromeMessage(
+        Action.DRY_RUN,
+        {
+          tezosWrappedOperation: wrappedOperation,
+          network,
+          wallet
+        }
       )
+      const { data }: ExtensionMessageOutputPayload<Action.DRY_RUN> = response as ExtensionMessageOutputPayload<
+        Action.DRY_RUN
+      >
+
+      const dryRunPreview = await this.operationProvider.performDryRun(data!.body, network)
 
       this.openModal(
         {
           component: DryRunPreviewPage,
           componentProps: {
-            preapplyResponse: dryRunPreview.preapplyResponse
+            preapplyResponse: dryRunPreview
           }
         },
         false
@@ -386,11 +395,12 @@ export class BeaconRequestPage implements OnInit {
   }
 }
 
-type RequestOutput = | PermissionRequestOutput
-    | OperationRequestOutput
-    | SignPayloadRequestOutput
-    | BroadcastRequestOutput
-    | undefined
+type RequestOutput =
+  | PermissionRequestOutput
+  | OperationRequestOutput
+  | SignPayloadRequestOutput
+  | BroadcastRequestOutput
+  | undefined
 
 function isOperationRequestOutput(request: RequestOutput): request is OperationRequestOutput {
   if (request === undefined) {
