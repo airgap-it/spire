@@ -4,13 +4,12 @@ import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
 import { RawTezosTransaction } from '@airgap/coinlib-core/serializer/types'
 import Axios, { AxiosError, AxiosResponse } from 'axios'
-import { WalletInfo, WalletType } from './extension-client/Actions'
 
 import { bridge } from './extension-client/ledger-bridge'
 import { Logger } from './extension-client/Logger'
 import { OperationProvider, Signer } from './extension-client/Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from './extension-client/utils'
-import { DryRunResponse, DryRunSignatures, FullOperationGroup, PreapplyResponse } from './tezos-types'
+import { DryRunSignatures, FullOperationGroup, PreapplyResponse } from './tezos-types'
 
 const logger: Logger = new Logger('AirGap Signer')
 
