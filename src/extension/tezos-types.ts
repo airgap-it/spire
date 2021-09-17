@@ -1,5 +1,3 @@
-import { TezosWrappedOperation } from '@airgap/coinlib-core'
-
 export interface TezosGenericOperationError {
   kind: string
   id: string

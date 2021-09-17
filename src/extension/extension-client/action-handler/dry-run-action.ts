@@ -5,12 +5,10 @@ import Axios from 'axios'
 import { LedgerSigner, LocalSigner } from 'src/extension/AirGapSigner'
 import { DryRunSignatures } from 'src/extension/tezos-types'
 
-import { WalletInfo, WalletType } from '../Actions'
+import { Action, WalletInfo, WalletType } from '../Actions'
 import { Logger } from '../Logger'
 import { Signer } from '../Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from '../utils'
-
-import { Action } from '../Actions'
 
 import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 

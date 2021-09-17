@@ -24,7 +24,6 @@ import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-con
 import { ErrorPage } from '../error/error.page'
 import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
 import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
-import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
   selector: 'beacon-request',

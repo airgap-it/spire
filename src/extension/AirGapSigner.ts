@@ -44,8 +44,7 @@ export class AirGapOperationProvider implements OperationProvider {
   }
 
   public async performDryRun(body: any, network: Network): Promise<PreapplyResponse[]> {
-    const preapplyResponse = await this.send(network, [body], '/chains/main/blocks/head/helpers/preapply/operations')
-    return preapplyResponse
+    return this.send(network, [body], '/chains/main/blocks/head/helpers/preapply/operations')
   }
 
   public async broadcast(network: Network, signedTx: string): Promise<string> {
