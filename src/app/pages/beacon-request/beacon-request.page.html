@@ -84,9 +84,7 @@
     </ng-container>
 
     <ion-row *ngIf="request.type === 'broadcast_request'">
-      <beacon-from-to
-        [transactions]="transactionsPromise | async"
-      ></beacon-from-to>
+      <beacon-from-to [transactions]="transactionsPromise | async"></beacon-from-to>
     </ion-row>
 
     <div *ngIf="request.type === 'sign_payload_request'" class="request--container">
@@ -104,7 +102,7 @@
     <div *ngIf="request.type === 'operation_request'" class="request--container">
       <beacon-from-to
         [transactions]="transactionsPromise | async"
-        [operationGroup]="operationGroupPromise | async"
+        [tezosWrappedOperation]="wrappedOperationPromise | async"
         (onOperationGroupUpdate)="onOperationGroupUpdate($event)"
       ></beacon-from-to>
     </div>

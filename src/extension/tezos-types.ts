@@ -31,10 +31,6 @@ export interface DryRunResponse {
   signatures: DryRunSignatures
 }
 
-export interface FullOperationGroup extends TezosWrappedOperation {
-  chain_id: string
-}
-
 export interface DryRunSignatures {
   preapplySignature: string
   signedTransaction: string

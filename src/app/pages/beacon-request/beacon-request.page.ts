@@ -13,7 +13,7 @@ import {
 import { ModalOptions } from '@ionic/core'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController, ToastController } from '@ionic/angular'
-import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
+import { IAirGapTransaction, TezosProtocol, TezosWrappedOperation } from '@airgap/coinlib-core'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
@@ -41,7 +41,7 @@ export class BeaconRequestPage implements OnInit {
   public address: string = ''
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
-  public operationGroupPromise: Promise<FullOperationGroup> | undefined
+  public wrappedOperationPromise: Promise<TezosWrappedOperation> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -230,7 +230,7 @@ export class BeaconRequestPage implements OnInit {
       contents: request.operationDetails
     }
 
-    this.operationGroupPromise = this.operationProvider.operationGroupFromWrappedOperation(
+    this.wrappedOperationPromise = this.operationProvider.completeWrappedOperation(
       wrappedOperation,
       this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
     )

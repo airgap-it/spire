@@ -9,7 +9,7 @@ import { bridge } from './extension-client/ledger-bridge'
 import { Logger } from './extension-client/Logger'
 import { OperationProvider, Signer } from './extension-client/Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from './extension-client/utils'
-import { DryRunSignatures, FullOperationGroup, PreapplyResponse } from './tezos-types'
+import { DryRunSignatures, PreapplyResponse } from './tezos-types'
 
 const logger: Logger = new Logger('AirGap Signer')
 
@@ -34,14 +34,13 @@ export class AirGapOperationProvider implements OperationProvider {
     return forgedTx.binaryTransaction
   }
 
-  public async operationGroupFromWrappedOperation(
+  public async completeWrappedOperation(
     tezosWrappedOperation: TezosWrappedOperation,
     network: Network
-  ): Promise<FullOperationGroup> {
+  ): Promise<TezosWrappedOperation> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
-    const { data: block }: AxiosResponse<{ chain_id: string }> = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
     const { data: branch } = await Axios.get(`${rpcUrl}/chains/main/blocks/head/hash`)
-    return { chain_id: block.chain_id, ...tezosWrappedOperation, branch: branch }
+    return { ...tezosWrappedOperation, branch: branch }
   }
 
   public async performDryRun(body: any, network: Network): Promise<PreapplyResponse[]> {

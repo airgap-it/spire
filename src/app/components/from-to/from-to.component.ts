@@ -1,6 +1,10 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core'
-import { getProtocolByIdentifier, IAirGapTransaction, MainProtocolSymbols } from '@airgap/coinlib-core'
-import { FullOperationGroup } from 'src/extension/tezos-types'
+import {
+  getProtocolByIdentifier,
+  IAirGapTransaction,
+  MainProtocolSymbols,
+  TezosWrappedOperation
+} from '@airgap/coinlib-core'
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { FeeConverterPipe } from 'src/app/pipes/fee-converter/fee-converter.pipe'
 import { isInjectableOperation } from 'src/app/types/tezos-operation'
@@ -17,10 +21,12 @@ export class FromToComponent {
   public transactions: IAirGapTransaction[] | undefined
 
   @Input()
-  public operationGroup: FullOperationGroup | undefined
+  public tezosWrappedOperation: TezosWrappedOperation | undefined
 
   @Output()
-  public readonly onOperationGroupUpdate: EventEmitter<FullOperationGroup> = new EventEmitter<FullOperationGroup>()
+  public readonly onWrappedOperationUpdate: EventEmitter<TezosWrappedOperation> = new EventEmitter<
+    TezosWrappedOperation
+  >()
 
   constructor(private readonly formBuilder: FormBuilder, private readonly feeConverter: FeeConverterPipe) {}
 
@@ -34,17 +40,21 @@ export class FromToComponent {
   }
 
   public async initForms() {
-    if (this.operationGroup === undefined) {
+    if (this.tezosWrappedOperation === undefined) {
       return
     }
+
     const protocol = getProtocolByIdentifier(MainProtocolSymbols.XTZ)
     this.formGroup = this.formBuilder.group({
       operations: this.formBuilder.array(
-        this.operationGroup.contents.map(operation => {
+        this.tezosWrappedOperation.contents.map(operation => {
           if (!isInjectableOperation(operation)) {
             return this.formBuilder.group({})
           }
-          const feeValue = this.feeConverter.transform(operation.fee, { protocolIdentifier: MainProtocolSymbols.XTZ, appendSymbol: false })
+          const feeValue = this.feeConverter.transform(operation.fee, {
+            protocolIdentifier: MainProtocolSymbols.XTZ,
+            appendSymbol: false
+          })
           const feeControl = this.formBuilder.control(feeValue, [
             Validators.required,
             Validators.pattern(`^[0-9]+(\.[0-9]{1,${protocol.feeDecimals}})*$`)
@@ -68,23 +78,27 @@ export class FromToComponent {
   }
 
   public updateOperationGroup() {
-    if (this.operationGroup === undefined) {
+    if (this.tezosWrappedOperation === undefined) {
       return
     }
-    this.operationGroup.contents = this.operationGroup.contents.map((operation, index) => {
+    this.tezosWrappedOperation.contents = this.tezosWrappedOperation.contents.map((operation, index) => {
       if (!isInjectableOperation(operation) || this.formGroup === undefined) {
         return operation
       }
       const group = (this.formGroup.controls.operations as FormArray).controls[index] as FormGroup
-      const fee = this.feeConverter.transform(group.controls.fee.value, { protocolIdentifier: MainProtocolSymbols.XTZ, reverse: true, appendSymbol: false })
+      const fee = this.feeConverter.transform(group.controls.fee.value, {
+        protocolIdentifier: MainProtocolSymbols.XTZ,
+        reverse: true,
+        appendSymbol: false
+      })
       return {
         ...operation,
         fee,
         gas_limit: String(group.controls.gasLimit.value),
-        storage_limit: String(group.controls.storageLimit.value),
+        storage_limit: String(group.controls.storageLimit.value)
       }
     })
-    this.onOperationGroupUpdate.emit(this.operationGroup)
+    this.onWrappedOperationUpdate.emit(this.tezosWrappedOperation)
     this.advanced = false
   }
 }

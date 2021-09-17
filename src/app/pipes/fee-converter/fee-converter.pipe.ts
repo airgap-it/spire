@@ -7,7 +7,10 @@ import { BigNumber } from 'bignumber.js'
   name: 'feeConverter'
 })
 export class FeeConverterPipe implements PipeTransform {
-  public transform(value: BigNumber | string | number, args: { protocolIdentifier: ProtocolSymbols, reverse?: boolean, appendSymbol?: boolean }): string {
+  public transform(
+    value: BigNumber | string | number,
+    args: { protocolIdentifier: ProtocolSymbols; reverse?: boolean; appendSymbol?: boolean }
+  ): string {
     const reverse = args.reverse !== undefined && args.reverse
     const appendSymbol = args.appendSymbol === undefined || args.appendSymbol
     if (BigNumber.isBigNumber(value)) {
@@ -28,7 +31,7 @@ export class FeeConverterPipe implements PipeTransform {
     const amount = new BigNumber(value)
     const shiftDirection: number = !reverse ? -1 : 1
     const fee = amount.shiftedBy(shiftDirection * protocol.feeDecimals)
-    
+
     return fee.toFixed() + (appendSymbol ? ' ' + protocol.feeSymbol.toUpperCase() : '')
   }
 }
