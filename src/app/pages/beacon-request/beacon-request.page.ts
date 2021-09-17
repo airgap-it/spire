@@ -147,11 +147,11 @@ export class BeaconRequestPage implements OnInit {
     return modal.present()
   }
 
-  public async onOperationGroupUpdate(operationGroup: FullOperationGroup) {
+  public async onWrappedOperationUpdate(tezosWrappedOperation: TezosWrappedOperation) {
     if (!isOperationRequestOutput(this.request)) {
       return
     }
-    this.request = { ...this.request, operationDetails: operationGroup.contents } as OperationRequestOutput
+    this.request = { ...this.request, operationDetails: tezosWrappedOperation.contents } as OperationRequestOutput
     await this.operationRequest(this.request)
     const toast = await this.toastController.create({
       message: `Updated Operation Details`,

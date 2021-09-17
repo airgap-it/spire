@@ -103,7 +103,7 @@
       <beacon-from-to
         [transactions]="transactionsPromise | async"
         [tezosWrappedOperation]="wrappedOperationPromise | async"
-        (onOperationGroupUpdate)="onOperationGroupUpdate($event)"
+        (onWrappedOperationUpdate)="onWrappedOperationUpdate($event)"
       ></beacon-from-to>
     </div>
 
