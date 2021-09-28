@@ -64,7 +64,9 @@ export interface ActionInputTypesMap {
   [Action.LEDGER_INIT]: undefined
   [Action.BEACON_ID_GET]: undefined
   [Action.RESPONSE]: { request: unknown; extras: unknown }
-  [Action.DRY_RUN]: { tezosWrappedOperation: TezosWrappedOperation; network: Network; wallet: WalletInfo | undefined }
+  [Action.DRY_RUN]: {
+    request: { tezosWrappedOperation: TezosWrappedOperation; network: Network; wallet: WalletInfo | undefined }
+  }
 }
 
 export interface ActionOutputTypesMap {
@@ -93,6 +95,7 @@ export interface ActionOutputTypesMap {
       branch: string
       signature: string
     }
+    signedTransaction: string
   }
 }
 

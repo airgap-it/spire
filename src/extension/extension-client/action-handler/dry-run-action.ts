@@ -15,10 +15,10 @@ import { ActionContext, ActionHandlerFunction } from './ActionMessageHandler'
 export const dryRunAction: (logger: Logger) => ActionHandlerFunction<Action.DRY_RUN> = (
   logger: Logger
 ): ActionHandlerFunction<Action.DRY_RUN> => async (context: ActionContext<Action.DRY_RUN>): Promise<void> => {
-  logger.log('ledgerInitAction')
-  const tezosWrappedOperation = context.data.data.tezosWrappedOperation
-  const network = context.data.data.network
-  const wallet = context.data.data.wallet
+  logger.log('dryRunAction')
+  const tezosWrappedOperation = context.data.data.request.tezosWrappedOperation
+  const network = context.data.data.request.network
+  const wallet = context.data.data.request.wallet
   const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
   const { data: block } = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
   const forgedTx = await forgeWrappedOperation({ ...tezosWrappedOperation, branch: block.hash }, network)
@@ -43,7 +43,7 @@ export const dryRunAction: (logger: Logger) => ActionHandlerFunction<Action.DRY_
     signature: signatures.preapplySignature
   }
 
-  context.sendResponse({ data: { body } })
+  context.sendResponse({ data: { body, signedTransaction: signatures.signedTransaction } })
 }
 
 export const forgeWrappedOperation = async (

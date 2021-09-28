@@ -264,29 +264,42 @@ export class BeaconRequestPage implements OnInit {
     const network = this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
 
     try {
-      const response: ExtensionMessageOutputPayload<Action> = await this.chromeMessagingService.sendChromeMessage(
-        Action.DRY_RUN,
-        {
-          tezosWrappedOperation: wrappedOperation,
-          network,
-          wallet
+      const request = {
+        tezosWrappedOperation: wrappedOperation,
+        network,
+        wallet
+      }
+
+      const modalOptions = {
+        component: AddLedgerConnectionPage,
+        componentProps: {
+          request,
+          targetMethod: Action.DRY_RUN
         }
-      )
-      const { data }: ExtensionMessageOutputPayload<Action.DRY_RUN> = response as ExtensionMessageOutputPayload<
-        Action.DRY_RUN
-      >
+      }
+      const modal = await this.modalController.create(modalOptions)
 
-      const dryRunPreview = await this.operationProvider.performDryRun(data!.body, network)
+      modal.present()
 
-      this.openModal(
-        {
-          component: DryRunPreviewPage,
-          componentProps: {
-            preapplyResponse: dryRunPreview
-          }
-        },
-        false
-      )
+      modal
+        .onDidDismiss()
+        .then(async ({ data: dryRunResponse }) => {
+          const dryRunPreview = await this.operationProvider.performDryRun(dryRunResponse!.body, network)
+
+          this.openModal(
+            {
+              component: DryRunPreviewPage,
+              componentProps: {
+                preapplyResponse: dryRunPreview,
+                network,
+                request: this.request,
+                signedTransaction: dryRunResponse!.signedTransaction
+              }
+            },
+            false
+          )
+        })
+        .catch(error => console.error(error))
     } catch (error) {
       console.error(error)
       this.openModal({
