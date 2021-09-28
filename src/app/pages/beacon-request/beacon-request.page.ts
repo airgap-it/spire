@@ -296,7 +296,7 @@ export class BeaconRequestPage implements OnInit {
                 signedTransaction: dryRunResponse!.signedTransaction
               }
             },
-            false
+            true
           )
         })
         .catch(error => console.error(error))

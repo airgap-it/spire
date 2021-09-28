@@ -92,7 +92,6 @@ export class AddLedgerConnectionPage implements OnInit {
     if (response && response.error) {
       console.log('received an error', response.error)
     } else {
-      let dismissPromise: Promise<boolean | void> = this.dismiss(true)
       this.success = true
       if (this.targetMethod === Action.LEDGER_INIT) {
         const { data }: ExtensionMessageOutputPayload<Action.LEDGER_INIT> = response as ExtensionMessageOutputPayload<
@@ -113,10 +112,12 @@ export class AddLedgerConnectionPage implements OnInit {
         const { data }: ExtensionMessageOutputPayload<Action.DRY_RUN> = response as ExtensionMessageOutputPayload<
           Action.DRY_RUN
         >
-        dismissPromise = this.modalController.dismiss(data)
+        setTimeout(() => {
+          return this.modalController.dismiss(data)
+        }, 2000)
       }
       setTimeout(() => {
-        return dismissPromise
+        return this.dismiss(true)
       }, 2000)
     }
     this.cdr.detectChanges()
