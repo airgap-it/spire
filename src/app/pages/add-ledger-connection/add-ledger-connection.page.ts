@@ -65,6 +65,12 @@ export class AddLedgerConnectionPage implements OnInit {
       this.confirmText = 'Confirm Transaction on your ledger.'
     }
 
+    if (this.targetMethod === Action.DRY_RUN) {
+      this.title = 'Simulate Operation'
+      this.showDerivationPath = false
+      this.confirmText = 'Confirm Simulation on your ledger.'
+    }
+
     return this.connect()
   }
 
@@ -102,6 +108,13 @@ export class AddLedgerConnectionPage implements OnInit {
           }
           await this.walletService.addAndActiveWallet(walletInfo)
         }
+      } else if (this.targetMethod === Action.DRY_RUN) {
+        const { data }: ExtensionMessageOutputPayload<Action.DRY_RUN> = response as ExtensionMessageOutputPayload<
+          Action.DRY_RUN
+        >
+        setTimeout(() => {
+          return this.modalController.dismiss(data)
+        }, 2000)
       }
       setTimeout(() => {
         return this.dismiss(true)

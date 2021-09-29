@@ -21,6 +21,7 @@ import { walletAddAction } from './wallet-add-action'
 import { openFullscreen } from './open-fullscreen'
 import { walletDeleteAction } from './wallet-delete-action'
 import { walletsGetAction } from './wallets-get-action'
+import { dryRunAction } from './dry-run-action'
 
 const logger: Logger = new Logger('action-message-handler.ts')
 
@@ -60,7 +61,7 @@ export class ActionMessageHandler {
     [Action.LEDGER_INIT]: ledgerInitAction(logger),
     [Action.BEACON_ID_GET]: beaconIdGetAction(logger),
     [Action.RESPONSE]: responseAction(logger),
-    [Action.DRY_RUN]: responseAction(logger)
+    [Action.DRY_RUN]: dryRunAction(logger)
   }
 
   public async getHandler(action: Action): Promise<ActionHandlerFunction<any>> {

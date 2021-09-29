@@ -13,7 +13,7 @@ import {
 import { ModalOptions } from '@ionic/core'
 import { Component, OnInit } from '@angular/core'
 import { AlertController, ModalController, ToastController } from '@ionic/angular'
-import { IAirGapTransaction, TezosProtocol } from '@airgap/coinlib-core'
+import { IAirGapTransaction, TezosProtocol, TezosWrappedOperation } from '@airgap/coinlib-core'
 import { take } from 'rxjs/operators'
 import { ChromeMessagingService } from 'src/app/services/chrome-messaging.service'
 import { WalletService } from 'src/app/services/local-wallet.service'
@@ -24,7 +24,6 @@ import { AddLedgerConnectionPage } from '../add-ledger-connection/add-ledger-con
 import { ErrorPage } from '../error/error.page'
 import { AirGapOperationProvider } from 'src/extension/AirGapSigner'
 import { DryRunPreviewPage } from '../dry-run-preview/dry-run-preview.page'
-import { FullOperationGroup } from 'src/extension/tezos-types'
 
 @Component({
   selector: 'beacon-request',
@@ -41,7 +40,7 @@ export class BeaconRequestPage implements OnInit {
   public address: string = ''
   public inputs?: any
   public transactionsPromise: Promise<IAirGapTransaction[]> | undefined
-  public operationGroupPromise: Promise<FullOperationGroup> | undefined
+  public wrappedOperationPromise: Promise<TezosWrappedOperation> | undefined
 
   public responseHandler: (() => Promise<void>) | undefined
 
@@ -148,11 +147,11 @@ export class BeaconRequestPage implements OnInit {
     return modal.present()
   }
 
-  public async onOperationGroupUpdate(operationGroup: FullOperationGroup) {
+  public async onWrappedOperationUpdate(tezosWrappedOperation: TezosWrappedOperation) {
     if (!isOperationRequestOutput(this.request)) {
       return
     }
-    this.request = { ...this.request, operationDetails: operationGroup.contents } as OperationRequestOutput
+    this.request = { ...this.request, operationDetails: tezosWrappedOperation.contents } as OperationRequestOutput
     await this.operationRequest(this.request)
     const toast = await this.toastController.create({
       message: `Updated Operation Details`,
@@ -230,7 +229,7 @@ export class BeaconRequestPage implements OnInit {
       contents: request.operationDetails
     }
 
-    this.operationGroupPromise = this.operationProvider.operationGroupFromWrappedOperation(
+    this.wrappedOperationPromise = this.operationProvider.completeWrappedOperation(
       wrappedOperation,
       this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
     )
@@ -262,23 +261,45 @@ export class BeaconRequestPage implements OnInit {
     const sourceAddress = (this.request as OperationRequestOutput).sourceAddress
     const wallets: WalletInfo<WalletType>[] | undefined = await this.walletService.getAllWallets()
     const wallet = wallets.find(w => w.address === sourceAddress)
+    const network = this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET }
 
     try {
-      const dryRunPreview = await this.operationProvider.performDryRun(
-        wrappedOperation,
-        this.requestedNetwork !== undefined ? this.requestedNetwork : { type: NetworkType.MAINNET },
+      const request = {
+        tezosWrappedOperation: wrappedOperation,
+        network,
         wallet
-      )
+      }
 
-      this.openModal(
-        {
-          component: DryRunPreviewPage,
-          componentProps: {
-            preapplyResponse: dryRunPreview.preapplyResponse
-          }
-        },
-        false
-      )
+      const modalOptions = {
+        component: AddLedgerConnectionPage,
+        componentProps: {
+          request,
+          targetMethod: Action.DRY_RUN
+        }
+      }
+      const modal = await this.modalController.create(modalOptions)
+
+      modal.present()
+
+      modal
+        .onDidDismiss()
+        .then(async ({ data: dryRunResponse }) => {
+          const dryRunPreview = await this.operationProvider.performDryRun(dryRunResponse!.body, network)
+
+          this.openModal(
+            {
+              component: DryRunPreviewPage,
+              componentProps: {
+                preapplyResponse: dryRunPreview,
+                network,
+                request: this.request,
+                signedTransaction: dryRunResponse!.signedTransaction
+              }
+            },
+            false
+          )
+        })
+        .catch(error => console.error(error))
     } catch (error) {
       console.error(error)
       this.openModal({
@@ -386,11 +407,12 @@ export class BeaconRequestPage implements OnInit {
   }
 }
 
-type RequestOutput = | PermissionRequestOutput
-    | OperationRequestOutput
-    | SignPayloadRequestOutput
-    | BroadcastRequestOutput
-    | undefined
+type RequestOutput =
+  | PermissionRequestOutput
+  | OperationRequestOutput
+  | SignPayloadRequestOutput
+  | BroadcastRequestOutput
+  | undefined
 
 function isOperationRequestOutput(request: RequestOutput): request is OperationRequestOutput {
   if (request === undefined) {

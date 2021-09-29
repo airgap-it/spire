@@ -28,17 +28,18 @@ export class ChromeMessagingService {
   private updateWalletCallback: (() => Promise<void>) | undefined
   private accountPresent: boolean = false
 
-  private readonly loader: Promise<HTMLIonLoadingElement> = this.loadingController.create({
-    message: 'Preparing beacon message...'
-  })
+  private readonly loader: Promise<HTMLIonLoadingElement>
 
   constructor(
     private readonly popupService: PopupService,
     private readonly ngZone: NgZone,
-    private readonly loadingController: LoadingController,
+    loadingController: LoadingController,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController
   ) {
+    this.loader = loadingController.create({
+      message: 'Preparing beacon message...'
+    })
     chrome.runtime.sendMessage({ data: 'Handshake' }) // TODO: Remove and use Action.HANDSHAKE
     this.sendChromeMessage(Action.HANDSHAKE, undefined).catch(console.error)
     chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {

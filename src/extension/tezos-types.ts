@@ -1,5 +1,3 @@
-import { TezosWrappedOperation } from '@airgap/coinlib-core'
-
 export interface TezosGenericOperationError {
   kind: string
   id: string
@@ -29,10 +27,6 @@ export type PreapplyResponse = {
 export interface DryRunResponse {
   preapplyResponse: PreapplyResponse[]
   signatures: DryRunSignatures
-}
-
-export interface FullOperationGroup extends TezosWrappedOperation {
-  chain_id: string
 }
 
 export interface DryRunSignatures {

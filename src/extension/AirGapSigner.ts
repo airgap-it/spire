@@ -4,13 +4,12 @@ import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.
 import { TezosWrappedOperation } from '@airgap/coinlib-core/protocols/tezos/types/TezosWrappedOperation'
 import { RawTezosTransaction } from '@airgap/coinlib-core/serializer/types'
 import Axios, { AxiosError, AxiosResponse } from 'axios'
-import { WalletInfo, WalletType } from './extension-client/Actions'
 
 import { bridge } from './extension-client/ledger-bridge'
 import { Logger } from './extension-client/Logger'
 import { OperationProvider, Signer } from './extension-client/Signer'
 import { getProtocolForNetwork, getRpcUrlForNetwork } from './extension-client/utils'
-import { DryRunResponse, DryRunSignatures, FullOperationGroup } from './tezos-types'
+import { DryRunSignatures, PreapplyResponse } from './tezos-types'
 
 const logger: Logger = new Logger('AirGap Signer')
 
@@ -35,48 +34,17 @@ export class AirGapOperationProvider implements OperationProvider {
     return forgedTx.binaryTransaction
   }
 
-  public async operationGroupFromWrappedOperation(
+  public async completeWrappedOperation(
     tezosWrappedOperation: TezosWrappedOperation,
     network: Network
-  ): Promise<FullOperationGroup> {
+  ): Promise<TezosWrappedOperation> {
     const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
-    const { data: block }: AxiosResponse<{ chain_id: string }> = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
     const { data: branch } = await Axios.get(`${rpcUrl}/chains/main/blocks/head/hash`)
-    return { chain_id: block.chain_id, ...tezosWrappedOperation, branch: branch }
+    return { ...tezosWrappedOperation, branch: branch }
   }
 
-  public async performDryRun(
-    tezosWrappedOperation: TezosWrappedOperation,
-    network: Network,
-    wallet: WalletInfo | undefined
-  ): Promise<DryRunResponse> {
-    const { rpcUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
-    const { data: block } = await Axios.get(`${rpcUrl}/chains/main/blocks/head`)
-    const forgedTx = await this.forgeWrappedOperation({ ...tezosWrappedOperation, branch: block.hash }, network)
-    let signatures: DryRunSignatures
-    if (!wallet) {
-      throw new Error('NO WALLET FOUND')
-    }
-
-    if (wallet.type === WalletType.LOCAL_MNEMONIC) {
-      const localWallet: WalletInfo<WalletType.LOCAL_MNEMONIC> = wallet as WalletInfo<WalletType.LOCAL_MNEMONIC>
-      const signer: Signer = new LocalSigner()
-      signatures = await signer.generateDryRunSignatures({ binaryTransaction: forgedTx }, localWallet.info.mnemonic)
-    } else {
-      const signer: Signer = new LedgerSigner()
-      signatures = await signer.generateDryRunSignatures({ binaryTransaction: forgedTx }, wallet.derivationPath)
-    }
-
-    const body = [
-      {
-        protocol: block.protocol,
-        ...tezosWrappedOperation,
-        branch: block.hash,
-        signature: signatures.preapplySignature
-      }
-    ]
-    const preapplyResponse = await this.send(network, body, '/chains/main/blocks/head/helpers/preapply/operations')
-    return { preapplyResponse, signatures }
+  public async performDryRun(body: any, network: Network): Promise<PreapplyResponse[]> {
+    return this.send(network, [body], '/chains/main/blocks/head/helpers/preapply/operations')
   }
 
   public async broadcast(network: Network, signedTx: string): Promise<string> {

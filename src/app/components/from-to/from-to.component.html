@@ -52,7 +52,7 @@
   </ng-container>
 </ng-container>
 
-<ng-container *ngIf="operationGroup !== undefined">
+<ng-container *ngIf="tezosWrappedOperation !== undefined">
   <ion-row class="rawdata--container ion-padding-bottom ion-margin-bottom">
     <ion-col class="ion-no-padding">
       <ion-item class="ion-no-padding" lines="none">
@@ -61,11 +61,11 @@
       </ion-item>
 
       <ng-container *ngIf="advanced && formGroup !== undefined && operationControls !== undefined">
-        <ng-container *ngFor="let operationGroup of operationControls.controls; let i = index">
+        <ng-container *ngFor="let tezosWrappedOperation of operationControls.controls; let i = index">
           <h6 *ngIf="operationControls && operationControls.length > 1">
             <span class="style__strong color__primary">Operation #{{ i + 1 }}</span>
           </h6>
-          <form [formGroup]="operationGroup" class="ion-padding-bottom">
+          <form [formGroup]="tezosWrappedOperation" class="ion-padding-bottom">
             <ion-row class="padding-top">
               <ion-col>
                 <ion-item mode="md" color="light">
@@ -94,7 +94,7 @@
         </ion-button>
       </ng-container>
 
-      <collapsable-json [json]="operationGroup"></collapsable-json>
+      <collapsable-json [json]="tezosWrappedOperation"></collapsable-json>
     </ion-col>
   </ion-row>
 </ng-container>
