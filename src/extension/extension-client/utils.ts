@@ -18,6 +18,8 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
     [NetworkType.EDONET]: 'https://tezos-edonet-node.prod.gke.papers.tech',
     [NetworkType.FLORENCENET]: 'https://tezos-florencenet-node.prod.gke.papers.tech',
     [NetworkType.GRANADANET]: 'https://tezos-granadanet-node.prod.gke.papers.tech',
+    [NetworkType.HANGZHOUNET]: 'https://tezos-hangzhounet-node.prod.gke.papers.tech',
+    [NetworkType.IDIAZABALNET]: 'https://tezos-idiazabalnet-node.prod.gke.papers.tech',
     [NetworkType.CUSTOM]: ''
   }
   const apiUrls: { [key in NetworkType]: string } = {
@@ -26,6 +28,8 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
     [NetworkType.EDONET]: 'https://tezos-edonet-conseil.prod.gke.papers.tech',
     [NetworkType.FLORENCENET]: 'https://tezos-florencenet-conseil.prod.gke.papers.tech',
     [NetworkType.GRANADANET]: 'https://tezos-granadanet-conseil.prod.gke.papers.tech',
+    [NetworkType.HANGZHOUNET]: 'https://tezos-hangzhounet-conseil.prod.gke.papers.tech',
+    [NetworkType.IDIAZABALNET]: 'https://tezos-idiazabalnet-conseil.prod.gke.papers.tech',
     [NetworkType.CUSTOM]: ''
   }
 
@@ -46,6 +50,8 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.EDONET]: 'Edonet',
     [NetworkType.FLORENCENET]: 'Florencenet',
     [NetworkType.GRANADANET]: 'Granadanet',
+    [NetworkType.HANGZHOUNET]: 'Hangzhounet',
+    [NetworkType.IDIAZABALNET]: 'Idiazabal',
     [NetworkType.CUSTOM]: 'Custom'
   }
   const airgapNetworks: { [key in NetworkType]: AirGapNetworkType } = {
@@ -54,6 +60,8 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.EDONET]: AirGapNetworkType.TESTNET,
     [NetworkType.FLORENCENET]: AirGapNetworkType.TESTNET,
     [NetworkType.GRANADANET]: AirGapNetworkType.TESTNET,
+    [NetworkType.HANGZHOUNET]: AirGapNetworkType.TESTNET,
+    [NetworkType.IDIAZABALNET]: AirGapNetworkType.TESTNET,
     [NetworkType.CUSTOM]: AirGapNetworkType.CUSTOM
   }
   const blockExplorers: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: string } = {
@@ -61,14 +69,18 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.EDONET]: 'https://edonet.tezblock.io',
     [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io',
     [NetworkType.GRANADANET]: 'https://granadanet.tezblock.io',
-    [NetworkType.CUSTOM]: 'https://granadanet.tezblock.io'
+    [NetworkType.HANGZHOUNET]: 'https://hangzhounet.tezblock.io',
+    [NetworkType.IDIAZABALNET]: 'https://idiazabalnet.tezblock.io/account',
+    [NetworkType.CUSTOM]: 'https://hangzhounet.tezblock.io'
   }
   const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
     [NetworkType.MAINNET]: TezosNetwork.MAINNET,
     [NetworkType.EDONET]: TezosNetwork.EDONET,
     [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET,
-    [NetworkType.GRANADANET]: TezosNetwork.GRANADANET,
-    [NetworkType.CUSTOM]: TezosNetwork.GRANADANET
+    [NetworkType.GRANADANET]: TezosNetwork.MAINNET,
+    [NetworkType.HANGZHOUNET]: TezosNetwork.MAINNET,
+    [NetworkType.IDIAZABALNET]: TezosNetwork.MAINNET,
+    [NetworkType.CUSTOM]: TezosNetwork.MAINNET
   }
 
   const conseilNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
@@ -76,6 +88,8 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.EDONET]: TezosNetwork.EDONET,
     [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET,
     [NetworkType.GRANADANET]: TezosNetwork.MAINNET,
+    [NetworkType.HANGZHOUNET]: TezosNetwork.MAINNET,
+    [NetworkType.IDIAZABALNET]: TezosNetwork.MAINNET,
     [NetworkType.CUSTOM]: TezosNetwork.MAINNET
   }
 
@@ -107,6 +121,8 @@ export const getTezblockLinkForNetwork: (network: Network | undefined) => Promis
     [NetworkType.EDONET]: 'https://edonet.tezblock.io/account/',
     [NetworkType.FLORENCENET]: 'https://florencenet.tezblock.io/account/',
     [NetworkType.GRANADANET]: 'https://granadanet.tezblock.io/account',
+    [NetworkType.HANGZHOUNET]: 'https://hangzhounet.tezblock.io/account',
+    [NetworkType.IDIAZABALNET]: 'https://idiazabalnet.tezblock.io/account',
     [NetworkType.CUSTOM]: 'http://localhost:8100/account/'
   }
   const url: string = urls[network ? network.type : NetworkType.MAINNET]
