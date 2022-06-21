@@ -35,7 +35,9 @@ export class BeaconMessageHandler {
     [BeaconMessageType.BroadcastResponse]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.Acknowledge]: beaconMessageHandlerNotSupported,
     [BeaconMessageType.Error]: errorResponseHandler(this.client, logger),
-    [BeaconMessageType.Disconnect]: beaconMessageHandlerNotSupported
+    [BeaconMessageType.Disconnect]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.BlockchainRequest]: beaconMessageHandlerNotSupported,
+    [BeaconMessageType.BlockchainResponse]: beaconMessageHandlerNotSupported
   }
 
   constructor(private readonly client: ExtensionClient) {

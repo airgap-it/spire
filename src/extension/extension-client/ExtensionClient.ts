@@ -10,7 +10,6 @@ import {
   BEACON_VERSION,
   ChromeStorage,
   ConnectionContext,
-  DappP2PTransport,
   ErrorResponse,
   ExtendedP2PPairingResponse,
   ExtendedPostMessagePairingResponse,
@@ -40,6 +39,9 @@ import { ToExtensionMessageHandler } from './message-handler/ToExtensionMessageH
 import { ToPageMessageHandler } from './message-handler/ToPageMessageHandler'
 import { PopupManager } from './PopupManager'
 import { Signer } from './Signer'
+
+// TODO: Export in beacon-sdk
+import { DappP2PTransport } from '@airgap/beacon-dapp/dist/esm/transports/DappP2PTransport'
 
 const logger: Logger = new Logger('ExtensionClient')
 
