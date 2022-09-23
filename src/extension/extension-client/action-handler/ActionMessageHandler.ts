@@ -1,4 +1,7 @@
-import { ChromeStorage, DappP2PTransport, ExtendedP2PPairingResponse } from '@airgap/beacon-sdk'
+import { ChromeStorage, ExtendedP2PPairingResponse } from '@airgap/beacon-sdk'
+
+// TODO: Export in beacon-sdk
+import { DappP2PTransport } from '@airgap/beacon-dapp/dist/esm/transports/DappP2PTransport'
 
 import { Action, ExtensionMessageInputPayload, ExtensionMessageOutputPayload } from '../Actions'
 import { ExtensionClient } from '../ExtensionClient'
