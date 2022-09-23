@@ -9,16 +9,12 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "target": "ESNext",
     "types": ["chrome"],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["es2018", "dom"],
     /* Strict Type-Checking Options */
     // "strict": true /* Enable all strict type-checking options. */,
     // "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,

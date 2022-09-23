@@ -1,12 +1,5 @@
 import { Network, NetworkType } from '@airgap/beacon-sdk'
-import {
-  TezblockBlockExplorer,
-  TezosProtocol,
-  TezosProtocolNetwork,
-  TezosProtocolNetworkExtras,
-  TezosProtocolOptions
-} from '@airgap/coinlib-core'
-import { TezosNetwork } from '@airgap/coinlib-core/protocols/tezos/TezosProtocol'
+import { TezosBlockExplorer, TezosProtocol, TezosProtocolNetwork, TezosProtocolOptions } from '@airgap/coinlib-core'
 import { NetworkType as AirGapNetworkType } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 
 export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string; apiUrl: string }> = async (
@@ -42,7 +35,7 @@ export const getRpcUrlForNetwork: (network: Network) => Promise<{ rpcUrl: string
 export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol> = async (
   network: Network
 ): Promise<TezosProtocol> => {
-  const { rpcUrl, apiUrl }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
+  const { rpcUrl /*, apiUrl */ }: { rpcUrl: string; apiUrl: string } = await getRpcUrlForNetwork(network)
 
   const names: { [key in NetworkType]: string } = {
     [NetworkType.MAINNET]: 'Mainnet',
@@ -73,41 +66,14 @@ export const getProtocolForNetwork: (network: Network) => Promise<TezosProtocol>
     [NetworkType.IDIAZABALNET]: 'https://idiazabalnet.tezblock.io/account',
     [NetworkType.CUSTOM]: 'https://hangzhounet.tezblock.io'
   }
-  const tezosNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
-    [NetworkType.MAINNET]: TezosNetwork.MAINNET,
-    [NetworkType.EDONET]: TezosNetwork.EDONET,
-    [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET,
-    [NetworkType.GRANADANET]: TezosNetwork.MAINNET,
-    [NetworkType.HANGZHOUNET]: TezosNetwork.MAINNET,
-    [NetworkType.IDIAZABALNET]: TezosNetwork.MAINNET,
-    [NetworkType.CUSTOM]: TezosNetwork.MAINNET
-  }
-
-  const conseilNetworks: { [key in Exclude<NetworkType, NetworkType.DELPHINET>]: TezosNetwork } = {
-    [NetworkType.MAINNET]: TezosNetwork.MAINNET,
-    [NetworkType.EDONET]: TezosNetwork.EDONET,
-    [NetworkType.FLORENCENET]: TezosNetwork.FLORENCENET,
-    [NetworkType.GRANADANET]: TezosNetwork.MAINNET,
-    [NetworkType.HANGZHOUNET]: TezosNetwork.MAINNET,
-    [NetworkType.IDIAZABALNET]: TezosNetwork.MAINNET,
-    [NetworkType.CUSTOM]: TezosNetwork.MAINNET
-  }
 
   const name: string = names[network.type]
   const airgapNetwork: AirGapNetworkType = airgapNetworks[network.type]
   const blockExplorer: string = blockExplorers[network.type]
-  const tezosNetwork: TezosNetwork = tezosNetworks[network.type]
-  const conseilNetwork: TezosNetwork = conseilNetworks[network.type]
 
   return new TezosProtocol(
     new TezosProtocolOptions(
-      new TezosProtocolNetwork(
-        name,
-        airgapNetwork,
-        rpcUrl,
-        new TezblockBlockExplorer(blockExplorer),
-        new TezosProtocolNetworkExtras(tezosNetwork, apiUrl, conseilNetwork, 'airgap00391')
-      )
+      new TezosProtocolNetwork(name, airgapNetwork, rpcUrl, new TezosBlockExplorer(blockExplorer))
     )
   )
 }
